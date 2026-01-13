@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Your Phone - IBOX MOBILE SINGAPORE</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="quote.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="index.html" class="logo">IBOX MOBILE SINGAPORE</a>
+            <ul class="nav-links">
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="index.html#sell-now">Sell Now</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="quote-page">
+        <div class="container">
+            <!-- Progress Bar -->
+            <div class="quote-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <span>Select Device</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <span>Device Condition</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <span>Get Quote</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <span>Book Appointment</span>
+                </div>
+            </div>
+
+            <!-- Quote Wizard Container -->
+            <div class="quote-wizard">
+                <!-- Step 1: Select Device -->
+                <div class="wizard-step active" id="step-1">
+                    <h2>Select Your Device</h2>
+                    <p class="step-description">Choose your phone brand and model</p>
+                    
+                    <div class="brand-selector">
+                        <h3>Select Brand</h3>
+                        
+                        <!-- BRAND BUTTONS - Only Apple and Samsung -->
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin: 20px 0; max-width: 500px; margin-left: auto; margin-right: auto;">
+                            <button data-brand="Apple" 
+                                    onclick="window.selectBrand('Apple'); return false;" 
+                                    style="background: white; border: 2px solid #e0e0e0; padding: 1.5rem 1rem; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; transition: all 0.3s ease;"
+                                    onmouseover="this.style.borderColor='#C9A84C'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';"
+                                    onmouseout="this.style.borderColor='#e0e0e0'; this.style.boxShadow='';">
+                                <img src="images/logos/apple-logo.svg" alt="Apple" style="width: 40px; height: 40px; object-fit: contain; pointer-events: none;" onerror="this.style.display='none';">
+                                <span style="color: #2c2c2c; font-size: 0.95rem; font-weight: 500; pointer-events: none;">iPhone</span>
+                            </button>
+                            <button data-brand="Samsung" 
+                                    onclick="window.selectBrand('Samsung'); return false;" 
+                                    style="background: white; border: 2px solid #e0e0e0; padding: 1.5rem 1rem; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; transition: all 0.3s ease;"
+                                    onmouseover="this.style.borderColor='#C9A84C'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';"
+                                    onmouseout="this.style.borderColor='#e0e0e0'; this.style.boxShadow='';">
+                                <img src="images/logos/samsung-logo.svg" alt="Samsung" style="width: 80px; height: auto; max-height: 40px; object-fit: contain; pointer-events: none;" onerror="this.style.display='none';">
+                                <span style="color: #2c2c2c; font-size: 0.95rem; font-weight: 500; pointer-events: none;">Samsung</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="model-selector" id="model-selector" style="display: none;">
+                        <h3>Select Model</h3>
+                        <div class="model-grid" id="model-grid">
+                            <!-- Models will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Device Condition -->
+                <div class="wizard-step" id="step-2">
+                    <div class="selected-device-header">
+                        <img id="selected-device-image" src="" alt="">
+                        <div>
+                            <h2 id="selected-device-name">iPhone 16 Pro Max</h2>
+                            <p class="step-description">Tell us about your device condition</p>
+                        </div>
+                    </div>
+
+                    <!-- Device Type Selection (New vs Used) -->
+                    <div class="condition-section device-type-section">
+                        <h3>Device Condition Type <span class="required-badge">Required</span></h3>
+                        <p class="section-hint">Select whether your device is new or used</p>
+                        <div class="option-buttons device-type-options" id="device-type-options">
+                            <button class="option-btn device-type-btn" data-value="new-sealed" data-bonus="200">
+                                <div class="device-type-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                </div>
+                                <strong>New Sealed</strong>
+                                <span>Factory sealed, never opened</span>
+                            </button>
+                            <button class="option-btn device-type-btn" data-value="new-activated" data-bonus="100">
+                                <div class="device-type-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                </div>
+                                <strong>New Activated</strong>
+                                <span>Opened but unused, like new</span>
+                            </button>
+                            <button class="option-btn device-type-btn" data-value="used" data-bonus="0">
+                                <div class="device-type-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </div>
+                                <strong>Used</strong>
+                                <span>Previously used device</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Storage Selection -->
+                    <div class="condition-section">
+                        <h3>Built-In Storage <span class="required-badge">Required</span></h3>
+                        <div class="option-buttons" id="storage-options">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Color Selection -->
+                    <div class="condition-section">
+                        <h3>Colour <span class="required-badge">Required</span></h3>
+                        <div class="option-buttons color-options" id="color-options">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Official Receipt (Only for NEW phones) -->
+                    <div class="condition-section new-device-only" id="receipt-section" style="display: none;">
+                        <h3>Official Receipt Available? <span class="required-badge">Required</span></h3>
+                        <p class="section-hint">Original purchase receipt from authorized retailer (for New phones only)</p>
+                        <div class="option-buttons" id="receipt-options">
+                            <button class="option-btn" data-value="yes" data-bonus="30">
+                                <strong>Yes</strong>
+                                <span>I have the official receipt</span>
+                            </button>
+                            <button class="option-btn" data-value="no" data-bonus="0">
+                                <strong>No</strong>
+                                <span>No receipt available</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Country of Purchase -->
+                    <div class="condition-section">
+                        <h3>Country of Purchase <span class="required-badge">Required</span></h3>
+                        <div class="option-buttons" id="country-options">
+                            <button class="option-btn" data-value="local" data-bonus="0">Local Singapore Set</button>
+                            <button class="option-btn" data-value="export" data-deduction="50">Export Set <span class="deduction-tag">-$50</span></button>
+                        </div>
+                    </div>
+
+                    <!-- Used Device Conditions (Hidden for New devices) -->
+                    <div class="used-device-conditions" id="used-device-conditions">
+                        <!-- Body Condition - Deductions based on SellUp verified prices -->
+                        <div class="condition-section">
+                            <h3>Body Condition <span class="required-badge">Required</span></h3>
+                            <div class="option-buttons grade-options" id="body-options">
+                                <button class="option-btn" data-value="A" data-deduction="0">
+                                    <strong>Grade A</strong>
+                                    <span>Flawless. Like New</span>
+                                </button>
+                                <button class="option-btn" data-value="B" data-deduction="100">
+                                    <strong>Grade B</strong>
+                                    <span>Minor scratches. No dent, nick or scuff</span>
+                                </button>
+                                <button class="option-btn" data-value="C" data-deduction="270">
+                                    <strong>Grade C</strong>
+                                    <span>Obvious scratches, dent, nick or scuff</span>
+                                </button>
+                                <button class="option-btn" data-value="D" data-deduction="570">
+                                    <strong>Defective</strong>
+                                    <span>Cracked or chipped</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Screen Condition - Deductions based on SellUp verified prices -->
+                        <div class="condition-section">
+                            <h3>Glass Screen Condition <span class="required-badge">Required</span></h3>
+                            <div class="option-buttons grade-options" id="screen-options">
+                                <button class="option-btn" data-value="A" data-deduction="0">
+                                    <strong>Grade A</strong>
+                                    <span>Flawless. Like New</span>
+                                </button>
+                                <button class="option-btn" data-value="B" data-deduction="80">
+                                    <strong>Grade B</strong>
+                                    <span>Minor scratches</span>
+                                </button>
+                                <button class="option-btn" data-value="C" data-deduction="200">
+                                    <strong>Grade C</strong>
+                                    <span>Obvious scratches</span>
+                                </button>
+                                <button class="option-btn" data-value="D" data-deduction="500">
+                                    <strong>Defective</strong>
+                                    <span>Cracked or chipped</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Battery Health - Deductions based on SellUp verified prices -->
+                        <div class="condition-section">
+                            <h3>Battery Health <span class="required-badge">Required</span></h3>
+                            <p class="section-hint">Check in Settings > Battery > Battery Health</p>
+                            <div class="option-buttons" id="battery-options">
+                                <button class="option-btn" data-value="91-100" data-deduction="0">91 - 100%</button>
+                                <button class="option-btn" data-value="86-90" data-deduction="30">86 - 90%</button>
+                                <button class="option-btn" data-value="81-85" data-deduction="70">81 - 85%</button>
+                                <button class="option-btn" data-value="80-below" data-deduction="120">80% or less</button>
+                            </div>
+                        </div>
+
+                        <!-- Functional Issues -->
+                        <div class="condition-section">
+                            <h3>Any Functional Issues?</h3>
+                            <p class="section-hint">Select all that apply. Skip if none.</p>
+                            <div class="option-buttons checkbox-options" id="issue-options">
+                                <button class="option-btn checkbox" data-value="power" data-deduction="300">
+                                    <span class="issue-icon">⚡</span> Unable to power on
+                                </button>
+                                <button class="option-btn checkbox" data-value="faceid" data-deduction="150">
+                                    <span class="issue-icon">👤</span> Fingerprint / FaceID faulty
+                                </button>
+                                <button class="option-btn checkbox" data-value="display" data-deduction="200">
+                                    <span class="issue-icon">🖥️</span> Screen / Display defect
+                                </button>
+                                <button class="option-btn checkbox" data-value="touch" data-deduction="180">
+                                    <span class="issue-icon">👆</span> Touchscreen faulty
+                                </button>
+                                <button class="option-btn checkbox" data-value="camera" data-deduction="120">
+                                    <span class="issue-icon">📷</span> Camera faulty
+                                </button>
+                                <button class="option-btn checkbox" data-value="speaker" data-deduction="80">
+                                    <span class="issue-icon">🔊</span> Speaker / Microphone issue
+                                </button>
+                                <button class="option-btn checkbox" data-value="wifi" data-deduction="100">
+                                    <span class="issue-icon">📶</span> WiFi / Bluetooth issue
+                                </button>
+                                <button class="option-btn checkbox" data-value="charging" data-deduction="90">
+                                    <span class="issue-icon">🔌</span> Charging port issue
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accessories (Following SellUp - Cable and Box) -->
+                    <div class="condition-section">
+                        <h3>Working Original Accessories Available?</h3>
+                        <p class="section-hint">Select all accessories you have. Deductions apply if missing.</p>
+                        <div class="option-buttons checkbox-options" id="accessory-options">
+                            <button class="option-btn checkbox" data-value="cable" data-bonus="20">
+                                Cable <span class="bonus-tag">+$20</span>
+                            </button>
+                            <button class="option-btn checkbox" data-value="box" data-bonus="15">
+                                Box <span class="bonus-tag">+$15</span>
+                            </button>
+                        </div>
+                        <p class="section-hint" style="margin-top: 10px; color: #666;">Base price assumes no accessories. Select what you have to increase quote.</p>
+                    </div>
+
+                    <!-- Live Price Estimate -->
+                    <div class="live-price-estimate" id="live-price-estimate">
+                        <div class="estimate-label">Estimated Buyback Price</div>
+                        <div class="estimate-price" id="estimate-price">$0</div>
+                        <div class="estimate-hint">Final price confirmed after inspection</div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn btn-secondary" id="back-to-step-1">Back</button>
+                        <button class="btn btn-primary" id="get-quote-btn">Get Quote</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Quote Result -->
+                <div class="wizard-step" id="step-3">
+                    <div class="quote-result">
+                        <div class="quote-device-summary">
+                            <img id="quote-device-image" src="" alt="">
+                            <div class="quote-device-info">
+                                <h2 id="quote-device-name">iPhone 16 Pro Max</h2>
+                                <p id="quote-device-specs">256GB - Black Titanium - Grade A</p>
+                            </div>
+                        </div>
+
+                        <div class="quote-price-card">
+                            <h3>Your Buyback Quote</h3>
+                            <div class="quote-price">
+                                <span class="currency">SGD</span>
+                                <span class="amount" id="quote-amount">$1,450</span>
+                            </div>
+                            <p class="quote-validity">Quote valid for 3 days</p>
+                        </div>
+
+                        <div class="quote-breakdown">
+                            <h4>Price Breakdown</h4>
+                            <div class="breakdown-items" id="price-breakdown">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="quote-note">
+                            <p><strong>Note:</strong> We DO NOT buy devices that are:</p>
+                            <ul>
+                                <li>Password or iCloud locked</li>
+                                <li>Lost or Stolen device</li>
+                            </ul>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-secondary" id="back-to-step-2">Re-evaluate</button>
+                            <button class="btn btn-primary" id="proceed-booking">Proceed to Book</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Booking -->
+                <div class="wizard-step" id="step-4">
+                    <h2>Book Your Appointment</h2>
+                    <p class="step-description">Visit our office to sell your device</p>
+
+                    <div class="booking-options">
+                        <div class="booking-option" data-type="pickup" style="display: none;">
+                            <div class="booking-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            </div>
+                            <h3>Free Doorstep Pickup</h3>
+                            <p>We come to your location and pay you on the spot</p>
+                            <div class="unavailable-badge" style="position: absolute; top: 10px; right: 10px; background: var(--danger); color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Temporarily Unavailable</div>
+                        </div>
+                        <div class="booking-option selected" data-type="store">
+                            <div class="booking-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </div>
+                            <h3>Visit Our Store</h3>
+                            <p>Visit us at 203 Henderson Rd, #09-09 Wing B for instant payment</p>
+                        </div>
+                    </div>
+
+                    <div class="booking-form" id="booking-form" style="display: block;">
+                        <h3 id="booking-form-title">Store Visit Details</h3>
+                        <p class="section-hint" style="margin-bottom: 1.5rem; color: var(--text-light);">
+                            <strong>Note:</strong> Doorstep pickup is temporarily unavailable. Please visit our office to complete your sale.
+                        </p>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Preferred Date <small style="color: var(--text-light); font-weight: normal;">(within 10 days)</small></label>
+                                <input type="date" id="booking-date" min="" max="" required>
+                                <small class="date-limit-note" style="display: block; color: var(--text-light); font-size: 0.875rem; margin-top: 0.25rem;">
+                                    Bookings are limited to 10 days ahead due to price fluctuations.
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label>Preferred Time</label>
+                                <select id="booking-time" required>
+                                    <option value="">Select Time</option>
+                                    <option value="10:00">10:00 AM - 12:00 PM</option>
+                                    <option value="12:00">12:00 PM - 2:00 PM</option>
+                                    <option value="14:00">2:00 PM - 4:00 PM</option>
+                                    <option value="16:00">4:00 PM - 6:00 PM</option>
+                                    <option value="18:00">6:00 PM - 8:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="address-group" style="display: none;">
+                            <label>Pickup Address</label>
+                            <input type="text" id="booking-address" placeholder="Enter your address">
+                        </div>
+
+                        <div class="form-row" id="postal-group" style="display: none;">
+                            <div class="form-group">
+                                <label>Postal Code</label>
+                                <input type="text" id="booking-postal" placeholder="e.g. 159239">
+                            </div>
+                            <div class="form-group">
+                                <label>Unit No.</label>
+                                <input type="text" id="booking-unit" placeholder="e.g. #01-23">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="background: rgba(201, 168, 76, 0.1); border: 1px solid rgba(201, 168, 76, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                            <h4 style="margin: 0 0 0.5rem 0; color: var(--gold); font-size: 1rem;">📍 Office Location</h4>
+                            <p style="margin: 0; color: var(--text-dark); font-size: 0.95rem; line-height: 1.6;">
+                                203 Henderson Rd, #09-09 Wing B<br>
+                                Henderson Industrial Park<br>
+                                Singapore 159239
+                            </p>
+                            <p style="margin: 0.5rem 0 0 0; color: var(--text-light); font-size: 0.875rem;">
+                                <strong>Operating Hours:</strong> Mon - Fri: 10am - 8pm | Sat: 9am - 12pm | Sun: Closed
+                            </p>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name</label>
+                                <input type="text" id="booking-firstname" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                <input type="text" id="booking-lastname" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Mobile Number</label>
+                                <input type="tel" id="booking-mobile" placeholder="+65" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="booking-email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Remarks (Optional)</label>
+                            <textarea id="booking-remarks" rows="3" placeholder="Any special instructions..."></textarea>
+                        </div>
+
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="terms-agree" required>
+                            <label for="terms-agree">I have read and agree to the <a href="#" class="link">Buy-Back Terms and Conditions</a></label>
+                        </div>
+
+                        <div class="step-actions">
+                            <button class="btn btn-secondary" id="back-to-step-3">Back</button>
+                            <button class="btn btn-primary" id="confirm-booking">Confirm Booking</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Confirmation -->
+                <div class="wizard-step" id="step-5">
+                    <div class="confirmation-success">
+                        <div class="success-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <h2>Booking Confirmed!</h2>
+                        <p>Your appointment has been successfully scheduled.</p>
+                        
+                        <div class="confirmation-details">
+                            <div class="detail-row">
+                                <span>Booking Reference:</span>
+                                <strong id="booking-ref">KT-2024-001234</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Device:</span>
+                                <strong id="confirm-device">iPhone 16 Pro Max 256GB</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Quote Amount:</span>
+                                <strong id="confirm-amount">SGD $1,450</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Date & Time:</span>
+                                <strong id="confirm-datetime">15 Jan 2024, 2:00 PM</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Location:</span>
+                                <strong id="confirm-location">Doorstep Pickup</strong>
+                            </div>
+                        </div>
+
+                        <p class="confirmation-note">A confirmation email has been sent to your email address. Our agent will contact you 30 minutes before arrival.</p>
+
+                        <div class="step-actions">
+                            <a href="index.html" class="btn btn-primary">Back to Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 KT MOBILE SINGAPORE. All rights reserved. | WhatsApp: <a href="https://wa.me/6596999744" style="color: var(--gold);">+65 9699 9744</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/6596999744" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+    </a>
+
+    <script src="quote.js"></script>
+    <script src="admin.js" defer></script>
+    
+    <!-- Emergency click fix script -->
+    <script>
+    (function() {
+        console.log('=== EMERGENCY CLICK FIX LOADING ===');
+        
+        // Immediately remove test indicator to show JS is working
+        const testIndicator = document.getElementById('testIndicator');
+        if (testIndicator) {
+            testIndicator.style.background = 'green';
+            testIndicator.innerHTML = '✅ JAVASCRIPT LOADED - Click detection active';
+            setTimeout(() => {
+                testIndicator.style.display = 'none';
+            }, 2000);
+        }
+        
+        function forceEnableClicks() {
+            console.log('Running forceEnableClicks...');
+            
+            // Remove ALL pointer-events: none from entire page
+            const allElements = document.querySelectorAll('*');
+            let fixed = 0;
+            allElements.forEach(el => {
+                const computed = window.getComputedStyle(el);
+                if (computed.pointerEvents === 'none') {
+                    el.style.pointerEvents = 'auto';
+                    fixed++;
+                }
+            });
+            console.log('Removed pointer-events:none from', fixed, 'elements');
+            
+            // Force brand buttons to be clickable
+            const brandBtns = document.querySelectorAll('.brand-btn');
+            console.log('Found', brandBtns.length, 'brand buttons');
+            
+            brandBtns.forEach((btn, index) => {
+                const brand = btn.getAttribute('data-brand');
+                console.log('Fixing button', index + 1, ':', brand);
+                
+                // Nuclear option: remove ALL styles that might block
+                btn.style.pointerEvents = 'auto';
+                btn.style.cursor = 'pointer';
+                btn.style.zIndex = '9999';
+                btn.style.position = 'relative';
+                btn.style.display = 'flex';
+                
+                // Add visual indicator on hover
+                btn.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 0 20px rgba(201, 168, 76, 0.8)';
+                    console.log('Mouse entered:', brand);
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = '';
+                });
+                
+                // Multiple event handlers
+                btn.onclick = function(e) {
+                    console.log('ONCLICK fired for:', brand);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.selectBrand) {
+                        window.selectBrand(brand);
+                    }
+                    return false;
+                };
+                
+                btn.addEventListener('mousedown', function(e) {
+                    console.log('MOUSEDOWN fired for:', brand);
+                    e.preventDefault();
+                    if (window.selectBrand) {
+                        window.selectBrand(brand);
+                    }
+                });
+                
+                btn.addEventListener('touchstart', function(e) {
+                    console.log('TOUCHSTART fired for:', brand);
+                    e.preventDefault();
+                    if (window.selectBrand) {
+                        window.selectBrand(brand);
+                    }
+                });
+            });
+            
+            console.log('=== EMERGENCY FIX COMPLETE ===');
+        }
+        
+        // Run immediately if DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', forceEnableClicks);
+        } else {
+            forceEnableClicks();
+        }
+        
+        // Run again after a delay for safety
+        setTimeout(forceEnableClicks, 100);
+        setTimeout(forceEnableClicks, 500);
+    })();
+    </script>
+</body>
+</html>

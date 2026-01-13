@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - IBOX MOBILE SINGAPORE</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-page">
+    <header class="admin-header">
+        <nav class="admin-nav">
+            <div class="admin-nav-left">
+                <a href="index.html" class="logo">IBOX MOBILE SINGAPORE</a>
+                <span class="admin-badge">Admin Panel</span>
+            </div>
+            <div class="admin-nav-right">
+                <span class="admin-user" id="adminUserName">Admin</span>
+                <button class="btn btn-secondary btn-sm" onclick="auth.logout()">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="admin-main">
+        <div class="admin-sidebar">
+            <nav class="admin-menu">
+                <div class="menu-section-header">Buyback Management</div>
+                <a href="#buyback-phones" class="menu-item active" data-section="buyback-phones" id="buybackPhonesMenuItem">
+                    <span>📱</span>
+                    <span>Phone Models</span>
+                </a>
+                <a href="#buyback-prices" class="menu-item" data-section="buyback-prices">
+                    <span>💰</span>
+                    <span>Buyback Prices</span>
+                </a>
+                <a href="#buyback-conditions" class="menu-item" data-section="buyback-conditions">
+                    <span>📊</span>
+                    <span>Condition Modifiers</span>
+                </a>
+                
+                <div class="menu-section-header" style="margin-top: 2rem;">Refurbishment Management</div>
+                <a href="#refurbish-phones" class="menu-item" data-section="refurbish-phones">
+                    <span>🛍️</span>
+                    <span>Refurbished Phones</span>
+                </a>
+                <a href="#refurbish-prices" class="menu-item" data-section="refurbish-prices">
+                    <span>💵</span>
+                    <span>Sale Prices & Stock</span>
+                </a>
+                <a href="#refurbish-display" class="menu-item" data-section="refurbish-display">
+                    <span>👁️</span>
+                    <span>Display Settings</span>
+                </a>
+                
+                <div class="menu-section-header" style="margin-top: 2rem;">System</div>
+                <a href="#brands" class="menu-item" data-section="brands">
+                    <span>🏷️</span>
+                    <span>Brand Settings</span>
+                </a>
+                <a href="#users" class="menu-item" data-section="users" id="usersMenuItem" style="display: none;">
+                    <span>👥</span>
+                    <span>User Management</span>
+                </a>
+                <a href="#appointments" class="menu-item" data-section="appointments">
+                    <span>📅</span>
+                    <span>Appointments</span>
+                </a>
+                <a href="#settings" class="menu-item" data-section="settings">
+                    <span>⚙️</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="admin-content">
+            <!-- ============================================ -->
+            <!-- BUYBACK MANAGEMENT SECTIONS -->
+            <!-- ============================================ -->
+            
+            <!-- Buyback Phone Models Section -->
+            <section id="buyback-phones-section" class="admin-section active">
+                <div class="section-header">
+                    <h2>Buyback Phone Models</h2>
+                    <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
+                        Manage phone models that customers can sell to IBOX Mobile. Configure base prices, colors, and storage options.
+                    </p>
+                    <button class="btn btn-primary" id="addPhoneBtn">
+                        <span>+</span> Add New Phone Model
+                    </button>
+                </div>
+
+                <div class="filters-bar">
+                    <select id="brandFilter" class="filter-select">
+                        <option value="">All Brands</option>
+                        <option value="Apple">Apple</option>
+                        <option value="Samsung">Samsung</option>
+                    </select>
+                    <select id="modelFilter" class="filter-select">
+                        <option value="">All Models</option>
+                        <!-- Models will be dynamically populated based on brand selection -->
+                    </select>
+                    <input type="text" id="searchPhones" class="filter-search" placeholder="Search phones...">
+                    <button class="btn btn-secondary btn-sm" id="clearFiltersBtn" title="Clear all filters">
+                        <span>✕</span> Clear
+                    </button>
+                </div>
+
+                <div class="phones-grid" id="buybackPhonesGrid">
+                    <!-- Phone cards will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <!-- Buyback Prices Section -->
+            <section id="buyback-prices-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Buyback Base Prices</h2>
+                    <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
+                        Set the base buyback prices for each phone model and storage option. These prices are used as the starting point for buyback quotes.
+                    </p>
+                    <div class="header-actions">
+                        <select id="buybackPriceBrandFilter" class="filter-select" style="margin-right: 1rem;" onchange="renderPriceTable();">
+                            <option value="">All Brands</option>
+                            <option value="Apple">Apple</option>
+                            <option value="Samsung">Samsung</option>
+                        </select>
+                        <button class="btn btn-primary" id="bulkUpdateBuybackPricesBtn">
+                            <span>📊</span> Bulk Update Prices
+                        </button>
+                    </div>
+                </div>
+                <div class="price-table-container">
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Model</th>
+                                <th>Storage</th>
+                                <th>Base Price (SGD)</th>
+                                <th>New Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="buybackPriceTableBody">
+                            <!-- Price rows will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Buyback Condition Modifiers Section -->
+            <section id="buyback-conditions-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Buyback Condition Modifiers</h2>
+                    <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
+                        Set price adjustments based on phone condition. These modifiers are applied to base prices when calculating buyback quotes.
+                    </p>
+                </div>
+                    <div class="condition-pricing-container">
+                        <div class="condition-group-admin">
+                            <h3>Body Condition Modifiers</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Condition</th>
+                                            <th>Description</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyConditionTable">
+                                        <tr>
+                                            <td><strong>Grade A</strong></td>
+                                            <td>Flawless. Like New</td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="body" data-grade="A"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('body', 'A')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Grade B</strong></td>
+                                            <td>Minor scratches. No dent</td>
+                                            <td><input type="number" class="modifier-input" value="-20" data-condition="body" data-grade="B"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('body', 'B')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Grade C</strong></td>
+                                            <td>Obvious scratches, dent</td>
+                                            <td><input type="number" class="modifier-input" value="-60" data-condition="body" data-grade="C"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('body', 'C')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Defective</strong></td>
+                                            <td>Cracked or chipped</td>
+                                            <td><input type="number" class="modifier-input" value="-120" data-condition="body" data-grade="D"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('body', 'D')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="condition-group-admin">
+                            <h3>Screen Condition Modifiers</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Condition</th>
+                                            <th>Description</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="screenConditionTable">
+                                        <tr>
+                                            <td><strong>Grade A</strong></td>
+                                            <td>Flawless. Like New</td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="screen" data-grade="A"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('screen', 'A')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Grade B</strong></td>
+                                            <td>Minor scratches (no deduction)</td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="screen" data-grade="B"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('screen', 'B')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Grade C</strong></td>
+                                            <td>Deep scratches visible</td>
+                                            <td><input type="number" class="modifier-input" value="-40" data-condition="screen" data-grade="C"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('screen', 'C')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Defective</strong></td>
+                                            <td>Cracked or chipped</td>
+                                            <td><input type="number" class="modifier-input" value="-150" data-condition="screen" data-grade="D"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('screen', 'D')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="condition-group-admin">
+                            <h3>Battery Health Modifiers</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Battery Health</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="batteryConditionTable">
+                                        <tr>
+                                            <td><strong>91 - 100%</strong></td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="battery" data-grade="91-100"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('battery', '91-100')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>86 - 90%</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-20" data-condition="battery" data-grade="86-90"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('battery', '86-90')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>81 - 85%</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-50" data-condition="battery" data-grade="81-85"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('battery', '81-85')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>80% or less</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-100" data-condition="battery" data-grade="80-below"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('battery', '80-below')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="condition-group-admin">
+                            <h3>Functional Issues Modifiers</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Issue</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="functionalIssuesTable">
+                                        <tr>
+                                            <td><strong>Unable to power on</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-300" data-condition="issue" data-grade="power"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('issue', 'power')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Fingerprint / FaceID</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-150" data-condition="issue" data-grade="faceid"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('issue', 'faceid')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Screen / Display defect</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-200" data-condition="issue" data-grade="display"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('issue', 'display')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Touchscreen faulty</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-180" data-condition="issue" data-grade="touch"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('issue', 'touch')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Camera faulty</strong></td>
+                                            <td><input type="number" class="modifier-input" value="-120" data-condition="issue" data-grade="camera"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('issue', 'camera')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="condition-group-admin">
+                            <h3>Accessories Bonuses</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Accessory</th>
+                                            <th>Price Bonus (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="accessoriesTable">
+                                        <tr>
+                                            <td><strong>Cable</strong></td>
+                                            <td><input type="number" class="modifier-input" value="10" data-condition="accessory" data-grade="cable"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('accessory', 'cable')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Original Box</strong></td>
+                                            <td><input type="number" class="modifier-input" value="20" data-condition="accessory" data-grade="box"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('accessory', 'box')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Buyback Colors & Storage Section - REMOVED (Consolidated into Phone Models) -->
+
+            <!-- ============================================ -->
+            <!-- REFURBISHMENT MANAGEMENT SECTIONS -->
+            <!-- ============================================ -->
+
+            <!-- Refurbished Phones Section -->
+            <section id="refurbish-phones-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Refurbished Phones Inventory</h2>
+                    <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
+                        View and manage all refurbished phones available for sale. Add new refurbished phones to inventory.
+                    </p>
+                    <button class="btn btn-primary" id="addRefurbishPhoneBtn">
+                        <span>+</span> Add Refurbished Phone
+                    </button>
+                </div>
+                <div class="filters-bar">
+                    <select id="refurbishBrandFilter" class="filter-select">
+                        <option value="">All Brands</option>
+                        <option value="Apple">Apple</option>
+                        <option value="Samsung">Samsung</option>
+                    </select>
+                    <select id="refurbishModelFilter" class="filter-select">
+                        <option value="">All Models</option>
+                    </select>
+                    <input type="text" id="searchRefurbish" class="filter-search" placeholder="Search refurbished phones...">
+                </div>
+                <div class="phones-grid" id="refurbishPhonesGrid">
+                    <!-- Refurbished phone cards will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <!-- Refurbished Prices & Stock Section -->
+            <section id="refurbish-prices-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Refurbished Sale Prices & Stock Management</h2>
+                    <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
+                        Set sale prices and stock quantities for refurbished phones. Manage availability by storage size and cosmetic condition.
+                    </p>
+                </div>
+                <div class="filters-bar">
+                    <select id="refurbishPriceBrandFilter" class="filter-select">
+                        <option value="">All Brands</option>
+                        <option value="Apple">Apple</option>
+                        <option value="Samsung">Samsung</option>
+                    </select>
+                    <select id="refurbishPriceModelFilter" class="filter-select">
+                        <option value="">All Models</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm" onclick="clearRefurbishPriceFilters()" title="Clear filters">
+                        <span>✕</span> Clear Filters
+                    </button>
+                </div>
+                <div class="price-table-container">
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Model</th>
+                                <th>Storage</th>
+                                <th>Condition</th>
+                                <th>Sale Price (SGD)</th>
+                                <th>Stock Quantity</th>
+                                <th>Availability</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="buyPricesTable">
+                            <!-- Refurbished prices rows will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Refurbished Display Settings Section -->
+            <section id="refurbish-display-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Refurbished Display Settings</h2>
+                    <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
+                        Control which refurbished phones are visible on the "Buy Refurbished" page. Toggle display on/off for each model.
+                    </p>
+                </div>
+                <div class="filters-bar">
+                    <select id="displayBrandFilter" class="filter-select">
+                        <option value="">All Brands</option>
+                        <option value="Apple">Apple</option>
+                        <option value="Samsung">Samsung</option>
+                    </select>
+                    <select id="displayModelFilter" class="filter-select">
+                        <option value="">All Models</option>
+                    </select>
+                </div>
+                <div class="display-settings-grid" id="displaySettingsGrid">
+                    <!-- Display toggle cards will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <!-- ============================================ -->
+            <!-- SYSTEM SECTIONS -->
+            <!-- ============================================ -->
+
+            <!-- Brand Settings Section -->
+            <section id="brands-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Brand Image Settings</h2>
+                </div>
+
+                <div class="brands-grid" id="brandsGrid">
+                    <!-- Brand cards will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <!-- User Management Section -->
+            <section id="users-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Admin User Management</h2>
+                    <button class="btn btn-primary" id="addAdminBtn">
+                        <span>+</span> Add New Admin
+                    </button>
+                </div>
+
+                <div class="users-table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Permission Type</th>
+                                <th>Created</th>
+                                <th>Created By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Admin users will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <!-- Appointments Section -->
+            <section id="appointments-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Appointments Management</h2>
+                    <div class="header-actions">
+                        <select id="appointmentTypeFilter" class="filter-select" style="margin-right: 1rem;">
+                            <option value="">All Types</option>
+                            <option value="pickup">Doorstep Pickup</option>
+                            <option value="store">Store Visit</option>
+                        </select>
+                        <select id="appointmentStatusFilter" class="filter-select" style="margin-right: 1rem;">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <input type="date" id="appointmentDateFilter" class="filter-select" style="margin-right: 1rem;" placeholder="Filter by date">
+                        <button class="btn btn-secondary btn-sm" onclick="clearAppointmentFilters()">
+                            <span>✕</span> Clear Filters
+                        </button>
+                    </div>
+                </div>
+
+                <div class="appointments-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="stat-card" style="background: var(--gray); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <div class="stat-number" id="totalAppointments" style="font-size: 2rem; font-weight: 700; color: var(--gold);">0</div>
+                        <div class="stat-label" style="color: var(--text-light); margin-top: 0.5rem;">Total Appointments</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--gray); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <div class="stat-number" id="pickupAppointments" style="font-size: 2rem; font-weight: 700; color: #3B82F6;">0</div>
+                        <div class="stat-label" style="color: var(--text-light); margin-top: 0.5rem;">Pickup Scheduled</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--gray); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <div class="stat-number" id="storeAppointments" style="font-size: 2rem; font-weight: 700; color: #10B981;">0</div>
+                        <div class="stat-label" style="color: var(--text-light); margin-top: 0.5rem;">Store Visits</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--gray); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <div class="stat-number" id="pendingAppointments" style="font-size: 2rem; font-weight: 700; color: #F59E0B;">0</div>
+                        <div class="stat-label" style="color: var(--text-light); margin-top: 0.5rem;">Pending</div>
+                    </div>
+                </div>
+
+                <div class="appointments-table-container">
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>Booking Ref</th>
+                                <th>Customer</th>
+                                <th>Device</th>
+                                <th>Quote Amount</th>
+                                <th>Type</th>
+                                <th>Date & Time</th>
+                                <th>Location</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                            <!-- Appointments will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="admin-section">
+                <div class="section-header">
+                    <h2>System Settings</h2>
+                </div>
+
+                <div class="settings-container">
+                    <div class="setting-group">
+                        <h3>Hero Image Management</h3>
+                        <div class="setting-item">
+                            <label>Main Page Hero Image</label>
+                            <div class="hero-image-manager" style="display: flex; gap: 2rem; align-items: flex-start;">
+                                <div class="current-hero-image" style="flex: 0 0 200px;">
+                                    <img id="currentHeroPreview" src="" alt="Current Hero Image" style="max-width: 200px; max-height: 300px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: var(--gray); padding: 0.5rem;">
+                                    <p id="currentHeroPath" style="margin-top: 0.5rem; color: var(--text-light); font-size: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Current Image</p>
+                                </div>
+                                <div class="hero-image-upload" style="flex: 1;">
+                                    <input type="file" id="heroImageFile" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('heroImageFile').click()" style="width: 100%;">📁 Choose New Image</button>
+                                    <div style="margin: 1rem 0; text-align: center; color: var(--text-light); font-size: 0.875rem;">OR</div>
+                                    <input type="text" id="heroImageUrl" class="form-control" placeholder="Enter image URL (e.g. images/phones/iphone-16-pro-max.jpg)">
+                                    <div class="image-options" style="margin-top: 1rem;">
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; pointer-events: auto;">
+                                            <input type="checkbox" id="removeBackground" checked style="pointer-events: auto;">
+                                            <span>Remove white background automatically</span>
+                                        </label>
+                                    </div>
+                                    <button type="button" class="btn btn-primary" onclick="saveHeroImage()" style="margin-top: 1rem; width: 100%; pointer-events: auto;">💾 Save Hero Image</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>General Settings</h3>
+                        <div class="setting-item">
+                            <label>Company Name</label>
+                            <input type="text" class="form-control" id="settingCompanyName" value="IBOX MOBILE SINGAPORE">
+                        </div>
+                        <div class="setting-item">
+                            <label>Company Address</label>
+                            <input type="text" class="form-control" id="settingCompanyAddress" value="203 Henderson Rd, #09-09 Wing B, Henderson Industrial Park, Singapore 159239">
+                        </div>
+                        <div class="setting-item">
+                            <label>Contact Phone</label>
+                            <input type="tel" class="form-control" id="settingContactPhone" value="+65 9699 9744">
+                        </div>
+                        <div class="setting-item">
+                            <label>Contact Email</label>
+                            <input type="email" class="form-control" id="settingContactEmail" value="sales@iboxmobile.sg">
+                        </div>
+                        <div class="setting-item">
+                            <label>WhatsApp Number</label>
+                            <input type="tel" class="form-control" id="settingWhatsApp" value="+65 8919 0776">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="saveGeneralSettings()" style="margin-top: 1rem;">
+                            💾 Save General Settings
+                        </button>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>Price Settings</h3>
+                        <div class="setting-item">
+                            <label>Default Currency</label>
+                            <select class="form-control">
+                                <option>SGD</option>
+                                <option>USD</option>
+                                <option>MYR</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Price Update Frequency</label>
+                            <select class="form-control">
+                                <option>Daily</option>
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>Image Settings</h3>
+                        <div class="setting-item">
+                            <label>Default Image Source</label>
+                            <select class="form-control">
+                                <option>Local Storage</option>
+                                <option>GSMArena</option>
+                                <option>Custom CDN</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary">Save Settings</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Add/Edit Admin Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="adminModalTitle">Add New Admin</h3>
+                <button class="modal-close" onclick="closeAdminModal()">&times;</button>
+            </div>
+            <form id="adminForm" class="modal-body">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="adminName" class="form-control" placeholder="e.g. John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="adminEmail" class="form-control" placeholder="admin@ktmobile.sg" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="adminPassword" class="form-control" placeholder="Minimum 6 characters" required minlength="6">
+                    <small class="form-help">Password must be at least 6 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm Password *</label>
+                    <input type="password" id="adminPasswordConfirm" class="form-control" placeholder="Re-enter password" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Permission Type *</label>
+                    <select id="adminPermissionType" class="form-control" required>
+                        <option value="">Select Permission Type</option>
+                        <option value="admin">Admin - Full access except user management</option>
+                        <option value="editor">Editor - Can edit phones and prices, cannot delete</option>
+                        <option value="viewer">Viewer - Read-only access</option>
+                    </select>
+                    <div id="permissionDescription" class="permission-description"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Phone Modal -->
+    <div id="phoneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Phone</h3>
+                <button class="modal-close" onclick="closePhoneModal()">&times;</button>
+            </div>
+            <form id="phoneForm" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Brand *</label>
+                        <select id="phoneBrand" class="form-control" required>
+                            <option value="">Select Brand</option>
+                            <option value="Apple">Apple</option>
+                            <option value="Samsung">Samsung</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Model Name *</label>
+                        <input type="text" id="phoneModel" class="form-control" placeholder="e.g. iPhone 16 Pro Max" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Image File</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="phoneImageFile" accept="image/*" class="image-file-input">
+                        <div class="image-preview" id="imagePreview">
+                            <span>No image selected</span>
+                        </div>
+                        <div class="image-url-option">
+                            <span>OR</span>
+                            <input type="text" id="phoneImageUrl" class="form-control" placeholder="Image URL">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Available Storage Options *</label>
+                    <div class="storage-checkboxes">
+                        <label><input type="checkbox" value="64GB"> 64GB</label>
+                        <label><input type="checkbox" value="128GB"> 128GB</label>
+                        <label><input type="checkbox" value="256GB"> 256GB</label>
+                        <label><input type="checkbox" value="512GB"> 512GB</label>
+                        <label><input type="checkbox" value="1TB"> 1TB</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Available Colors</label>
+                    <div class="colors-input">
+                        <input type="text" id="phoneColors" class="form-control" placeholder="Comma-separated: Black, White, Blue">
+                    </div>
+                    <div id="colorToggles" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        <!-- Color toggle switches will be dynamically generated -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Base Price (SGD) *</label>
+                    <input type="number" id="phoneBasePrice" class="form-control" placeholder="0" min="0" step="10" required>
+                </div>
+
+                <div class="form-group" style="background: rgba(201, 168, 76, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.2);">
+                    <label style="color: var(--gold); font-weight: 700;">🛒 Buyback Settings</label>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
+                        Toggle which options are accepted for buyback. Unchecked options will show as "Not Buying" on the quote page.
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <input type="checkbox" id="phoneBuybackEnabled" checked style="width: 18px; height: 18px;">
+                        <label for="phoneBuybackEnabled" style="margin: 0; font-weight: 600;">Accept this model for buyback</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Storage Price Modifiers</label>
+                    <div class="storage-prices" id="storagePrices">
+                        <!-- Dynamic storage price inputs -->
+                    </div>
+                </div>
+
+                <!-- Display Toggle for Refurbishment Page -->
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="phoneDisplay" checked style="width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-weight: 600;">Display on Refurbishment/Buy Page</span>
+                    </label>
+                    <p style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.5rem;">
+                        Uncheck to hide this phone from the "Buy Refurbished" page. This does NOT affect buyback quotes.
+                    </p>
+                </div>
+
+                <!-- Buy Prices & Stock Section (For Refurbished Phone Sales) -->
+                <div class="form-group" style="border-top: 2px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem; color: var(--gold);">Refurbished Phone Sales - Buy Prices & Stock</h4>
+                    <p style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 1rem;">
+                        Set prices and stock quantities for selling refurbished phones. These are for the "Buy Refurbished" page only, not buyback quotes.
+                    </p>
+                    <div id="buyPricesStockSection">
+                        <!-- Dynamic buy prices and stock inputs -->
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePhoneModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Phone</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="quote.js"></script>
+    <script src="auth.js"></script>
+    <script src="admin.js"></script>
+    <script>
+        // IMMEDIATE MENU NAVIGATION FIX - Runs as soon as possible
+        (function() {
+            console.log('=== Starting immediate menu navigation setup ===');
+            
+            function setupMenuNavigation() {
+                const menuItems = document.querySelectorAll('.menu-item');
+                console.log('Found', menuItems.length, 'menu items');
+                
+                if (menuItems.length === 0) {
+                    console.log('Menu items not found yet, retrying...');
+                    return false;
+                }
+                
+                // Function to switch sections
+                function switchToSection(sectionName) {
+                    console.log('Switching to:', sectionName);
+                    
+                    // Remove active from all menu items
+                    menuItems.forEach(m => m.classList.remove('active'));
+                    
+                    // Add active to clicked item
+                    const clickedItem = document.querySelector(`.menu-item[data-section="${sectionName}"]`);
+                    if (clickedItem) clickedItem.classList.add('active');
+                    
+                    // Hide all sections
+                    document.querySelectorAll('.admin-section').forEach(s => {
+                        s.classList.remove('active');
+                        s.style.display = 'none';
+                    });
+                    
+                    // Show target section
+                    const target = document.getElementById(`${sectionName}-section`);
+                    if (target) {
+                        target.classList.add('active');
+                        target.style.display = 'block';
+                        console.log('✓ Successfully switched to', sectionName);
+                        
+                        // Render content for the section
+                        setTimeout(() => {
+                            renderSectionContentInline(sectionName);
+                        }, 100);
+                        
+                        return true;
+                    } else {
+                        console.error('✗ Section not found:', sectionName);
+                        return false;
+                    }
+                }
+                
+                // Function to render section content
+                function renderSectionContentInline(sectionName) {
+                    console.log('Rendering content for:', sectionName);
+                    try {
+                        switch(sectionName) {
+                            // Buyback Management
+                            case 'buyback-phones':
+                            case 'phones':
+                                if (typeof renderPhones === 'function') renderPhones();
+                                break;
+                            case 'buyback-prices':
+                            case 'prices':
+                                if (typeof renderPriceTable === 'function') renderPriceTable();
+                                break;
+                            case 'buyback-conditions':
+                                // Static content, no render needed
+                                break;
+                            // Refurbishment Management
+                            case 'refurbish-phones':
+                                if (typeof renderRefurbishPhones === 'function') renderRefurbishPhones();
+                                break;
+                            case 'refurbish-prices':
+                                if (typeof renderBuyPricesTable === 'function') renderBuyPricesTable();
+                                break;
+                            case 'refurbish-display':
+                                if (typeof renderDisplaySettings === 'function') renderDisplaySettings();
+                                break;
+                            // System
+                            case 'brands':
+                                if (typeof renderBrands === 'function') renderBrands();
+                                break;
+                            case 'users':
+                                if (typeof renderUsers === 'function') renderUsers();
+                                break;
+                            case 'appointments':
+                                if (typeof renderAppointments === 'function') renderAppointments();
+                                if (typeof updateAppointmentStats === 'function') updateAppointmentStats();
+                                break;
+                            case 'settings':
+                                // Static content
+                                break;
+                            default:
+                                console.log('Unknown section:', sectionName);
+                        }
+                    } catch (e) {
+                        console.error('Error rendering section:', e);
+                    }
+                }
+                
+                // Add click handlers to each menu item
+                menuItems.forEach(item => {
+                    const section = item.dataset.section;
+                    if (!section) return;
+                    
+                    // Clone to remove old listeners
+                    const newItem = item.cloneNode(true);
+                    item.parentNode.replaceChild(newItem, item);
+                    
+                    // Force styles
+                    newItem.style.cssText += 'pointer-events: auto !important; cursor: pointer !important; position: relative !important; z-index: 1000 !important;';
+                    
+                    // Add multiple event types for reliability
+                    ['click', 'mousedown', 'touchstart'].forEach(eventType => {
+                        newItem.addEventListener(eventType, function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            console.log('Menu clicked:', section, 'via', eventType);
+                            switchToSection(section);
+                        }, { capture: true });
+                    });
+                });
+                
+                // Expose renderSectionContentInline globally
+                window.renderSectionContentInline = renderSectionContentInline;
+                
+                console.log('=== Menu navigation setup complete ===');
+                return true;
+            }
+            
+            // Try immediately
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(setupMenuNavigation, 100);
+                    setTimeout(setupMenuNavigation, 500);
+                    setTimeout(setupMenuNavigation, 1000);
+                });
+            } else {
+                setupMenuNavigation();
+                setTimeout(setupMenuNavigation, 100);
+                setTimeout(setupMenuNavigation, 500);
+            }
+            
+            // Also expose globally
+            window.setupMenuNavigation = setupMenuNavigation;
+        })();
+        
+        // Additional fixes after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                // Force enable all interactive elements
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.style.cssText += 'pointer-events: auto !important; cursor: pointer !important; z-index: 1000 !important;';
+                });
+                
+                // Ensure sidebar is clickable
+                const sidebar = document.querySelector('.admin-sidebar');
+                if (sidebar) {
+                    sidebar.style.cssText += 'pointer-events: auto !important; z-index: 100 !important;';
+                }
+                
+                // Render initial section content
+                const activeSection = document.querySelector('.admin-section.active');
+                if (activeSection) {
+                    const sectionId = activeSection.id.replace('-section', '');
+                    console.log('Rendering initial section:', sectionId);
+                    if (typeof renderSectionContentInline === 'function') {
+                        renderSectionContentInline(sectionId);
+                    } else if (typeof renderPhones === 'function') {
+                        renderPhones();
+                    }
+                }
+                
+                console.log('Applied CSS fixes to menu items');
+            }, 500);
+            
+            // Retry rendering after a longer delay
+            setTimeout(function() {
+                const activeSection = document.querySelector('.admin-section.active');
+                if (activeSection) {
+                    const sectionId = activeSection.id.replace('-section', '');
+                    if (sectionId === 'buyback-phones' && typeof renderPhones === 'function') {
+                        renderPhones();
+                    }
+                }
+            }, 1500);
+        });
+    </script>
+
+    <!-- Bulk Price Update Modal -->
+    <div id="bulkPriceModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Bulk Price Update</h3>
+                <button class="modal-close" onclick="closeBulkPriceModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1.5rem; color: var(--text-light);">
+                    Adjust prices for multiple phones at once. Enter a positive value to increase prices or a negative value to decrease.
+                </p>
+                
+                <div class="form-group">
+                    <label>Select Brand</label>
+                    <select id="bulkPriceBrand" class="form-control">
+                        <option value="">All Brands</option>
+                        <option value="Apple">Apple Only</option>
+                        <option value="Samsung">Samsung Only</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Price Adjustment (SGD)</label>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button type="button" class="btn btn-secondary" onclick="setBulkPriceValue(-50)" style="min-width: 60px;">-50</button>
+                        <button type="button" class="btn btn-secondary" onclick="setBulkPriceValue(-20)" style="min-width: 60px;">-20</button>
+                        <button type="button" class="btn btn-secondary" onclick="setBulkPriceValue(-10)" style="min-width: 60px;">-10</button>
+                        <button type="button" class="btn btn-secondary" onclick="setBulkPriceValue(10)" style="min-width: 60px;">+10</button>
+                        <button type="button" class="btn btn-secondary" onclick="setBulkPriceValue(20)" style="min-width: 60px;">+20</button>
+                        <button type="button" class="btn btn-secondary" onclick="setBulkPriceValue(50)" style="min-width: 60px;">+50</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Custom Amount</label>
+                    <input type="number" id="bulkPriceAmount" class="form-control" placeholder="Enter amount (e.g., 20 or -20)" value="0">
+                    <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">
+                        Positive = increase prices, Negative = decrease prices
+                    </small>
+                </div>
+                
+                <div class="form-group" style="background: var(--gray); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem;">Preview</h4>
+                    <p id="bulkPricePreview" style="color: var(--text-light); font-size: 0.875rem;">
+                        Select options above to see preview
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBulkPriceModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="applyBulkPriceUpdate()">
+                    Apply Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Details Modal -->
+    <div id="appointmentDetailsModal" class="modal">
+        <div class="modal-content appointment-details-modal">
+            <div class="modal-header">
+                <h3>Appointment Details</h3>
+                <button class="modal-close" onclick="closeAppointmentDetailsModal()">&times;</button>
+            </div>
+            <div class="modal-body appointment-details-body">
+                <div class="appointment-detail-section">
+                    <div class="detail-header">
+                        <span class="detail-icon">📋</span>
+                        <h4>Booking Information</h4>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Reference Number:</span>
+                            <span class="detail-value" id="modalRef">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value status-badge" id="modalStatus">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Created:</span>
+                            <span class="detail-value" id="modalCreated">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="appointment-detail-section">
+                    <div class="detail-header">
+                        <span class="detail-icon">👤</span>
+                        <h4>Customer Information</h4>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Full Name:</span>
+                            <span class="detail-value" id="modalCustomerName">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Mobile:</span>
+                            <span class="detail-value" id="modalCustomerMobile">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value" id="modalCustomerEmail">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="appointment-detail-section">
+                    <div class="detail-header">
+                        <span class="detail-icon">📅</span>
+                        <h4>Appointment Details</h4>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Type:</span>
+                            <span class="detail-value" id="modalBookingType">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date:</span>
+                            <span class="detail-value" id="modalBookingDate">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time:</span>
+                            <span class="detail-value" id="modalBookingTime">-</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Location:</span>
+                            <span class="detail-value" id="modalLocation">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="appointment-detail-section">
+                    <div class="detail-header">
+                        <span class="detail-icon">📱</span>
+                        <h4>Device Information</h4>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Brand:</span>
+                            <span class="detail-value" id="modalDeviceBrand">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Model:</span>
+                            <span class="detail-value" id="modalDeviceModel">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Storage:</span>
+                            <span class="detail-value" id="modalDeviceStorage">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Color:</span>
+                            <span class="detail-value" id="modalDeviceColor">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Body Condition:</span>
+                            <span class="detail-value" id="modalBodyCondition">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Screen Condition:</span>
+                            <span class="detail-value" id="modalScreenCondition">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Battery Health:</span>
+                            <span class="detail-value" id="modalBatteryHealth">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="appointment-detail-section">
+                    <div class="detail-header">
+                        <span class="detail-icon">💰</span>
+                        <h4>Quote Information</h4>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Quote Amount:</span>
+                            <span class="detail-value quote-amount" id="modalQuoteAmount">-</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Price Breakdown:</span>
+                            <div class="detail-value" id="modalPriceBreakdown">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="appointment-detail-section" id="remarksSection" style="display: none;">
+                    <div class="detail-header">
+                        <span class="detail-icon">📝</span>
+                        <h4>Remarks</h4>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item full-width">
+                            <span class="detail-value" id="modalRemarks">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAppointmentDetailsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

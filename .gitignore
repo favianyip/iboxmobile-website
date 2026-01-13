@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment files
+*.env
+config.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+
+# Python cache
+__pycache__/
+*.pyc

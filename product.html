@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - IBOX MOBILE SINGAPORE</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="product.css">
+</head>
+<body class="product-page">
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <a href="index.html" style="color: var(--gold); text-decoration: none;">IBOX MOBILE SINGAPORE</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quote.html">Sell Your Phone</a></li>
+                <li><a href="index.html#buy-now">Buy Refurbished</a></li>
+                <li id="authLinkContainer">
+                    <a href="login.html" id="loginLink">Login</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <a href="index.html">Home</a> / 
+            <a href="index.html#sell-now">Smartphones</a> / 
+            <span id="breadcrumb-brand">Apple</span> / 
+            <span id="breadcrumb-model">iPhone 16 Pro Max</span>
+        </div>
+    </div>
+
+    <!-- Product Section -->
+    <section class="product-section">
+        <div class="container">
+            <div class="product-layout">
+                <!-- Product Images -->
+                <div class="product-images">
+                    <div class="main-image-container">
+                        <img id="mainProductImage" src="" alt="Product Image" class="main-product-image">
+                        <div class="image-badge">32-Step Quality Check</div>
+                    </div>
+                    <div class="thumbnail-gallery" id="thumbnailGallery">
+                        <!-- Thumbnails will be generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="product-info">
+                    <h1 id="productTitle" class="product-title">iPhone 16 Pro Max</h1>
+                    <div class="product-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-text">5 stars from <span id="reviewCount">512</span> reviews</span>
+                    </div>
+
+                    <!-- Price Section -->
+                    <div class="price-section">
+                        <div class="price-main">
+                            <span class="price-label">From</span>
+                            <span class="price-current" id="currentPrice">S$1,800</span>
+                        </div>
+                        <div class="price-compare">
+                            <span class="price-original" id="originalPrice">S$2,199</span>
+                            <span class="price-save">Save up to S$399</span>
+                        </div>
+                    </div>
+
+                    <!-- Variant Selection -->
+                    <div class="variant-section">
+                        <!-- Color Selection -->
+                        <div class="variant-group">
+                            <label class="variant-label">Color</label>
+                            <div class="variant-options" id="colorOptions">
+                                <!-- Colors will be populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Storage Selection -->
+                        <div class="variant-group">
+                            <label class="variant-label">Storage</label>
+                            <div class="variant-options" id="storageOptions">
+                                <!-- Storage options will be populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Condition Selection -->
+                        <div class="variant-group">
+                            <label class="variant-label">Cosmetic Grading</label>
+                            <div class="variant-options condition-options" id="conditionOptions">
+                                <!-- Conditions will be populated dynamically with descriptions -->
+                            </div>
+                            <div class="condition-details" id="conditionDetails">
+                                <!-- Condition descriptions will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selected Variant Display -->
+                    <div class="selected-variant" id="selectedVariant">
+                        <span id="selectedColor">Desert Titanium</span> | 
+                        <span id="selectedStorage">256GB</span> | 
+                        <span id="selectedCondition">Excellent</span>
+                        <span class="quantity-text" id="quantityText"></span>
+                    </div>
+
+                    <!-- Financing Options -->
+                    <div class="financing-section" id="financingSection">
+                        <div class="financing-option">
+                            <span class="financing-label">or just <span id="installmentCount">4</span> x</span>
+                            <span class="financing-price" id="installmentPrice">S$0</span>
+                            <span class="financing-label">with</span>
+                            <div class="financing-providers">
+                                <span class="provider-badge">Grab PayLater</span>
+                                <span class="provider-badge">Atome</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="product-actions">
+                        <button class="btn btn-primary btn-large" id="buyNowBtn">
+                            Buy Now
+                        </button>
+                        <button class="btn btn-secondary btn-large" id="addToCartBtn">
+                            Add to Cart
+                        </button>
+                        <button class="btn btn-outline btn-large" id="notifyMeBtn" style="display: none;">
+                            Notify Me When Available
+                        </button>
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div class="trust-badges">
+                        <div class="trust-item">
+                            <span class="trust-icon">✓</span>
+                            <span>32-step quality check</span>
+                        </div>
+                        <div class="trust-item">
+                            <span class="trust-icon">✓</span>
+                            <span>5 stars from 512 reviews</span>
+                        </div>
+                        <div class="trust-item">
+                            <span class="trust-icon">✓</span>
+                            <span>Free 3-month warranty</span>
+                        </div>
+                    </div>
+
+                    <!-- Warranty Options -->
+                    <div class="warranty-section">
+                        <h3>Get protected for the unexpected</h3>
+                        <div class="warranty-description">
+                            <strong>✓ Longest Protection</strong> – Extend your warranty up to 24 months, the longest coverage in Singapore.
+                        </div>
+                        <div class="warranty-description">
+                            <strong>✓ Zero Repair Costs</strong> – Manufacturer defects are fully covered at no charge.
+                        </div>
+                        <div class="warranty-description">
+                            <strong>✓ Replacement Assurance</strong> – Get a replacement device if repair is not possible.
+                        </div>
+                        <div class="warranty-options">
+                            <label class="warranty-option">
+                                <input type="radio" name="warranty" id="extendedWarranty" value="12">
+                                <div class="warranty-content">
+                                    <strong>Extended Warranty (12 months)</strong>
+                                    <span>+S$99</span>
+                                </div>
+                            </label>
+                            <label class="warranty-option">
+                                <input type="radio" name="warranty" id="extendedWarranty24" value="24">
+                                <div class="warranty-content">
+                                    <strong>Extended Warranty (24 months)</strong>
+                                    <span>+S$179</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Battery Upgrade Option -->
+                    <div class="battery-upgrade-section">
+                        <label class="battery-option">
+                            <input type="checkbox" id="batteryUpgrade">
+                            <div class="battery-content">
+                                <div>
+                                    <strong>New Battery (100% Battery Health)</strong>
+                                    <p>✓ A brand-new battery at full capacity, maximum power and performance</p>
+                                    <p>✓ Standard battery health is 80% and above. Upgrade for a guaranteed 100%.</p>
+                                    <p class="battery-note">✓ May require 1–2 working days for battery upgrade</p>
+                                </div>
+                                <span class="battery-price">+S$89</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Buyback Link -->
+                    <div class="buyback-link-section">
+                        <p>Want to sell this model instead?</p>
+                        <a href="quote.html" class="btn btn-outline" id="sellPhoneLink">
+                            Get Instant Buyback Quote →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Details Tabs -->
+    <section class="product-details-section">
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="specs">Specifications</button>
+                <button class="tab-btn" data-tab="reviews">Customer Reviews</button>
+                <button class="tab-btn" data-tab="quality">Quality Check</button>
+                <button class="tab-btn" data-tab="warranty">Warranty</button>
+            </div>
+
+            <!-- Specifications Tab -->
+            <div class="tab-content active" id="specsTab">
+                <div class="specs-grid" id="specsContent">
+                    <!-- Specifications will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-content" id="reviewsTab">
+                <div class="reviews-summary">
+                    <div class="reviews-rating">
+                        <div class="rating-large">4.8</div>
+                        <div class="stars-large">★★★★★</div>
+                        <div class="reviews-count">Based on 512 reviews</div>
+                    </div>
+                    <div class="reviews-breakdown">
+                        <div class="rating-bar">
+                            <span>5 stars</span>
+                            <div class="bar"><div class="fill" style="width: 86%"></div></div>
+                            <span>86%</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span>4 stars</span>
+                            <div class="bar"><div class="fill" style="width: 12%"></div></div>
+                            <span>12%</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span>3 stars</span>
+                            <div class="bar"><div class="fill" style="width: 2%"></div></div>
+                            <span>2%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="reviews-list" id="reviewsList">
+                    <!-- Reviews will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Quality Check Tab -->
+            <div class="tab-content" id="qualityTab">
+                <div class="quality-info">
+                    <h3>32-Step Quality Check</h3>
+                    <p>Every device goes through a deep check to ensure functionality and quality. Checks are done by qualified technicians following industry gold standard practices. Features that are inspected include:</p>
+                    <div class="quality-checklist">
+                        <div class="quality-item">✓ Battery health min +80%</div>
+                        <div class="quality-item">✓ WiFi connectivity</div>
+                        <div class="quality-item">✓ Bluetooth functionality</div>
+                        <div class="quality-item">✓ Speaker & Microphone</div>
+                        <div class="quality-item">✓ Camera (all lenses)</div>
+                        <div class="quality-item">✓ Charging port</div>
+                        <div class="quality-item">✓ Screen sensitivity</div>
+                        <div class="quality-item">✓ Face ID / Touch ID</div>
+                        <div class="quality-item">✓ Buttons & Switches</div>
+                        <div class="quality-item">✓ Water resistance test</div>
+                        <div class="quality-item">✓ SIM card slot</div>
+                        <div class="quality-item">✓ Vibration motor</div>
+                        <div class="quality-item">✓ Proximity sensor</div>
+                        <div class="quality-item">✓ Ambient light sensor</div>
+                        <div class="quality-item">✓ Gyroscope & Accelerometer</div>
+                        <div class="quality-item">✓ GPS functionality</div>
+                        <div class="quality-item">✓ NFC chip</div>
+                        <div class="quality-item">✓ Wireless charging</div>
+                        <div class="quality-item">✓ Display uniformity</div>
+                        <div class="quality-item">✓ Touch response</div>
+                        <div class="quality-item">✓ Audio jack (if applicable)</div>
+                        <div class="quality-item">✓ Volume buttons</div>
+                        <div class="quality-item">✓ Power button</div>
+                        <div class="quality-item">✓ Silent switch</div>
+                        <div class="quality-item">✓ Flash functionality</div>
+                        <div class="quality-item">✓ Front camera</div>
+                        <div class="quality-item">✓ Rear cameras (all)</div>
+                        <div class="quality-item">✓ Video recording</div>
+                        <div class="quality-item">✓ Slow motion</div>
+                        <div class="quality-item">✓ Portrait mode</div>
+                        <div class="quality-item">✓ Night mode</div>
+                        <div class="quality-item">✓ And more comprehensive checks...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warranty Tab -->
+            <div class="tab-content" id="warrantyTab">
+                <div class="warranty-info">
+                    <h3>Warranty Coverage</h3>
+                    <div class="warranty-features">
+                        <div class="warranty-feature">
+                            <strong>✓ Longest Protection</strong>
+                            <p>Extend your warranty up to 24 months, the longest coverage in Singapore.</p>
+                        </div>
+                        <div class="warranty-feature">
+                            <strong>✓ Zero Repair Costs</strong>
+                            <p>Manufacturer defects are fully covered at no charge.</p>
+                        </div>
+                        <div class="warranty-feature">
+                            <strong>✓ Replacement Assurance</strong>
+                            <p>Get a replacement device if repair is not possible.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Products -->
+    <section class="related-products-section">
+        <div class="container">
+            <h2 class="section-title">You May Also Like</h2>
+            <div class="related-products-grid" id="relatedProducts">
+                <!-- Related products will be populated dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>IBOX MOBILE SINGAPORE</h3>
+                    <p>Henderson Industrial Park<br>Singapore</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="quote.html">Sell Your Phone</a></li>
+                        <li><a href="login.html">Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: support@ktmobile.sg</p>
+                    <p>Phone: +65 XXXX XXXX</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 IBOX MOBILE SINGAPORE. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="quote.js"></script>
+    <script src="admin.js"></script>
+    <script src="product.js"></script>
+</body>
+</html>

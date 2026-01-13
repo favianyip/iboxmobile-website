@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBOX MOBILE SINGAPORE - BuyBack Your Used Phone at Highest Price</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="quote.js" defer></script>
+    <script src="script.js" defer></script>
+    <script src="auth.js" defer></script>
+    <script src="admin.js" defer></script>
+    <!-- iPhone Image Quality Solution: See image-scraper-solution.js for API integration options -->
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">IBOX MOBILE SINGAPORE</div>
+            <ul class="nav-links">
+                <li><a href="#sell-now">Sell Your Phone</a></li>
+                <!-- <li><a href="buy.html">Buy Refurbished</a></li> --> <!-- Temporarily disabled - Buyback focus only -->
+                <li><a href="#wholesale">Wholesale</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li id="authLinkContainer">
+                    <a href="login.html" id="loginLink">Login</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>BuyBack Your Used Phones <span>At Highest Price</span></h1>
+                        <p class="hero-description">Get instant quotes. Fast cash payment. Trusted by thousands of Singaporeans. Visit our office for instant payment.</p>
+                        <div class="hero-buttons">
+                            <a href="quote.html" class="btn btn-primary">Sell Your Phone Now</a>
+                            <a href="#how-it-works" class="btn btn-secondary">How It Works</a>
+                        </div>
+                        <!-- Trust Badges -->
+                        <div class="hero-trust-badges">
+                            <div class="trust-item">
+                                <span class="trust-icon">✓</span>
+                                <span>Highest prices guaranteed</span>
+                            </div>
+                            <div class="trust-item">
+                                <span class="trust-icon">✓</span>
+                                <span>Instant cash payment</span>
+                            </div>
+                            <div class="trust-item">
+                                <span class="trust-icon">✓</span>
+                                <span>Visit our office</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-phone-display">
+                        <div class="featured-phone">
+                            <img id="heroPhoneImage" src="images/phones/iphone-16-pro-max-best.jpg" alt="iPhone 16 Pro Max" class="featured-phone-image no-background" loading="eager" style="background: transparent;" onerror="this.src='images/phones/iphone-16-pro-max-gsmarena-pics.jpg'; this.onerror=function(){this.src='images/phones/iphone-16-pro-max-hq.jpg'; this.onerror=function(){this.src='images/phones/iphone-16-pro-max.jpg';};};">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="how-it-works">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Whether you're selling, buying, or trading in bulk — we've got you covered</p>
+                
+                <!-- For Retail Customers -->
+                <div class="how-it-works-category">
+                    <h3 class="category-title">For Retail Customers</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <h3>Select Your Device</h3>
+                            <p>Choose your phone model, storage, and condition</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <h3>Get Instant Quote</h3>
+                            <p>Receive the best buyback price in seconds</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <h3>Get Paid Instantly</h3>
+                            <p>Visit our store for instant cash payment</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- For Wholesale Partners -->
+                <div class="how-it-works-category wholesale-category">
+                    <h3 class="category-title">For Wholesale & Business Partners</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <h3>Contact Our Team</h3>
+                            <p>WhatsApp or call for bulk pricing and stock availability</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <h3>Buy or Sell in Bulk</h3>
+                            <p>Import & export iPhones. We buy and sell wholesale quantities.</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <h3>Fast Turnaround</h3>
+                            <p>Efficient shipping to local and international destinations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="sell-now" class="sell-now">
+            <div class="container">
+                <h2 class="section-title">Sell Your Phone</h2>
+                <p class="section-subtitle">Select your device to get an instant quote</p>
+                
+                <!-- Search Bar like SellUp -->
+                <div class="search-container">
+                    <form class="search-bar" onsubmit="searchDevice(event)">
+                        <input type="text" id="device-search" placeholder="Search your device (e.g. iPhone 15 Pro Max)..." autocomplete="off">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+                
+                <!-- iPhone Models -->
+                <div class="brand-section">
+                    <h3 class="brand-title">iPhone</h3>
+                    <div class="device-grid">
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 15 Pro Max</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                            <div class="color-options">
+                                <div class="color-dot color-black" title="Black Titanium"></div>
+                                <div class="color-dot color-white" title="White Titanium"></div>
+                                <div class="color-dot color-blue" title="Blue Titanium"></div>
+                                <div class="color-dot color-silver" title="Natural Titanium"></div>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 15 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                            <div class="color-options">
+                                <div class="color-dot color-black" title="Black Titanium"></div>
+                                <div class="color-dot color-white" title="White Titanium"></div>
+                                <div class="color-dot color-blue" title="Blue Titanium"></div>
+                                <div class="color-dot color-silver" title="Natural Titanium"></div>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 15 Plus</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                            <div class="color-options">
+                                <div class="color-dot color-black" title="Black"></div>
+                                <div class="color-dot color-blue" title="Blue"></div>
+                                <div class="color-dot color-green" title="Green"></div>
+                                <div class="color-dot color-yellow" title="Yellow"></div>
+                                <div class="color-dot color-pink" title="Pink"></div>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 15</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                            <div class="color-options">
+                                <div class="color-dot color-black" title="Black"></div>
+                                <div class="color-dot color-blue" title="Blue"></div>
+                                <div class="color-dot color-green" title="Green"></div>
+                                <div class="color-dot color-yellow" title="Yellow"></div>
+                                <div class="color-dot color-pink" title="Pink"></div>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 14 Pro Max</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 14 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 14 Plus</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 14</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 13 Pro Max</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 13 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 13</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 13 mini</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 12 Pro Max</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 12 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 12</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 12 mini</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 11 Pro Max</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 11 Pro</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone 11</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone SE (3rd Gen)</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone XS Max</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone XS</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>iPhone XR</h4>
+                            <div class="storage-options">
+                                <span>64GB</span>
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Samsung Models - Temporarily Hidden -->
+                <div class="brand-section" style="display: none;">
+                    <h3 class="brand-title">Samsung</h3>
+                    <div class="device-grid">
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S23 Ultra</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S23+</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S23</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S22 Ultra</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S22+</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S22</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S21 Ultra</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S21+</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy S21</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy Note 20 Ultra</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy Note 20</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy Z Fold 5</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy Z Fold 4</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                                <span>1TB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy Z Flip 5</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy Z Flip 4</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy A54</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Galaxy A34</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Brands - Temporarily Hidden -->
+                <div class="brand-section" style="display: none;">
+                    <h3 class="brand-title">Other Brands</h3>
+                    <div class="device-grid">
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Google Pixel 8 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Google Pixel 8</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Google Pixel 7 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Google Pixel 7</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>OnePlus 11</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>OnePlus 10 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Xiaomi 13 Pro</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Xiaomi 13</h4>
+                            <div class="storage-options">
+                                <span>128GB</span>
+                                <span>256GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>OPPO Find X5 Pro</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                        <div class="device-card">
+                            <div class="device-icon">📱</div>
+                            <h4>Vivo X90 Pro</h4>
+                            <div class="storage-options">
+                                <span>256GB</span>
+                                <span>512GB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- We Accept All Conditions Section -->
+        <section class="conditions-section section">
+            <div class="container">
+                <h2 class="section-title">We Accept Phones In All Conditions</h2>
+                <p class="section-subtitle">Whether your phone is brand new or has some issues, we'll make you an offer</p>
+                <div class="conditions-grid">
+                    <div class="condition-card">
+                        <div class="condition-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <h3>Brand New</h3>
+                        <p>Sealed or unsealed, get the best price for unused devices</p>
+                    </div>
+                    <div class="condition-card">
+                        <div class="condition-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                        </div>
+                        <h3>Used & Working</h3>
+                        <p>Normal wear and tear? No problem, we accept them all</p>
+                    </div>
+                    <div class="condition-card">
+                        <div class="condition-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                        </div>
+                        <h3>Cracked Screen</h3>
+                        <p>Screen damage? We still accept and offer fair prices</p>
+                    </div>
+                    <div class="condition-card">
+                        <div class="condition-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="13" x2="23" y2="11"/></svg>
+                        </div>
+                        <h3>Battery Issues</h3>
+                        <p>Poor battery health or charging problems accepted</p>
+                    </div>
+                </div>
+                <div class="conditions-note">
+                    <p><strong>Note:</strong> We DO NOT accept devices that are iCloud/Google locked, lost or stolen.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="why-choose-us" class="benefits why-choose-us">
+            <div class="container">
+                <h2 class="section-title">Why Choose IBOX Mobile</h2>
+                <div class="benefits-grid">
+                    <div class="benefit">
+                        <div class="benefit-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <h3>Highest Buyback Prices</h3>
+                        <p>We beat competitor prices. Get up to 20% more for your device with our best price guarantee.</p>
+                    </div>
+                    <div class="benefit">
+                        <div class="benefit-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <h3>Instant Cash Payment</h3>
+                        <p>Get paid on the spot. No waiting, no delays. Cash or bank transfer immediately upon inspection.</p>
+                    </div>
+                    <div class="benefit">
+                        <div class="benefit-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <h3>Free Doorstep Pickup</h3>
+                        <p>We come to you. Free pickup service anywhere in Singapore at your preferred time.</p>
+                    </div>
+                    <div class="benefit">
+                        <div class="benefit-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                        </div>
+                        <h3>Trusted & Verified</h3>
+                        <p>Licensed dealer with physical store. Your data is securely wiped. 5000+ happy customers.</p>
+                    </div>
+                    <div class="benefit">
+                        <div class="benefit-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        </div>
+                        <h3>Instant Online Quote</h3>
+                        <p>Get your price in 60 seconds. No hidden fees, no surprises. What you see is what you get.</p>
+                    </div>
+                    <div class="benefit">
+                        <div class="benefit-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <h3>Trade-In Options</h3>
+                        <p>Upgrade to a newer model. Get extra value when you trade in your old phone with us.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wholesale Section - Standalone -->
+        <section id="wholesale" class="wholesale-section">
+            <div class="container">
+                <div class="wholesale-header">
+                    <span class="wholesale-badge">Wholesale Partner</span>
+                    <h2 class="section-title">Wholesale iPhone Trading</h2>
+                    <p class="section-subtitle">IBOX Mobile Singapore partners with established wholesale distributors for bulk iPhone import and export operations</p>
+                </div>
+
+                <div class="wholesale-content">
+                    <div class="wholesale-info">
+                        <div class="partner-highlight">
+                            <h3>Our Wholesale Partner</h3>
+                            <div class="partner-name">KT TELECOM PTE LTD</div>
+                            <p class="partner-desc">
+                                Established iPhone distributor with extensive experience in the mobile phone trade. 
+                                Specializing in bulk transactions for retailers, exporters, and corporate buyers across 
+                                Southeast Asia, Middle East, and Europe.
+                            </p>
+                        </div>
+
+                        <div class="wholesale-services">
+                            <div class="service-item">
+                                <div class="service-icon">📦</div>
+                                <div class="service-text">
+                                    <h4>Bulk iPhone Purchase</h4>
+                                    <p>Buy wholesale quantities of new and graded iPhones at competitive prices</p>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-icon">💰</div>
+                                <div class="service-text">
+                                    <h4>Bulk iPhone Selling</h4>
+                                    <p>Sell your inventory in bulk - we buy any quantity, any iPhone model</p>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-icon">🌏</div>
+                                <div class="service-text">
+                                    <h4>Import & Export</h4>
+                                    <p>International shipping to Asia Pacific, Middle East, and European markets</p>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-icon">🤝</div>
+                                <div class="service-text">
+                                    <h4>Trade Partnerships</h4>
+                                    <p>Establish recurring business relationships with preferred partner pricing</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wholesale-stats">
+                            <div class="stat">
+                                <span class="stat-value">10K+</span>
+                                <span class="stat-label">Devices Monthly</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">500+</span>
+                                <span class="stat-label">Business Partners</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">15+</span>
+                                <span class="stat-label">Export Markets</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wholesale-contact">
+                        <div class="contact-card">
+                            <h3>Wholesale Enquiries</h3>
+                            <p class="contact-intro">Contact our wholesale team for bulk pricing, stock availability, and partnership opportunities.</p>
+                            
+                            <div class="contact-details">
+                                <div class="contact-item">
+                                    <span class="contact-label">Contact Person</span>
+                                    <span class="contact-value">Shawn</span>
+                                </div>
+                                <div class="contact-item">
+                                    <span class="contact-label">WhatsApp / Call</span>
+                                    <a href="https://wa.me/6596999744" class="contact-value contact-link">96999744</a>
+                                </div>
+                                <div class="contact-item">
+                                    <span class="contact-label">Office Location</span>
+                                    <span class="contact-value">203 Henderson Rd, #09-09 Wing B, Henderson Industrial Park, Singapore</span>
+                                </div>
+                                <div class="contact-item">
+                                    <span class="contact-label">Operating Hours</span>
+                                    <div class="contact-value" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                        <span>Mon - Fri: 9AM - 6PM</span>
+                                        <span>Sat: 9AM - 12PM</span>
+                                        <span>Sun: Closed</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="https://wa.me/6596999744?text=Hi%2C%20I%27m%20interested%20in%20wholesale%20enquiry%20-%20Contact%20Shawn" class="btn btn-primary btn-wholesale" target="_blank">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                WhatsApp Wholesale Team
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>IBOX MOBILE SINGAPORE</h3>
+                    <p>Your trusted partner for phone buyback and refurbished phones in Singapore. Best prices, instant payment, hassle-free service.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="quote.html">Sell Your Phone</a></li>
+                        <!-- <li><a href="buy.html">Buy Refurbished</a></li> --> <!-- Temporarily disabled -->
+                        <li><a href="#wholesale">Wholesale</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section footer-contact">
+                    <h4>General Enquiries</h4>
+                    <p>WhatsApp: <a href="https://wa.me/6589190776">+65 8919 0776</a></p>
+                    <p>Email: <a href="mailto:sales@iboxmobile.sg">sales@iboxmobile.sg</a></p>
+                </div>
+                <div class="footer-section footer-contact">
+                    <h4>Visit Us</h4>
+                    <p>203 Henderson Rd, #09-09 Wing B</p>
+                    <p>Henderson Industrial Park</p>
+                    <p>Singapore 159239</p>
+                    <p>Mon - Fri: 10am - 8pm</p>
+                    <p>Sat: 9am - 12pm</p>
+                    <p>Sun: Closed</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 IBOX MOBILE SINGAPORE. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/6589190776" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+    </a>
+</body>
+</html>

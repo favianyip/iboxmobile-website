@@ -1,0 +1,1050 @@
+/* CSS Variables */
+:root {
+    --gold: #C9A84C;
+    --gold-light: #E5C76B;
+    --gold-dark: #A88A3D;
+    --black: #1a1a1a;
+    --black-light: #333333;
+    --white: #ffffff;
+    --gray: #f8f9fa;
+    --gray-dark: #6c757d;
+    --text-dark: #2c2c2c;
+    --text-light: #666666;
+    --border: #e0e0e0;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --danger: #dc3545;
+    --success: #28a745;
+}
+
+/* CRITICAL: Force enable clicks on ALL interactive elements */
+button,
+.brand-btn,
+.model-card,
+.option-btn,
+input,
+select,
+textarea,
+a {
+    pointer-events: auto !important;
+}
+
+.brand-btn,
+.model-card,
+.option-btn,
+button {
+    cursor: pointer !important;
+}
+
+/* Child elements shouldn't block parent clicks */
+.brand-btn > *,
+.model-card > *,
+.option-btn > * {
+    pointer-events: none !important;
+}
+
+/* Quote Page Styles */
+body {
+    background: var(--gray);
+    color: var(--text-dark);
+}
+
+.quote-page {
+    padding-top: 80px;
+    min-height: 100vh;
+    background: var(--gray);
+    pointer-events: auto !important;
+}
+
+.quote-page * {
+    pointer-events: auto !important;
+}
+
+/* Progress Bar */
+.quote-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active {
+    opacity: 1;
+}
+
+.progress-step.completed {
+    opacity: 1;
+}
+
+.progress-step.completed .step-circle {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--white);
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active .step-circle {
+    background: var(--gold);
+    color: var(--white);
+}
+
+.progress-step span {
+    font-size: 0.8rem;
+    color: var(--text-dark);
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.progress-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin: 0 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Wizard Container */
+.quote-wizard {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 1;
+}
+
+.quote-wizard * {
+    pointer-events: auto !important;
+}
+
+.quote-wizard button {
+    cursor: pointer !important;
+    z-index: 9999 !important;
+}
+
+.wizard-step {
+    display: none !important;
+    animation: fadeIn 0.4s ease;
+}
+
+.wizard-step.active {
+    display: block !important;
+}
+
+.wizard-step.active * {
+    pointer-events: auto !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.wizard-step h2 {
+    color: var(--text-dark);
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.step-description {
+    color: var(--text-light);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Brand Selector */
+.brand-selector {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 5;
+    display: block; /* Always visible */
+}
+
+.model-selector {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 5;
+    display: none; /* Hidden until brand is selected */
+}
+
+.model-selector[style*="display: block"],
+.model-selector.show {
+    display: block !important;
+}
+
+.brand-selector h3,
+.model-selector h3,
+.condition-section h3 {
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.brand-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 5;
+}
+
+.brand-btn {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer !important;
+    transition: all 0.3s ease;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 100;
+    touch-action: manipulation;
+}
+
+.brand-btn:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 15px var(--shadow);
+}
+
+.brand-btn.selected {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.1);
+}
+
+.brand-btn img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+}
+
+.brand-btn .brand-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    display: block;
+    pointer-events: none;
+}
+
+.brand-btn span {
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.brand-text {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+/* Model Grid */
+.model-selector {
+    margin-top: 2rem;
+}
+
+.model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 5;
+}
+
+.model-card {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer !important;
+    transition: all 0.3s ease;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 100;
+    touch-action: manipulation;
+}
+
+.model-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 15px var(--shadow);
+}
+
+.model-card.selected {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.1);
+}
+
+.model-card img {
+    width: 70px;
+    height: 90px;
+    object-fit: contain;
+    margin-bottom: 0.8rem;
+    pointer-events: none;
+}
+
+.model-card h4 {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    pointer-events: none;
+}
+
+.model-card .price-from {
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* Selected Device Header */
+.selected-device-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px var(--shadow);
+}
+
+.selected-device-header img {
+    width: 70px;
+    height: 90px;
+    object-fit: contain;
+}
+
+.selected-device-header h2 {
+    text-align: left;
+    margin-bottom: 0.3rem;
+    font-size: 1.5rem;
+}
+
+.selected-device-header .step-description {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+/* Condition Sections */
+.condition-section {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px var(--shadow);
+    max-width: 100%;
+}
+
+/* Ensure Step 2 content is centered like Step 1 */
+#step-2 {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.option-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center; /* Center align options */
+}
+
+.option-btn {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1.2rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.option-btn:hover {
+    border-color: var(--gold);
+}
+
+.option-btn.selected {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold-dark);
+}
+
+.grade-options .option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 160px;
+}
+
+.grade-options .option-btn strong {
+    color: var(--text-dark);
+    margin-bottom: 0.3rem;
+}
+
+.grade-options .option-btn span {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.checkbox-options .option-btn.selected {
+    background: rgba(201, 168, 76, 0.15);
+}
+
+/* Color Options */
+.color-options .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+}
+
+/* Step Actions */
+.step-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.step-actions .btn {
+    min-width: 150px;
+}
+
+/* Quote Result */
+.quote-result {
+    text-align: center;
+}
+
+.quote-device-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px var(--shadow);
+}
+
+.quote-device-summary img {
+    width: 80px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.quote-device-info {
+    text-align: left;
+}
+
+.quote-device-info h2 {
+    text-align: left;
+    font-size: 1.5rem;
+}
+
+.quote-device-info p {
+    color: var(--text-light);
+}
+
+.quote-price-card {
+    background: var(--white);
+    border: 3px solid var(--gold);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px var(--shadow);
+}
+
+.quote-price-card h3 {
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.quote-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.quote-price .currency {
+    color: var(--gold);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.quote-price .amount {
+    color: var(--gold);
+    font-size: 3.5rem;
+    font-weight: 700;
+}
+
+.quote-validity {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+.quote-breakdown {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+    box-shadow: 0 2px 10px var(--shadow);
+}
+
+.quote-breakdown h4 {
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+
+.breakdown-item:last-child {
+    border-bottom: none;
+}
+
+.breakdown-item.total {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+    border-top: 2px solid var(--gold);
+}
+
+.breakdown-item .deduction {
+    color: var(--danger);
+}
+
+.breakdown-item .bonus {
+    color: var(--success);
+}
+
+.quote-note {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.quote-note p {
+    color: var(--danger);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.quote-note ul {
+    color: var(--text-dark);
+    padding-left: 1.5rem;
+    font-size: 0.9rem;
+}
+
+/* Booking Options */
+.booking-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.booking-option {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.booking-option:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px var(--shadow);
+}
+
+.booking-option.selected {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+}
+
+.booking-icon {
+    color: var(--gold);
+    margin-bottom: 1rem;
+}
+
+.booking-option h3 {
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.booking-option p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* Booking Form */
+.booking-form {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: left;
+    box-shadow: 0 2px 10px var(--shadow);
+}
+
+.booking-form h3 {
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dark);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-checkbox input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--gold);
+    margin-top: 2px;
+}
+
+.form-checkbox label {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.form-checkbox .link {
+    color: var(--gold);
+    text-decoration: underline;
+}
+
+/* Confirmation */
+.confirmation-success {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.success-icon {
+    color: var(--success);
+    margin-bottom: 1.5rem;
+}
+
+.confirmation-success h2 {
+    color: var(--success);
+    margin-bottom: 0.5rem;
+}
+
+.confirmation-success > p {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.confirmation-details {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    text-align: left;
+    box-shadow: 0 2px 10px var(--shadow);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row span {
+    color: var(--text-light);
+}
+
+.detail-row strong {
+    color: var(--text-dark);
+}
+
+.confirmation-note {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+/* Device Type Selection (New/Used) */
+.device-type-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.device-type-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.device-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 1rem;
+    min-height: 180px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.device-type-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(201, 168, 76, 0.3);
+}
+
+.device-type-btn.selected {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.15) 0%, rgba(201, 168, 76, 0.05) 100%);
+    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.25);
+}
+
+.device-type-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.device-type-btn strong {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.device-type-btn span {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.4;
+}
+
+.bonus-tag {
+    position: absolute;
+    bottom: 10px;
+    background: var(--success);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.bonus-tag.neutral {
+    background: var(--gray-dark);
+}
+
+.bonus-tag.small {
+    position: static;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+}
+
+.deduction-tag {
+    color: var(--danger);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+/* Required Badge */
+.required-badge {
+    font-size: 0.7rem;
+    background: var(--danger);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* Section Hint */
+.section-hint {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Used Device Conditions Container */
+.used-device-conditions {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.used-device-conditions.visible {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Issue Icons */
+.issue-icon, .accessory-icon {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+/* Live Price Estimate - Hidden by default, shown only when ready */
+.live-price-estimate {
+    background: linear-gradient(135deg, var(--black) 0%, var(--black-light) 100%);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    margin: 2rem 0;
+    position: relative; /* Changed from sticky to prevent overlay */
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    display: none; /* Hidden by default */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.live-price-estimate.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.estimate-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.estimate-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 2px 10px rgba(201, 168, 76, 0.3);
+}
+
+.estimate-hint {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 0.5rem;
+}
+
+/* Enhanced Option Buttons with Icons */
+.checkbox-options .option-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 0.8rem 1.2rem;
+}
+
+/* Receipt Options */
+#receipt-options .option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 1.5rem;
+    min-height: auto;
+}
+
+#receipt-options .option-btn strong {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+#receipt-options .option-btn span {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .quote-progress {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .progress-line {
+        display: none;
+    }
+
+    .progress-step {
+        flex: 0 0 45%;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .quote-price .amount {
+        font-size: 2.5rem;
+    }
+
+    .selected-device-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .selected-device-header h2,
+    .selected-device-header .step-description {
+        text-align: center;
+    }
+    
+    .grade-options .option-btn {
+        min-width: 100%;
+    }
+    
+    .device-type-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .device-type-btn {
+        min-height: auto;
+        padding: 1.2rem;
+        flex-direction: row;
+        gap: 1rem;
+        text-align: left;
+    }
+    
+    .device-type-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    .device-type-btn strong {
+        font-size: 1rem;
+    }
+    
+    .bonus-tag {
+        position: static;
+        margin-top: 0.5rem;
+    }
+    
+    .live-price-estimate {
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .estimate-price {
+        font-size: 2rem;
+    }
+}
