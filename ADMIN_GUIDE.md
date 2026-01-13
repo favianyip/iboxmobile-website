@@ -71,6 +71,76 @@ Complete admin system for managing phone models, prices, and brand settings.
 - Price update frequency
 - Image source preferences
 
+### 6. Phone Image Guidelines
+
+**IMPORTANT:** All phone images must follow these standardized specifications for consistent display across the website.
+
+#### Image Specifications
+- **Dimensions:** 160 x 212 pixels (fixed size)
+- **Aspect Ratio:** 3:4 (portrait orientation)
+- **File Format:** JPEG (.jpg)
+- **File Size:** Recommended < 50KB for optimal loading
+- **Background:** Transparent or white background preferred
+- **Quality:** High resolution, clear product shot
+- **Naming Convention:** `brand-model-variant.jpg` (e.g., `iphone-16-pro-max.jpg`)
+
+#### Image Requirements
+1. **Centered Product:** Phone should be centered in the frame
+2. **No Text Overlays:** Product image only, no promotional text
+3. **Consistent Angle:** Front-facing, slightly angled (similar to other products)
+4. **Good Lighting:** Well-lit, no harsh shadows
+5. **Clean Background:** Plain white or transparent background
+6. **No Watermarks:** Remove any brand watermarks or logos
+
+#### File Location
+- All phone images must be placed in: `/images/phones/`
+- Use lowercase file names with hyphens (not spaces)
+
+#### How to Add Images
+1. **Prepare Image:**
+   - Resize to exactly 160x212 pixels
+   - Use tools like Photoshop, GIMP, or online resizers
+   - Save as JPEG with 80-90% quality
+
+2. **Upload to Project:**
+   - Place file in `/images/phones/` directory
+   - Name file according to convention: `brand-model.jpg`
+
+3. **Update Admin Dashboard:**
+   - Login to admin panel
+   - Navigate to Phone Models
+   - Edit the phone or add new phone
+   - Enter image path: `images/phones/your-image-name.jpg`
+   - Save changes
+
+#### Quick Resize Commands
+If you have ImageMagick installed:
+```bash
+# Resize to exact dimensions
+convert input.jpg -resize 160x212! output.jpg
+
+# Resize and maintain aspect ratio with padding
+convert input.jpg -resize 160x212 -gravity center -extent 160x212 -background white output.jpg
+```
+
+#### Image Fallback System
+The website has a built-in fallback system:
+- Primary image loads from specified path
+- If fails, tries alternative image sources
+- Finally shows placeholder or hides image
+
+#### Best Practices
+✅ Always test images on both desktop and mobile
+✅ Check image quality after upload
+✅ Use consistent lighting across all products
+✅ Verify image loads correctly in all browsers
+✅ Keep file sizes small for fast loading
+
+❌ Don't use images with text overlays
+❌ Don't use low resolution or blurry images
+❌ Don't mix different aspect ratios
+❌ Don't use copyrighted images without permission
+
 ## Permission Types
 
 ### Master Admin
