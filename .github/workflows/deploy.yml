@@ -11,30 +11,79 @@ permissions:
   pages: write
   id-token: write
 
+# Cancel any in-progress deployments to avoid conflicts
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
+  # Build and Deploy in a single job for simplicity
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Pages
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
+        id: pages
 
-      - name: Upload artifact
+      - name: Create deployment artifact
+        run: |
+          # Create a clean build
+          mkdir -p _site
+
+          # Copy all necessary files (exclude unnecessary ones)
+          rsync -av --progress . _site/ \
+            --exclude .git \
+            --exclude .github \
+            --exclude _site \
+            --exclude .gitignore \
+            --exclude DEPLOYMENT_FIX.md \
+            --exclude README.md
+
+          echo "✅ Deployment artifact created"
+          ls -lah _site/
+
+      - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
+          retention-days: 1
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        timeout-minutes: 10
+        with:
+          timeout: 600000  # 10 minutes in milliseconds
+          error_count: 10
+          reporting_interval: 5000
+        continue-on-error: true
+
+      - name: Retry deployment if failed
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 600000
+        continue-on-error: true
+
+      - name: Final deployment status
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "⚠️ Deployment failed after retries"
+          echo "Please check Settings > Pages and ensure Source is set to 'GitHub Actions'"
+          echo "See DEPLOYMENT_FIX.md for detailed instructions"
+          exit 1
+
+      - name: Success message
+        if: steps.deployment.outcome == 'success'
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
