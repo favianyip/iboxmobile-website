@@ -731,3 +731,41 @@ window.searchDevice = searchDevice;
 window.searchDeviceBuy = searchDeviceBuy;
 window.navigateToProduct = navigateToProduct;
 window.phoneImages = phoneImages;
+
+// ============================================================================
+// DEVICE CARD CLICK HANDLERS FOR HOMEPAGE
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers to all device cards on homepage
+    const deviceCards = document.querySelectorAll('.device-card');
+    
+    deviceCards.forEach(card => {
+        // Skip if already has onclick
+        if (card.onclick) return;
+        
+        card.style.cursor = 'pointer';
+        
+        card.addEventListener('click', function(e) {
+            // Don't trigger if clicking a button inside
+            if (e.target.tagName === 'BUTTON') return;
+            
+            // Get the model name from h4
+            const modelName = this.querySelector('h4')?.textContent?.trim();
+            if (!modelName) return;
+            
+            // Determine brand
+            let brand = 'Apple';
+            if (modelName.toLowerCase().includes('galaxy') || 
+                modelName.toLowerCase().includes('samsung') ||
+                modelName.toLowerCase().includes('note')) {
+                brand = 'Samsung';
+            }
+            
+            // Navigate to quote page
+            window.location.href = `quote.html?brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(modelName)}`;
+        });
+    });
+    
+    console.log(`Added click handlers to ${deviceCards.length} device cards`);
+});
