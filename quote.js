@@ -168,7 +168,7 @@ const phoneDatabase = {
         },
         'iPhone 16e': {
             basePrice: 730, // SellUp: $730
-            image: 'images/phones/iphone-se-3.jpg',
+            image: 'images/phones/iphone-se-3rd-gen.jpg',
             storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
             colors: [
                 { name: 'Black', hex: '#000000' },
