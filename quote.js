@@ -46,46 +46,39 @@ async function loadDynamicPrices() {
 
 // DIRECT PRICE LOOKUP - Returns actual price, no calculation!
 function getDirectPrice(model, storage, color, country, body, screen, battery, issues, accessories) {
-    if (!directPriceLookup || !directPriceLookup.prices) {
+    if (!directPriceLookup || !directPriceLookup.models) {
         return null; // Fallback to calculation if not available
     }
     
-    // Build lookup key: model_storage_color_country_body_screen_battery_issues_accessories
-    const accKey = accessories.length === 2 ? 'CableBox' : 
-                   accessories.includes('Cable') ? 'Cable' :
-                   accessories.includes('Box') ? 'Box' : 'None';
+    const modelData = directPriceLookup.models[model];
+    if (!modelData || !modelData.conditions || !modelData.conditions[storage]) {
+        return null;
+    }
     
+    // Build condition key: Country_GradeBody_GradeScreen_Battery%
+    const countryKey = country === 'local' ? 'Local' : 'Export';
+    const bodyKey = 'Grade' + body;
+    const screenKey = 'Grade' + screen;
     const batteryKey = battery === '91-100' ? '91-100%' :
                        battery === '86-90' ? '86-90%' :
                        battery === '81-85' ? '81-85%' : '80%';
     
-    const countryKey = country === 'local' ? 'Local' : 'Export';
-    const bodyKey = 'Grade' + body;
-    const screenKey = 'Grade' + screen;
-    const issuesKey = issues && issues.length > 0 ? issues.join('_') : 'None';
+    const condKey = `${countryKey}_${bodyKey}_${screenKey}_${batteryKey}`;
     
-    const lookupKey = `${model}_${storage}_${color}_${countryKey}_${bodyKey}_${screenKey}_${batteryKey}_${issuesKey}_${accKey}`;
+    console.log('Looking up condition:', condKey);
     
-    console.log('Direct price lookup key:', lookupKey);
+    // Get base price for condition
+    let price = modelData.conditions[storage][condKey];
     
-    // Try exact match first
-    if (directPriceLookup.prices[lookupKey] !== undefined) {
-        console.log('Direct price found:', directPriceLookup.prices[lookupKey]);
-        return directPriceLookup.prices[lookupKey];
-    }
-    
-    // Try without accessories (add bonus manually)
-    const baseKey = `${model}_${storage}_${color}_${countryKey}_${bodyKey}_${screenKey}_${batteryKey}_${issuesKey}_None`;
-    if (directPriceLookup.prices[baseKey] !== undefined) {
-        let price = directPriceLookup.prices[baseKey];
+    if (price !== undefined) {
         // Add accessory bonus
-        if (accessories.includes('Cable')) price += 15;
-        if (accessories.includes('Box')) price += 20;
-        console.log('Direct price (with accessory adjustment):', price);
+        if (accessories.includes('cable') || accessories.includes('Cable')) price += 15;
+        if (accessories.includes('box') || accessories.includes('Box')) price += 20;
+        console.log('Direct price found:', price);
         return price;
     }
     
-    console.log('No direct price match for:', lookupKey);
+    console.log('No direct price for:', condKey);
     return null; // Fall back to calculation
 }
 
@@ -1593,9 +1586,9 @@ function updateLivePriceEstimate() {
     // Device type bonus for NEW phones
     if (quoteState.deviceType === 'new-sealed') {
         // Try direct lookup for new sealed
-        const newSealedKey = `${quoteState.model}_${quoteState.storage}_${quoteState.color || 'Black'}_new_sealed`;
-        if (directPriceLookup?.prices?.[newSealedKey]) {
-            price = directPriceLookup.prices[newSealedKey];
+        const modelLookup = directPriceLookup?.models?.[quoteState.model];
+        if (modelLookup?.storage?.[quoteState.storage]?.new_sealed) {
+            price = modelLookup.storage[quoteState.storage].new_sealed;
         } else {
             price += 200;
             if (quoteState.storage && model.storage[quoteState.storage]) {
@@ -1604,9 +1597,9 @@ function updateLivePriceEstimate() {
         }
     } else if (quoteState.deviceType === 'new-activated') {
         // Try direct lookup for new activated
-        const newActivatedKey = `${quoteState.model}_${quoteState.storage}_${quoteState.color || 'Black'}_new_activated`;
-        if (directPriceLookup?.prices?.[newActivatedKey]) {
-            price = directPriceLookup.prices[newActivatedKey];
+        const modelLookup = directPriceLookup?.models?.[quoteState.model];
+        if (modelLookup?.storage?.[quoteState.storage]?.new_activated) {
+            price = modelLookup.storage[quoteState.storage].new_activated;
         } else {
             price += 100;
             if (quoteState.storage && model.storage[quoteState.storage]) {
