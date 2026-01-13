@@ -1,0 +1,57 @@
+name: Deploy Fallback (Manual Trigger)
+
+# This workflow can be manually triggered if the main deployment fails
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create deployment artifact
+        run: |
+          # Exclude unnecessary files from deployment
+          tar \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='price-scraper' \
+            --exclude='node_modules' \
+            --exclude='.gitignore' \
+            -czf artifact.tar.gz .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-files
+          path: artifact.tar.gz
+          retention-days: 1
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        timeout-minutes: 10
+        continue-on-error: true
+
+      - name: Retry deployment if failed
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        timeout-minutes: 10
