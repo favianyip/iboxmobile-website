@@ -249,11 +249,11 @@ const phoneDatabase = {
             image: 'images/phones/iphone-15-plus.jpg',
             storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
             colors: [
-                { name: 'Pink', hex: '#FFB6C1' },
-                { name: 'Yellow', hex: '#FFFF00' },
-                { name: 'Green', hex: '#90EE90' },
-                { name: 'Blue', hex: '#87CEEB' },
-                { name: 'Black', hex: '#000000' }
+                { name: 'Black', hex: '#3C3C3C' },
+                { name: 'Blue', hex: '#D4E4ED' },
+                { name: 'Green', hex: '#CAD6C3' },
+                { name: 'Yellow', hex: '#F6E64C' },
+                { name: 'Pink', hex: '#F9D1CF' }
             ]
         },
         'iPhone 15': {
@@ -261,11 +261,11 @@ const phoneDatabase = {
             image: 'images/phones/iphone-15.jpg',
             storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
             colors: [
-                { name: 'Pink', hex: '#FFB6C1' },
-                { name: 'Yellow', hex: '#FFFF00' },
-                { name: 'Green', hex: '#90EE90' },
-                { name: 'Blue', hex: '#87CEEB' },
-                { name: 'Black', hex: '#000000' }
+                { name: 'Black', hex: '#3C3C3C' },
+                { name: 'Blue', hex: '#D4E4ED' },
+                { name: 'Green', hex: '#CAD6C3' },
+                { name: 'Yellow', hex: '#F6E64C' },
+                { name: 'Pink', hex: '#F9D1CF' }
             ]
         },
         'iPhone 14 Pro Max': {
@@ -920,6 +920,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const brandParam = urlParams.get('brand');
     const modelParam = urlParams.get('model');
+    const typeParam = urlParams.get('type'); // new or used
+    
+    // Store the type preference for later use in Step 2
+    if (typeParam) {
+        window.preferredDeviceType = typeParam === 'new' ? 'new-sealed' : 'used';
+        console.log('Trade-in type preference:', window.preferredDeviceType);
+    }
     
     // Auto-select Apple brand if no URL params (iPhone only focus)
     if (!brandParam && !modelParam) {
@@ -1422,6 +1429,17 @@ function populateStep2() {
     // Initialize device type selection
     initDeviceTypeSelection();
     
+    // Auto-select device type if coming from Trade In buttons
+    if (window.preferredDeviceType) {
+        setTimeout(() => {
+            const deviceTypeBtn = document.querySelector(`[data-value="${window.preferredDeviceType}"]`);
+            if (deviceTypeBtn) {
+                deviceTypeBtn.click();
+                console.log('Auto-selected device type:', window.preferredDeviceType);
+            }
+        }, 100);
+    }
+    
     // Receipt options
     initOptionButtons('receipt-options', 'hasReceipt');
     
@@ -1432,6 +1450,9 @@ function populateStep2() {
     initOptionButtons('battery-options', 'batteryHealth');
     initCheckboxButtons('issue-options', 'issues');
     initCheckboxButtons('accessory-options', 'accessories');
+    
+    // Initialize navigation buttons (Get Quote, Back, etc.)
+    initNavigationButtons();
     
     // Initialize live price estimate
     updateLivePriceEstimate();
