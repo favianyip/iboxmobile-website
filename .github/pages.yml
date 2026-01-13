@@ -1,0 +1,17 @@
+# GitHub Pages Configuration
+# This file helps configure GitHub Pages deployment
+
+# Deployment method
+# Options: "github-actions" or "branch"
+# Recommended: "github-actions" (faster, more reliable)
+deployment_method: github-actions
+
+# Custom domain configuration
+domain: iboxmobile.net
+
+# HTTPS enforcement
+enforce_https: true
+
+# Jekyll processing
+# Set to false since this is a vanilla HTML/JS site
+jekyll: false
