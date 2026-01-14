@@ -122,6 +122,8 @@
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 2rem;
             margin-bottom: 3rem;
+            animation: fadeIn 0.5s ease-in-out;
+            transition: opacity 0.3s ease-in-out;
         }
 
         .model-card {
@@ -132,6 +134,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid #f0f0f0;
+            animation: slideUp 0.4s ease-out;
         }
 
         .model-card:hover {
@@ -195,6 +198,46 @@
             display: block;
         }
 
+        /* Animation keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-title-animate {
+            animation: slideInFromTop 0.4s ease-out;
+        }
+
+        .condition-switch-animation {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
         @media (max-width: 768px) {
             .model-grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -220,13 +263,16 @@
 <body>
     <header class="header">
         <nav class="nav">
-            <div class="logo">IBOX MOBILE SINGAPORE</div>
+            <a href="index.html" class="logo">
+                <img src="images/ibox-logo.png" alt="IBOX MOBILE SINGAPORE" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <span class="logo-text" style="display: none;">IBOX MOBILE SINGAPORE</span>
+            </a>
             <ul class="nav-links">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle">Sell Phones <span style="font-size: 0.7rem;">▼</span></a>
-                    <ul class="dropdown-menu" style="position: absolute; top: 100%; left: 0; background: white; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; padding: 0.5rem 0; margin-top: 0.5rem; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000;">
-                        <li><a href="sell-phones.html?type=used" style="display: block; padding: 0.75rem 1.5rem; color: #333;">Used Phones</a></li>
-                        <li><a href="sell-phones.html?type=new" style="display: block; padding: 0.75rem 1.5rem; color: #333;">New Phones</a></li>
+                    <ul class="dropdown-menu" style="position: absolute; top: 100%; left: 0; background: white; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; padding: 0.5rem 0; margin-top: 0.5rem; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000;">
+                        <li><a href="sell-phones.html?type=used" style="display: block; padding: 0.75rem 1.5rem; color: #333;">Trade In Used Phone</a></li>
+                        <li><a href="sell-phones.html?type=new" style="display: block; padding: 0.75rem 1.5rem; color: #333;">Trade In New Phone</a></li>
                     </ul>
                 </li>
                 <li><a href="index.html#wholesale">Wholesale</a></li>
@@ -370,6 +416,15 @@
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
 
+            // Add animation class to title
+            pageTitle.classList.remove('page-title-animate');
+            void pageTitle.offsetWidth; // Trigger reflow
+            pageTitle.classList.add('page-title-animate');
+
+            pageSubtitle.classList.remove('page-title-animate');
+            void pageSubtitle.offsetWidth; // Trigger reflow
+            pageSubtitle.classList.add('page-title-animate');
+
             if (currentCondition === 'used') {
                 usedBtn.classList.add('active');
                 newBtn.classList.remove('active');
@@ -405,20 +460,30 @@
             const appleGrid = document.getElementById('apple-grid');
             const samsungGrid = document.getElementById('samsung-grid');
 
-            appleGrid.innerHTML = '';
-            samsungGrid.innerHTML = '';
+            // Add fade out effect before clearing
+            appleGrid.style.opacity = '0';
+            samsungGrid.style.opacity = '0';
 
-            // Render Apple models
-            phoneModels.apple.forEach(model => {
-                const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                appleGrid.innerHTML += createModelCard(model, 'Apple', price);
-            });
+            setTimeout(() => {
+                appleGrid.innerHTML = '';
+                samsungGrid.innerHTML = '';
 
-            // Render Samsung models
-            phoneModels.samsung.forEach(model => {
-                const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
-            });
+                // Render Apple models
+                phoneModels.apple.forEach(model => {
+                    const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
+                    appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                });
+
+                // Render Samsung models
+                phoneModels.samsung.forEach(model => {
+                    const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
+                    samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                });
+
+                // Fade in with new content
+                appleGrid.style.opacity = '1';
+                samsungGrid.style.opacity = '1';
+            }, 200);
         }
 
         // Create model card HTML
