@@ -581,12 +581,12 @@ function searchDevice(event) {
     event.preventDefault();
     const searchInput = document.getElementById('device-search');
     const searchTerm = searchInput?.value?.toLowerCase().trim();
-    
+
     if (!searchTerm) return;
-    
+
     const deviceCards = document.querySelectorAll('.device-card');
     let found = false;
-    
+
     deviceCards.forEach(card => {
         const deviceName = card.querySelector('h4')?.textContent?.toLowerCase() || '';
         if (deviceName.includes(searchTerm)) {
@@ -594,20 +594,182 @@ function searchDevice(event) {
             card.style.boxShadow = '0 0 25px rgba(201, 168, 76, 0.6)';
             card.style.borderColor = '#C9A84C';
             card.style.transform = 'scale(1.02)';
-            
+
             setTimeout(() => {
                 card.style.boxShadow = '';
                 card.style.borderColor = '';
                 card.style.transform = '';
             }, 3000);
-            
+
             found = true;
         }
     });
-    
+
     if (!found) {
         window.location.href = `quote.html?search=${encodeURIComponent(searchTerm)}`;
     }
+}
+
+/**
+ * Search autocomplete/recommendations functionality
+ */
+function initializeSearchAutocomplete() {
+    const searchInput = document.getElementById('device-search');
+    if (!searchInput) return;
+
+    // Create autocomplete dropdown
+    const autocompleteDiv = document.createElement('div');
+    autocompleteDiv.className = 'search-autocomplete';
+    autocompleteDiv.style.cssText = `
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    `;
+
+    searchInput.parentElement.style.position = 'relative';
+    searchInput.parentElement.appendChild(autocompleteDiv);
+
+    // Get all device names for autocomplete
+    const getAllDeviceNames = () => {
+        const names = [];
+        // From phoneImages object
+        for (let name in phoneImages) {
+            names.push(name);
+        }
+        return [...new Set(names)]; // Remove duplicates
+    };
+
+    const deviceNames = getAllDeviceNames();
+
+    // Handle input
+    searchInput.addEventListener('input', function(e) {
+        const value = e.target.value.toLowerCase().trim();
+        autocompleteDiv.innerHTML = '';
+
+        if (!value) {
+            autocompleteDiv.style.display = 'none';
+            return;
+        }
+
+        // Filter matching devices
+        const matches = deviceNames.filter(name =>
+            name.toLowerCase().includes(value)
+        ).slice(0, 8); // Limit to 8 results
+
+        if (matches.length > 0) {
+            autocompleteDiv.style.display = 'block';
+            matches.forEach(match => {
+                const div = document.createElement('div');
+                div.style.cssText = `
+                    padding: 12px 16px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f0f0f0;
+                    transition: background 0.2s ease;
+                `;
+                div.textContent = match;
+
+                div.addEventListener('mouseover', function() {
+                    this.style.background = '#f8f8f8';
+                    this.style.color = '#C9A84C';
+                });
+
+                div.addEventListener('mouseout', function() {
+                    this.style.background = 'white';
+                    this.style.color = '#333';
+                });
+
+                div.addEventListener('click', function() {
+                    searchInput.value = match;
+                    autocompleteDiv.style.display = 'none';
+                    searchDevice(new Event('submit'));
+                });
+
+                autocompleteDiv.appendChild(div);
+            });
+        } else {
+            autocompleteDiv.style.display = 'none';
+        }
+    });
+
+    // Close autocomplete when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target !== searchInput && !autocompleteDiv.contains(e.target)) {
+            autocompleteDiv.style.display = 'none';
+        }
+    });
+}
+
+// Initialize autocomplete when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeSearchAutocomplete);
+} else {
+    initializeSearchAutocomplete();
+}
+
+/**
+ * Fix dropdown menu functionality
+ */
+function initializeDropdownMenu() {
+    const dropdowns = document.querySelectorAll('.dropdown');
+
+    dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+
+        if (!toggle || !menu) return;
+
+        // On mobile, make dropdown clickable
+        if (window.innerWidth <= 768) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isVisible = menu.style.opacity === '1';
+
+                // Close all other dropdowns
+                document.querySelectorAll('.dropdown-menu').forEach(m => {
+                    m.style.opacity = '0';
+                    m.style.visibility = 'hidden';
+                });
+
+                // Toggle current dropdown
+                if (isVisible) {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                } else {
+                    menu.style.opacity = '1';
+                    menu.style.visibility = 'visible';
+                }
+            });
+        }
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (window.innerWidth <= 768) {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                }
+            });
+        }
+    });
+}
+
+// Initialize dropdown menu when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDropdownMenu);
+} else {
+    initializeDropdownMenu();
 }
 
 // ============================================================================
