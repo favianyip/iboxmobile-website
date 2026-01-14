@@ -221,11 +221,17 @@
         <input type="text" id="device-search-used" placeholder="Search your device to sell" onkeyup="filterDevices(this.value)">
     </div>
 
-    <!-- Models Section -->
+    <!-- Brand Tabs -->
     <div class="models-section">
-        <h2>Select Model</h2>
+        <div class="brand-tabs" style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem;">
+            <button class="brand-tab active" style="padding: 0.75rem 2rem; border: 2px solid #ddd; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 600;" onclick="showBrandUsed('apple')">Apple</button>
+            <button class="brand-tab" style="padding: 0.75rem 2rem; border: 2px solid #ddd; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 600;" onclick="showBrandUsed('samsung')">Samsung</button>
+        </div>
 
-        <div class="model-grid" id="iphone-grid">
+        <!-- Apple Models -->
+        <div id="apple-models-used" class="brand-content active" style="display: block;">
+            <h2>Select iPhone Model</h2>
+            <div class="model-grid" id="iphone-grid">
             <!-- iPhone 17 Series -->
             <div class="model-card" onclick="navigateToQuote('Apple', 'iPhone 17 Pro Max')" data-model="iphone 17 pro max">
                 <img src="images/phones/iphone-16-pro-max.jpg" alt="iPhone 17 Pro Max" onerror="this.style.display='none'">
@@ -572,6 +578,192 @@
                     <div class="price-amount">$240</div>
                 </div>
             </div>
+            </div>
+        </div>
+
+        <!-- Samsung Models -->
+        <div id="samsung-models-used" class="brand-content" style="display: none;">
+            <h2>Select Samsung Model</h2>
+            <div class="model-grid" id="samsung-grid-used">
+                <!-- Galaxy S24 Series -->
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S24 Ultra')" data-model="galaxy s24 ultra">
+                    <img src="images/phones/galaxy-s24-ultra.jpg" alt="Galaxy S24 Ultra" onerror="this.style.display='none'">
+                    <h3>Galaxy S24 Ultra</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                        <span class="storage-badge">1TB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$850</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S24+')" data-model="galaxy s24+">
+                    <img src="images/phones/galaxy-s24-plus.jpg" alt="Galaxy S24+" onerror="this.style.display='none'">
+                    <h3>Galaxy S24+</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$620</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S24')" data-model="galaxy s24">
+                    <img src="images/phones/galaxy-s24.jpg" alt="Galaxy S24" onerror="this.style.display='none'">
+                    <h3>Galaxy S24</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">128GB</span>
+                        <span class="storage-badge">256GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$520</div>
+                    </div>
+                </div>
+
+                <!-- Galaxy S23 Series -->
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S23 Ultra')" data-model="galaxy s23 ultra">
+                    <img src="images/phones/galaxy-s23-ultra.jpg" alt="Galaxy S23 Ultra" onerror="this.style.display='none'">
+                    <h3>Galaxy S23 Ultra</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                        <span class="storage-badge">1TB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$670</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S23+')" data-model="galaxy s23+">
+                    <img src="images/phones/galaxy-s23-plus.jpg" alt="Galaxy S23+" onerror="this.style.display='none'">
+                    <h3>Galaxy S23+</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$470</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S23')" data-model="galaxy s23">
+                    <img src="images/phones/galaxy-s23.jpg" alt="Galaxy S23" onerror="this.style.display='none'">
+                    <h3>Galaxy S23</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">128GB</span>
+                        <span class="storage-badge">256GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$350</div>
+                    </div>
+                </div>
+
+                <!-- Galaxy S22 Series -->
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S22 Ultra')" data-model="galaxy s22 ultra">
+                    <img src="images/phones/galaxy-s22-ultra.jpg" alt="Galaxy S22 Ultra" onerror="this.style.display='none'">
+                    <h3>Galaxy S22 Ultra</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">128GB</span>
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                        <span class="storage-badge">1TB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$480</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S22+')" data-model="galaxy s22+">
+                    <img src="images/phones/galaxy-s22-plus.jpg" alt="Galaxy S22+" onerror="this.style.display='none'">
+                    <h3>Galaxy S22+</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">128GB</span>
+                        <span class="storage-badge">256GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$350</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy S22')" data-model="galaxy s22">
+                    <img src="images/phones/galaxy-s22.jpg" alt="Galaxy S22" onerror="this.style.display='none'">
+                    <h3>Galaxy S22</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">128GB</span>
+                        <span class="storage-badge">256GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$280</div>
+                    </div>
+                </div>
+
+                <!-- Galaxy Z Fold Series -->
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy Z Fold5')" data-model="galaxy z fold5">
+                    <img src="images/phones/galaxy-z-fold5.jpg" alt="Galaxy Z Fold5" onerror="this.style.display='none'">
+                    <h3>Galaxy Z Fold5</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                        <span class="storage-badge">1TB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$790</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy Z Fold4')" data-model="galaxy z fold4">
+                    <img src="images/phones/galaxy-z-fold4.jpg" alt="Galaxy Z Fold4" onerror="this.style.display='none'">
+                    <h3>Galaxy Z Fold4</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                        <span class="storage-badge">1TB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$550</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy Z Flip5')" data-model="galaxy z flip5">
+                    <img src="images/phones/galaxy-z-flip5.jpg" alt="Galaxy Z Flip5" onerror="this.style.display='none'">
+                    <h3>Galaxy Z Flip5</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">256GB</span>
+                        <span class="storage-badge">512GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$530</div>
+                    </div>
+                </div>
+
+                <div class="model-card" onclick="navigateToQuote('Samsung', 'Galaxy Z Flip4')" data-model="galaxy z flip4">
+                    <img src="images/phones/galaxy-z-flip4.jpg" alt="Galaxy Z Flip4" onerror="this.style.display='none'">
+                    <h3>Galaxy Z Flip4</h3>
+                    <div class="storage-badges">
+                        <span class="storage-badge">128GB</span>
+                        <span class="storage-badge">256GB</span>
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$350</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -592,6 +784,34 @@
                     card.style.display = 'none';
                 }
             });
+        }
+
+        function showBrandUsed(brand) {
+            // Hide all brand contents
+            document.querySelectorAll('.brand-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.brand-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.background = 'white';
+                tab.style.color = '#333';
+                tab.style.borderColor = '#ddd';
+            });
+
+            // Show selected brand
+            if (brand === 'apple') {
+                document.getElementById('apple-models-used').style.display = 'block';
+            } else if (brand === 'samsung') {
+                document.getElementById('samsung-models-used').style.display = 'block';
+            }
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            event.target.style.background = '#C9A84C';
+            event.target.style.color = 'white';
+            event.target.style.borderColor = '#C9A84C';
         }
     </script>
 </body>
