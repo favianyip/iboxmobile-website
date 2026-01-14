@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Phones - IBOX MOBILE SINGAPORE</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Sell Phones Page Styles */
+        .sell-page-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            padding: 2rem 0;
+            text-align: center;
+            color: white;
+        }
+
+        .sell-page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #C9A84C;
+        }
+
+        .sell-page-header p {
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+
+        .condition-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+
+        .condition-toggle-btn {
+            flex: 0 0 200px;
+            padding: 1rem 2rem;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .condition-toggle-btn:hover {
+            border-color: #C9A84C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.2);
+        }
+
+        .condition-toggle-btn.active {
+            background: #C9A84C;
+            color: white;
+            border-color: #C9A84C;
+        }
+
+        .search-section {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .search-section input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-section input:focus {
+            outline: none;
+            border-color: #C9A84C;
+        }
+
+        .models-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .models-section h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .brand-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .brand-tab {
+            padding: 0.75rem 2rem;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .brand-tab:hover {
+            border-color: #C9A84C;
+        }
+
+        .brand-tab.active {
+            background: #C9A84C;
+            color: white;
+            border-color: #C9A84C;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .model-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #f0f0f0;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #C9A84C;
+        }
+
+        .model-card img {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 1rem;
+            object-fit: contain;
+        }
+
+        .model-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .storage-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .storage-badge {
+            padding: 0.4rem 0.8rem;
+            background: #f5f5f5;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .price-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .price-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-amount {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #C9A84C;
+        }
+
+        .brand-content {
+            display: none;
+        }
+
+        .brand-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .model-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .condition-toggle {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .condition-toggle-btn {
+                flex: 0 0 auto;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+    <script src="quote.js" defer></script>
+    <script src="script.js" defer></script>
+    <script src="auth.js" defer></script>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">IBOX MOBILE SINGAPORE</div>
+            <ul class="nav-links">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">Sell Phones <span style="font-size: 0.7rem;">▼</span></a>
+                    <ul class="dropdown-menu" style="position: absolute; top: 100%; left: 0; background: white; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; padding: 0.5rem 0; margin-top: 0.5rem; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000;">
+                        <li><a href="sell-phones.html?type=used" style="display: block; padding: 0.75rem 1.5rem; color: #333;">Used Phones</a></li>
+                        <li><a href="sell-phones.html?type=new" style="display: block; padding: 0.75rem 1.5rem; color: #333;">New Phones</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#wholesale">Wholesale</a></li>
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+                <li id="authLinkContainer">
+                    <a href="login.html" id="loginLink">Login</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="sell-page-header">
+        <h1 id="page-title">Sell Your Phones</h1>
+        <p id="page-subtitle">Get the best prices for your devices</p>
+    </div>
+
+    <!-- Condition Toggle (Used/New) -->
+    <div class="condition-toggle">
+        <button class="condition-toggle-btn" id="used-toggle" onclick="switchCondition('used')">
+            <div style="font-size: 1.2rem; margin-bottom: 0.25rem;">👤</div>
+            <div>Used</div>
+        </button>
+        <button class="condition-toggle-btn" id="new-toggle" onclick="switchCondition('new')">
+            <div style="font-size: 1.2rem; margin-bottom: 0.25rem;">📦</div>
+            <div>New</div>
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-section">
+        <input type="text" id="device-search" placeholder="Search your device to sell" onkeyup="filterDevices(this.value)">
+    </div>
+
+    <!-- Brand Tabs -->
+    <div class="models-section">
+        <div class="brand-tabs">
+            <button class="brand-tab active" onclick="showBrand('apple')">Apple</button>
+            <button class="brand-tab" onclick="showBrand('samsung')">Samsung</button>
+        </div>
+
+        <!-- Apple Models -->
+        <div id="apple-models" class="brand-content active">
+            <h2>Select iPhone Model</h2>
+            <div class="model-grid" id="apple-grid">
+                <!-- Models will be dynamically populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Samsung Models -->
+        <div id="samsung-models" class="brand-content">
+            <h2>Select Samsung Model</h2>
+            <div class="model-grid" id="samsung-grid">
+                <!-- Models will be dynamically populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Model data with both used and new prices
+        const phoneModels = {
+            apple: [
+                { name: 'iPhone 17 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1230, newPrice: 1430 },
+                { name: 'iPhone 17 Pro', img: 'iphone-16-pro.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1125, newPrice: 1325 },
+                { name: 'iPhone 17', img: 'iphone-16.jpg', storage: ['256GB', '512GB'], usedPrice: 910, newPrice: 1110 },
+                { name: 'iPhone 16 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1035, newPrice: 1235 },
+                { name: 'iPhone 16 Pro', img: 'iphone-16-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 920, newPrice: 1120 },
+                { name: 'iPhone 16 Plus', img: 'iphone-16-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 785, newPrice: 985 },
+                { name: 'iPhone 16', img: 'iphone-16.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 670, newPrice: 870 },
+                { name: 'iPhone 16e', img: 'iphone-se-3rd-gen.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 730, newPrice: 930 },
+                { name: 'iPhone 15 Pro Max', img: 'iphone-15-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 910, newPrice: 1110 },
+                { name: 'iPhone 15 Pro', img: 'iphone-15-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 810, newPrice: 1010 },
+                { name: 'iPhone 15 Plus', img: 'iphone-15-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 685, newPrice: 885 },
+                { name: 'iPhone 15', img: 'iphone-15.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 560, newPrice: 760 },
+                { name: 'iPhone 14 Pro Max', img: 'iphone-14-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 760, newPrice: 960 },
+                { name: 'iPhone 14 Pro', img: 'iphone-14-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 680, newPrice: 880 },
+                { name: 'iPhone 14 Plus', img: 'iphone-14-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 545, newPrice: 745 },
+                { name: 'iPhone 14', img: 'iphone-14.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 480, newPrice: 680 },
+                { name: 'iPhone 13 Pro Max', img: 'iphone-13-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 610, newPrice: 810 },
+                { name: 'iPhone 13 Pro', img: 'iphone-13-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 540, newPrice: 740 },
+                { name: 'iPhone 13 mini', img: 'iphone-13-mini.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 355, newPrice: 555 },
+                { name: 'iPhone 13', img: 'iphone-13.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 380, newPrice: 580 },
+                { name: 'iPhone 12 Pro Max', img: 'iphone-12-pro-max.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 455, newPrice: 655 },
+                { name: 'iPhone 12 Pro', img: 'iphone-12-pro.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 410, newPrice: 610 },
+                { name: 'iPhone 12', img: 'iphone-12.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 300, newPrice: 500 },
+                { name: 'iPhone 12 mini', img: 'iphone-12-mini.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 240, newPrice: 440 }
+            ],
+            samsung: [
+                { name: 'Galaxy S24 Ultra', img: 'galaxy-s24-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 850, newPrice: 1050 },
+                { name: 'Galaxy S24+', img: 'galaxy-s24-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 620, newPrice: 820 },
+                { name: 'Galaxy S24', img: 'galaxy-s24.jpg', storage: ['128GB', '256GB'], usedPrice: 520, newPrice: 720 },
+                { name: 'Galaxy S23 Ultra', img: 'galaxy-s23-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 670, newPrice: 870 },
+                { name: 'Galaxy S23+', img: 'galaxy-s23-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 470, newPrice: 670 },
+                { name: 'Galaxy S23', img: 'galaxy-s23.jpg', storage: ['128GB', '256GB'], usedPrice: 350, newPrice: 550 },
+                { name: 'Galaxy S22 Ultra', img: 'galaxy-s22-ultra.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 480, newPrice: 680 },
+                { name: 'Galaxy S22+', img: 'galaxy-s22-plus.jpg', storage: ['128GB', '256GB'], usedPrice: 350, newPrice: 550 },
+                { name: 'Galaxy S22', img: 'galaxy-s22.jpg', storage: ['128GB', '256GB'], usedPrice: 280, newPrice: 480 },
+                { name: 'Galaxy Z Fold5', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 790, newPrice: 990 },
+                { name: 'Galaxy Z Fold4', img: 'galaxy-z-fold4.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 550, newPrice: 750 },
+                { name: 'Galaxy Z Flip5', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 530, newPrice: 730 },
+                { name: 'Galaxy Z Flip4', img: 'galaxy-z-flip4.jpg', storage: ['128GB', '256GB'], usedPrice: 350, newPrice: 550 }
+            ]
+        };
+
+        let currentCondition = 'used'; // Default to used
+        let currentBrand = 'apple'; // Default to Apple
+
+        // Initialize page
+        function initPage() {
+            // Check URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+
+            if (typeParam === 'new') {
+                currentCondition = 'new';
+            } else {
+                currentCondition = 'used';
+            }
+
+            // Update UI
+            updateToggleButtons();
+            renderModels();
+        }
+
+        // Switch between Used/New
+        function switchCondition(condition) {
+            currentCondition = condition;
+            updateToggleButtons();
+            renderModels();
+
+            // Update URL without reload
+            const url = new URL(window.location);
+            url.searchParams.set('type', condition);
+            window.history.pushState({}, '', url);
+        }
+
+        // Update toggle button styles
+        function updateToggleButtons() {
+            const usedBtn = document.getElementById('used-toggle');
+            const newBtn = document.getElementById('new-toggle');
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+
+            if (currentCondition === 'used') {
+                usedBtn.classList.add('active');
+                newBtn.classList.remove('active');
+                pageTitle.textContent = 'Sell Used Phones';
+                pageSubtitle.textContent = 'Get cash for your pre-owned devices';
+            } else {
+                newBtn.classList.add('active');
+                usedBtn.classList.remove('active');
+                pageTitle.textContent = 'Sell New Phones';
+                pageSubtitle.textContent = 'Get the best prices for sealed or activated new devices';
+            }
+        }
+
+        // Show brand
+        function showBrand(brand) {
+            currentBrand = brand;
+
+            // Update tab styles
+            document.querySelectorAll('.brand-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show/hide brand sections
+            document.querySelectorAll('.brand-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(brand + '-models').classList.add('active');
+        }
+
+        // Render models
+        function renderModels() {
+            const appleGrid = document.getElementById('apple-grid');
+            const samsungGrid = document.getElementById('samsung-grid');
+
+            appleGrid.innerHTML = '';
+            samsungGrid.innerHTML = '';
+
+            // Render Apple models
+            phoneModels.apple.forEach(model => {
+                const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
+                appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+            });
+
+            // Render Samsung models
+            phoneModels.samsung.forEach(model => {
+                const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
+                samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+            });
+        }
+
+        // Create model card HTML
+        function createModelCard(model, brand, price) {
+            const searchKey = model.name.toLowerCase().replace(/\s+/g, '-');
+            return `
+                <div class="model-card" onclick="navigateToEvaluation('${brand}', '${model.name}')" data-model="${searchKey}">
+                    <img src="images/phones/${model.img}" alt="${model.name}" onerror="this.style.display='none'">
+                    <h3>${model.name}</h3>
+                    <div class="storage-badges">
+                        ${model.storage.map(s => `<span class="storage-badge">${s}</span>`).join('')}
+                    </div>
+                    <div class="price-info">
+                        <div class="price-label">Get up to</div>
+                        <div class="price-amount">$${price}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Navigate directly to evaluation (skip brand/model selection)
+        function navigateToEvaluation(brand, model) {
+            window.location.href = `quote.html?brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(model)}&type=${currentCondition}&direct=true`;
+        }
+
+        // Search filter
+        function filterDevices(searchTerm) {
+            const cards = document.querySelectorAll('.model-card');
+            const term = searchTerm.toLowerCase();
+
+            cards.forEach(card => {
+                const modelName = card.getAttribute('data-model');
+                if (modelName && modelName.includes(term)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

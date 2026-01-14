@@ -921,11 +921,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const brandParam = urlParams.get('brand');
     const modelParam = urlParams.get('model');
     const typeParam = urlParams.get('type'); // new or used
-    
+    const directParam = urlParams.get('direct'); // skip device type selection
+
     // Store the type preference for later use in Step 2
     if (typeParam) {
         window.preferredDeviceType = typeParam === 'new' ? 'new-sealed' : 'used';
+        window.isDirect = directParam === 'true';
         console.log('Trade-in type preference:', window.preferredDeviceType);
+        console.log('Direct evaluation mode:', window.isDirect);
+
+        // If direct mode, auto-select device type immediately
+        if (window.isDirect && typeParam) {
+            quoteState.deviceType = typeParam === 'new' ? 'new-sealed' : 'used';
+            console.log('Auto-selected device type:', quoteState.deviceType);
+        }
     }
     
     // Auto-select Apple brand if no URL params (iPhone only focus)
@@ -1425,10 +1434,10 @@ function populateStep2() {
     });
     
     console.log('populateStep2 completed successfully');
-    
+
     // Initialize device type selection
     initDeviceTypeSelection();
-    
+
     // Auto-select device type if coming from Trade In buttons
     if (window.preferredDeviceType) {
         setTimeout(() => {
@@ -1436,6 +1445,15 @@ function populateStep2() {
             if (deviceTypeBtn) {
                 deviceTypeBtn.click();
                 console.log('Auto-selected device type:', window.preferredDeviceType);
+
+                // Hide device type section if in direct mode (coming from sell-phones.html)
+                if (window.isDirect) {
+                    const deviceTypeSection = document.querySelector('.device-type-section');
+                    if (deviceTypeSection) {
+                        deviceTypeSection.style.display = 'none';
+                        console.log('Hidden device type section (direct mode)');
+                    }
+                }
             }
         }, 100);
     }
