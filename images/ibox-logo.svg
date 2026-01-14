@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 60" width="300" height="60">
+  <!-- Background -->
+  <rect width="300" height="60" fill="transparent"/>
+
+  <!-- IBOX text -->
+  <text x="10" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#4A9FD8" letter-spacing="1">ibox</text>
+
+  <!-- MOBILE text -->
+  <text x="95" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#5D6F8E" letter-spacing="1">mobile</text>
+
+  <!-- SINGAPORE text -->
+  <text x="10" y="53" font-family="Arial, sans-serif" font-size="14" font-weight="normal" fill="#5D6F8E" letter-spacing="2">SINGAPORE</text>
+</svg>
