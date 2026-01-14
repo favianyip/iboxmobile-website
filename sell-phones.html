@@ -256,6 +256,7 @@
             }
         }
     </style>
+    <script src="scripts/parse-competitor-prices.js"></script>
     <script src="quote.js" defer></script>
     <script src="script.js" defer></script>
     <script src="auth.js" defer></script>
@@ -332,48 +333,114 @@
     </div>
 
     <script>
-        // Model data with both used and new prices
+        // Helper function to get competitive price
+        function getCompetitivePrice(modelName, storage, condition) {
+            const brand = modelName.includes('iPhone') ? 'iphone' : 'samsung';
+            const fullModelKey = `${modelName} ${storage}`;
+
+            try {
+                if (competitorData && competitorData[condition] && competitorData[condition][brand]) {
+                    const priceData = competitorData[condition][brand][fullModelKey];
+                    if (priceData && priceData.highest) {
+                        return priceData.highest;
+                    }
+                }
+            } catch (e) {
+                console.warn(`Price not found for ${fullModelKey} (${condition})`);
+            }
+
+            // Return null if not found - will use base price display
+            return null;
+        }
+
+        // Helper function to get starting price (lowest storage variant)
+        function getStartingPrice(modelName, storageOptions, condition) {
+            const brand = modelName.includes('iPhone') ? 'iphone' : 'samsung';
+
+            // Try to find the first available storage price
+            for (let storage of storageOptions) {
+                const fullModelKey = `${modelName} ${storage}`;
+                try {
+                    if (competitorData && competitorData[condition] && competitorData[condition][brand]) {
+                        const priceData = competitorData[condition][brand][fullModelKey];
+                        if (priceData && priceData.highest) {
+                            return priceData.highest;
+                        }
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+
+            // Fallback prices if not found in competitive data
+            return condition === 'used' ? 500 : 700;
+        }
+
+        // Model data with both used and new prices from competitive data
         const phoneModels = {
             apple: [
-                { name: 'iPhone 17 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1230, newPrice: 1430 },
-                { name: 'iPhone 17 Pro', img: 'iphone-16-pro.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1125, newPrice: 1325 },
-                { name: 'iPhone 17', img: 'iphone-16.jpg', storage: ['256GB', '512GB'], usedPrice: 910, newPrice: 1110 },
-                { name: 'iPhone 16 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1035, newPrice: 1235 },
-                { name: 'iPhone 16 Pro', img: 'iphone-16-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 920, newPrice: 1120 },
-                { name: 'iPhone 16 Plus', img: 'iphone-16-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 785, newPrice: 985 },
-                { name: 'iPhone 16', img: 'iphone-16.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 670, newPrice: 870 },
-                { name: 'iPhone 16e', img: 'iphone-se-3rd-gen.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 730, newPrice: 930 },
-                { name: 'iPhone 15 Pro Max', img: 'iphone-15-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 910, newPrice: 1110 },
-                { name: 'iPhone 15 Pro', img: 'iphone-15-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 810, newPrice: 1010 },
-                { name: 'iPhone 15 Plus', img: 'iphone-15-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 685, newPrice: 885 },
-                { name: 'iPhone 15', img: 'iphone-15.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 560, newPrice: 760 },
-                { name: 'iPhone 14 Pro Max', img: 'iphone-14-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 760, newPrice: 960 },
-                { name: 'iPhone 14 Pro', img: 'iphone-14-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 680, newPrice: 880 },
-                { name: 'iPhone 14 Plus', img: 'iphone-14-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 545, newPrice: 745 },
-                { name: 'iPhone 14', img: 'iphone-14.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 480, newPrice: 680 },
-                { name: 'iPhone 13 Pro Max', img: 'iphone-13-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 610, newPrice: 810 },
-                { name: 'iPhone 13 Pro', img: 'iphone-13-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 540, newPrice: 740 },
-                { name: 'iPhone 13 mini', img: 'iphone-13-mini.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 355, newPrice: 555 },
-                { name: 'iPhone 13', img: 'iphone-13.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 380, newPrice: 580 },
-                { name: 'iPhone 12 Pro Max', img: 'iphone-12-pro-max.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 455, newPrice: 655 },
-                { name: 'iPhone 12 Pro', img: 'iphone-12-pro.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 410, newPrice: 610 },
-                { name: 'iPhone 12', img: 'iphone-12.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 300, newPrice: 500 },
-                { name: 'iPhone 12 mini', img: 'iphone-12-mini.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 240, newPrice: 440 }
+                { name: 'iPhone 17 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB', '2TB'], usedPrice: 1520, newPrice: 1730 },
+                { name: 'iPhone 17 Pro', img: 'iphone-16-pro.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1350, newPrice: 1600 },
+                { name: 'iPhone 17 Air', img: 'iphone-16.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 900, newPrice: 1050 },
+                { name: 'iPhone 17', img: 'iphone-16.jpg', storage: ['256GB', '512GB'], usedPrice: 900, newPrice: 1200 },
+                { name: 'iPhone 16 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1020, newPrice: 1430 },
+                { name: 'iPhone 16 Pro', img: 'iphone-16-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 870, newPrice: 870 },
+                { name: 'iPhone 16 Plus', img: 'iphone-16-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 750, newPrice: 1050 },
+                { name: 'iPhone 16', img: 'iphone-16.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 670, newPrice: 920 },
+                { name: 'iPhone 16e', img: 'iphone-se-3rd-gen.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 520, newPrice: 660 },
+                { name: 'iPhone 15 Pro Max', img: 'iphone-15-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 800, newPrice: 800 },
+                { name: 'iPhone 15 Pro', img: 'iphone-15-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 600, newPrice: 600 },
+                { name: 'iPhone 15 Plus', img: 'iphone-15-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 550, newPrice: 550 },
+                { name: 'iPhone 15', img: 'iphone-15.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 500, newPrice: 500 },
+                { name: 'iPhone 14 Pro Max', img: 'iphone-14-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 600, newPrice: 600 },
+                { name: 'iPhone 14 Pro', img: 'iphone-14-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 500, newPrice: 500 },
+                { name: 'iPhone 14 Plus', img: 'iphone-14-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 420, newPrice: 420 },
+                { name: 'iPhone 14', img: 'iphone-14.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 350, newPrice: 350 },
+                { name: 'iPhone 13 Pro Max', img: 'iphone-13-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 460, newPrice: 460 },
+                { name: 'iPhone 13 Pro', img: 'iphone-13-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 380, newPrice: 380 },
+                { name: 'iPhone 13 mini', img: 'iphone-13-mini.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 250, newPrice: 250 },
+                { name: 'iPhone 13', img: 'iphone-13.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 300, newPrice: 300 },
+                { name: 'iPhone 12 Pro Max', img: 'iphone-12-pro-max.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 370, newPrice: 370 },
+                { name: 'iPhone 12 Pro', img: 'iphone-12-pro.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 320, newPrice: 320 },
+                { name: 'iPhone 12', img: 'iphone-12.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 200, newPrice: 200 },
+                { name: 'iPhone 12 mini', img: 'iphone-12-mini.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 120, newPrice: 120 },
+                { name: 'iPhone 11 Pro Max', img: 'iphone-11-pro-max.jpg', storage: ['64GB', '256GB', '512GB'], usedPrice: 250, newPrice: 250 },
+                { name: 'iPhone 11 Pro', img: 'iphone-11-pro.jpg', storage: ['64GB', '256GB', '512GB'], usedPrice: 200, newPrice: 200 },
+                { name: 'iPhone 11', img: 'iphone-11.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 150, newPrice: 150 }
             ],
             samsung: [
-                { name: 'Galaxy S24 Ultra', img: 'galaxy-s24-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 850, newPrice: 1050 },
-                { name: 'Galaxy S24+', img: 'galaxy-s24-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 620, newPrice: 820 },
-                { name: 'Galaxy S24', img: 'galaxy-s24.jpg', storage: ['128GB', '256GB'], usedPrice: 520, newPrice: 720 },
-                { name: 'Galaxy S23 Ultra', img: 'galaxy-s23-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 670, newPrice: 870 },
-                { name: 'Galaxy S23+', img: 'galaxy-s23-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 470, newPrice: 670 },
-                { name: 'Galaxy S23', img: 'galaxy-s23.jpg', storage: ['128GB', '256GB'], usedPrice: 350, newPrice: 550 },
-                { name: 'Galaxy S22 Ultra', img: 'galaxy-s22-ultra.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 480, newPrice: 680 },
-                { name: 'Galaxy S22+', img: 'galaxy-s22-plus.jpg', storage: ['128GB', '256GB'], usedPrice: 350, newPrice: 550 },
-                { name: 'Galaxy S22', img: 'galaxy-s22.jpg', storage: ['128GB', '256GB'], usedPrice: 280, newPrice: 480 },
-                { name: 'Galaxy Z Fold5', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 790, newPrice: 990 },
-                { name: 'Galaxy Z Fold4', img: 'galaxy-z-fold4.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 550, newPrice: 750 },
-                { name: 'Galaxy Z Flip5', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 530, newPrice: 730 },
-                { name: 'Galaxy Z Flip4', img: 'galaxy-z-flip4.jpg', storage: ['128GB', '256GB'], usedPrice: 350, newPrice: 550 }
+                { name: 'Galaxy S25 Ultra', img: 'galaxy-s24-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 850, newPrice: 1040 },
+                { name: 'Galaxy S25 Plus', img: 'galaxy-s24-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 750, newPrice: 920 },
+                { name: 'Galaxy S25', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 600, newPrice: 850 },
+                { name: 'Galaxy S25 Edge', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 570, newPrice: 770 },
+                { name: 'Galaxy S25 FE', img: 'galaxy-s24.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 370, newPrice: 520 },
+                { name: 'Galaxy S24 Ultra', img: 'galaxy-s24-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 700, newPrice: 700 },
+                { name: 'Galaxy S24 Plus', img: 'galaxy-s24-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 570, newPrice: 570 },
+                { name: 'Galaxy S24', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 500, newPrice: 500 },
+                { name: 'Galaxy S24 FE', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 370, newPrice: 370 },
+                { name: 'Galaxy S23 Ultra', img: 'galaxy-s23-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 500, newPrice: 500 },
+                { name: 'Galaxy S23 Plus', img: 'galaxy-s23-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 400, newPrice: 400 },
+                { name: 'Galaxy S23', img: 'galaxy-s23.jpg', storage: ['128GB', '256GB'], usedPrice: 300, newPrice: 300 },
+                { name: 'Galaxy S23 FE', img: 'galaxy-s23.jpg', storage: ['256GB'], usedPrice: 220, newPrice: 220 },
+                { name: 'Galaxy S22 Ultra', img: 'galaxy-s22-ultra.jpg', storage: ['256GB', '512GB'], usedPrice: 350, newPrice: 350 },
+                { name: 'Galaxy S22 Plus', img: 'galaxy-s22-plus.jpg', storage: ['128GB', '256GB'], usedPrice: 200, newPrice: 200 },
+                { name: 'Galaxy S22', img: 'galaxy-s22.jpg', storage: ['128GB', '256GB'], usedPrice: 150, newPrice: 150 },
+                { name: 'Galaxy Z Fold 7', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1470, newPrice: 1720 },
+                { name: 'Galaxy Z Fold 6', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 770, newPrice: 770 },
+                { name: 'Galaxy Z Fold 5', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 550, newPrice: 550 },
+                { name: 'Galaxy Z Fold 4', img: 'galaxy-z-fold4.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 350, newPrice: 350 },
+                { name: 'Galaxy Z Flip 7', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 670, newPrice: 900 },
+                { name: 'Galaxy Z Flip 7 FE', img: 'galaxy-z-flip5.jpg', storage: ['128GB', '256GB'], usedPrice: 470, newPrice: 620 },
+                { name: 'Galaxy Z Flip 6', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 400, newPrice: 400 },
+                { name: 'Galaxy Z Flip 5', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 250, newPrice: 250 },
+                { name: 'Galaxy Z Flip 4', img: 'galaxy-z-flip4.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 100, newPrice: 100 },
+                { name: 'Samsung TriFold', img: 'galaxy-z-fold5.jpg', storage: ['512GB'], usedPrice: 4220, newPrice: 4220 },
+                { name: 'Galaxy A56', img: 'galaxy-s22.jpg', storage: ['12/256GB', '8/256GB'], usedPrice: 270, newPrice: 420 },
+                { name: 'Galaxy A55', img: 'galaxy-s22.jpg', storage: ['8/256GB'], usedPrice: 220, newPrice: 220 },
+                { name: 'Galaxy A36', img: 'galaxy-s22.jpg', storage: ['8/256GB'], usedPrice: 170, newPrice: 340 },
+                { name: 'Galaxy A26', img: 'galaxy-s22.jpg', storage: ['8/256GB'], usedPrice: 270, newPrice: 270 },
+                { name: 'Galaxy A17 5G', img: 'galaxy-s22.jpg', storage: ['8/128GB'], usedPrice: 200, newPrice: 200 },
+                { name: 'Galaxy A17 4G', img: 'galaxy-s22.jpg', storage: ['8/128GB'], usedPrice: 160, newPrice: 160 }
             ]
         };
 
