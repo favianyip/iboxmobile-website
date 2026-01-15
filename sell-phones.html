@@ -9,24 +9,31 @@
         /* Sell Phones Page Styles */
         .sell-page-header {
             background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
-            padding: 3rem 0 3.5rem 0;
+            padding: 4rem 0 4.5rem 0;
             text-align: center;
             color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
         }
 
         .sell-page-header h1 {
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
             color: #C9A84C;
             font-weight: 800;
+            line-height: 1.2;
         }
 
         .sell-page-header p {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: #ffffff;
             font-weight: 600;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             letter-spacing: 0.5px;
+            line-height: 1.6;
         }
 
         .condition-toggle {
@@ -68,6 +75,7 @@
             max-width: 600px;
             margin: 2rem auto;
             padding: 0 1rem;
+            position: relative;
         }
 
         .search-section input {
@@ -81,6 +89,55 @@
         .search-section input:focus {
             outline: none;
             border-color: #C9A84C;
+        }
+
+        /* Autocomplete Suggestions */
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 1rem;
+            right: 1rem;
+            background: white;
+            border: 2px solid #C9A84C;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .autocomplete-suggestions.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .autocomplete-item:hover {
+            background: #f8f8f8;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item .model-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .autocomplete-item .model-storage {
+            font-size: 0.9rem;
+            color: #888;
         }
 
         .models-section {
@@ -313,7 +370,10 @@
 
     <!-- Search Bar -->
     <div class="search-section">
-        <input type="text" id="device-search" placeholder="Search your device to sell" onkeyup="filterDevices(this.value)">
+        <input type="text" id="device-search" placeholder="Search your device to sell" onkeyup="handleSearch(this.value)" onfocus="handleSearch(this.value)" autocomplete="off">
+        <div class="autocomplete-suggestions" id="autocomplete-suggestions">
+            <!-- Suggestions will be populated here -->
+        </div>
     </div>
 
     <!-- Brand Tabs -->
@@ -598,6 +658,67 @@
                 }
             });
         }
+
+        // Autocomplete search handler
+        function handleSearch(searchTerm) {
+            const suggestionsContainer = document.getElementById('autocomplete-suggestions');
+            const term = searchTerm.toLowerCase().trim();
+
+            // If empty, hide suggestions
+            if (term.length === 0) {
+                suggestionsContainer.classList.remove('active');
+                suggestionsContainer.innerHTML = '';
+                filterDevices('');
+                return;
+            }
+
+            // Get all phone models
+            const allModels = [...phoneModels.apple, ...phoneModels.samsung];
+
+            // Filter models based on search term
+            const matches = allModels.filter(model =>
+                model.name.toLowerCase().includes(term)
+            );
+
+            // Show suggestions
+            if (matches.length > 0) {
+                suggestionsContainer.innerHTML = matches.slice(0, 8).map(model => {
+                    const brand = phoneModels.apple.includes(model) ? 'Apple' : 'Samsung';
+                    return `
+                        <div class="autocomplete-item" onclick="selectModel('${brand}', '${model.name}')">
+                            <div>
+                                <div class="model-name">${model.name}</div>
+                                <div class="model-storage">${model.storage.join(', ')}</div>
+                            </div>
+                            <div style="color: #C9A84C; font-weight: 600;">→</div>
+                        </div>
+                    `;
+                }).join('');
+                suggestionsContainer.classList.add('active');
+            } else {
+                suggestionsContainer.innerHTML = '<div class="autocomplete-item" style="cursor: default;"><div class="model-name">No models found</div></div>';
+                suggestionsContainer.classList.add('active');
+            }
+
+            // Also filter visible cards
+            filterDevices(term);
+        }
+
+        // Select model from autocomplete
+        function selectModel(brand, modelName) {
+            // Navigate directly to the model
+            navigateToEvaluation(brand, modelName);
+        }
+
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', function(e) {
+            const searchSection = document.querySelector('.search-section');
+            const suggestionsContainer = document.getElementById('autocomplete-suggestions');
+
+            if (!searchSection.contains(e.target)) {
+                suggestionsContainer.classList.remove('active');
+            }
+        });
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', initPage);
