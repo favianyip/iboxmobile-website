@@ -3561,7 +3561,8 @@ function exportAllData() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        alert('✅ Data exported successfully! \n\nNext steps:\n1. Save this file to /data/ folder\n2. Commit to git: git add data/admin-data-*.json\n3. Your changes will persist forever!');
+        showNotification('✓ All prices and settings exported successfully!', 'success');
+        alert('✅ Data Backup Saved Successfully!\n\n📊 All Prices & Settings Exported:\n• Phone models and prices (Used & New)\n• Buyback base prices\n• Condition modifiers\n• All settings\n\n💾 File saved to your Downloads\n\n⚠️ IMPORTANT:\n1. Save this file to /data/ folder in your repository\n2. Commit to git: git add data/admin-data-*.json\n3. This ensures your prices persist after updates!\n\n💡 TIP: Export after every major price update!');
     } catch (error) {
         console.error('Export error:', error);
         alert('❌ Error exporting data: ' + error.message);
@@ -3605,8 +3606,9 @@ function importAllData(event) {
                 localStorage.setItem('ibox_general_settings', JSON.stringify(importData.data.generalSettings));
             }
 
-            alert('✅ Data imported successfully! \n\nReloading admin panel to apply changes...');
-            location.reload();
+            showNotification('✓ All prices and settings restored successfully!', 'success');
+            alert('✅ Data Restored Successfully!\n\n📊 Imported:\n• All phone models and prices\n• Used and new phone prices\n• Buyback base prices\n• Condition modifiers\n• All settings\n\n🔄 Reloading admin panel to apply changes...');
+            setTimeout(() => location.reload(), 1500);
         } catch (error) {
             console.error('Import error:', error);
             alert('❌ Error importing data: ' + error.message);
@@ -3834,8 +3836,8 @@ function openBulkUpdateModal() {
     const currentType = currentPriceType === 'used' ? 'Used' : 'New';
 
     const modalHTML = `
-        <div class="modal-overlay" id="bulkUpdateModal" onclick="if(event.target === this) closeBulkUpdateModal()">
-            <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-overlay" id="bulkUpdateModal" onclick="if(event.target === this) closeBulkUpdateModal()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.3s ease;">
+            <div class="modal-content" style="max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease;">
                 <div class="modal-header">
                     <h3>Bulk Update ${currentType} Phone Prices</h3>
                     <button onclick="closeBulkUpdateModal()" class="btn btn-secondary btn-sm">✕</button>

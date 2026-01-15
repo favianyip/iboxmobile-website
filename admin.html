@@ -15,9 +15,16 @@
                 <span class="admin-badge">Admin Panel</span>
             </div>
             <div class="admin-nav-right">
-                <button class="btn btn-primary btn-sm" onclick="exportAllData()" title="Export all admin data to JSON file" style="margin-right: 0.5rem;">💾 Export Data</button>
-                <button class="btn btn-success btn-sm" onclick="document.getElementById('importDataFile').click()" title="Import data from JSON file" style="margin-right: 0.5rem;">📥 Import Data</button>
-                <input type="file" id="importDataFile" accept=".json" style="display: none;" onchange="importAllData(event)">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem; padding: 0.5rem 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <span style="font-size: 0.85rem; color: #666; font-weight: 600;">Data Backup:</span>
+                    <button class="btn btn-primary btn-sm" onclick="exportAllData()" title="Export all prices, models, and settings. Save this file after every price update!" style="margin: 0; white-space: nowrap;">
+                        💾 Export (Save Prices)
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="document.getElementById('importDataFile').click()" title="Import previously saved prices and settings" style="margin: 0; white-space: nowrap;">
+                        📥 Import (Restore)
+                    </button>
+                    <input type="file" id="importDataFile" accept=".xlsx,.xls,.json" style="display: none;" onchange="importAllData(event)">
+                </div>
                 <span class="admin-user" id="adminUserName">Admin</span>
                 <button class="btn btn-secondary btn-sm" onclick="auth.logout()">Logout</button>
             </div>
