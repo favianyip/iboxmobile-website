@@ -87,6 +87,17 @@
                     <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
                         Manage phone models that customers can sell to IBOX Mobile. Configure base prices, colors, and storage options.
                     </p>
+
+                    <!-- Used/New Toggle -->
+                    <div style="display: flex; justify-content: center; gap: 1rem; margin: 1.5rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <button class="condition-type-btn active" id="usedPhoneToggle" onclick="switchBuybackConditionType('used')" style="padding: 0.75rem 2rem; border: none; background: linear-gradient(135deg, #C9A84C 0%, #B8973B 100%); color: white; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3); transition: all 0.3s ease;">
+                            📱 Used Phone Prices
+                        </button>
+                        <button class="condition-type-btn" id="newPhoneToggle" onclick="switchBuybackConditionType('new')" style="padding: 0.75rem 2rem; border: none; background: #e9ecef; color: #666; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;">
+                            📦 New Phone Prices
+                        </button>
+                    </div>
+
                     <button class="btn btn-primary" id="addPhoneBtn">
                         <span>+</span> Add New Phone Model
                     </button>
@@ -784,28 +795,6 @@
                     <label>Storage Price Modifiers</label>
                     <div class="storage-prices" id="storagePrices">
                         <!-- Dynamic storage price inputs -->
-                    </div>
-                </div>
-
-                <!-- Display Toggle for Refurbishment Page -->
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" id="phoneDisplay" checked style="width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-weight: 600;">Display on Refurbishment/Buy Page</span>
-                    </label>
-                    <p style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.5rem;">
-                        Uncheck to hide this phone from the "Buy Refurbished" page. This does NOT affect buyback quotes.
-                    </p>
-                </div>
-
-                <!-- Buy Prices & Stock Section (For Refurbished Phone Sales) -->
-                <div class="form-group" style="border-top: 2px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem;">
-                    <h4 style="margin-bottom: 1rem; color: var(--gold);">Refurbished Phone Sales - Buy Prices & Stock</h4>
-                    <p style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 1rem;">
-                        Set prices and stock quantities for selling refurbished phones. These are for the "Buy Refurbished" page only, not buyback quotes.
-                    </p>
-                    <div id="buyPricesStockSection">
-                        <!-- Dynamic buy prices and stock inputs -->
                     </div>
                 </div>
 
