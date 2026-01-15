@@ -64,10 +64,11 @@ body {
 }
 
 .logo-img {
-    height: 50px;
+    height: 80px;
     width: auto;
-    max-width: 200px;
+    max-width: 350px;
     object-fit: contain;
+    background: transparent;
 }
 
 .logo-text {

@@ -15,6 +15,9 @@
                 <span class="admin-badge">Admin Panel</span>
             </div>
             <div class="admin-nav-right">
+                <button class="btn btn-primary btn-sm" onclick="exportAllData()" title="Export all admin data to JSON file" style="margin-right: 0.5rem;">💾 Export Data</button>
+                <button class="btn btn-success btn-sm" onclick="document.getElementById('importDataFile').click()" title="Import data from JSON file" style="margin-right: 0.5rem;">📥 Import Data</button>
+                <input type="file" id="importDataFile" accept=".json" style="display: none;" onchange="importAllData(event)">
                 <span class="admin-user" id="adminUserName">Admin</span>
                 <button class="btn btn-secondary btn-sm" onclick="auth.logout()">Logout</button>
             </div>
