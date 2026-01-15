@@ -107,8 +107,8 @@ body {
 }
 
 .dropdown:hover .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
+    opacity: 1 !important;
+    visibility: visible !important;
     transform: translateY(0);
 }
 
