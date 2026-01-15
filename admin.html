@@ -131,13 +131,24 @@
                     <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
                         Set the base buyback prices for each phone model and storage option. These prices are used as the starting point for buyback quotes.
                     </p>
+
+                    <!-- Used/New Toggle for Prices -->
+                    <div style="display: flex; justify-content: center; gap: 1rem; margin: 1.5rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <button class="condition-type-btn active" id="usedPriceToggle" onclick="switchPriceConditionType('used')" style="padding: 0.75rem 2rem; border: none; background: linear-gradient(135deg, #C9A84C 0%, #B8973B 100%); color: white; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3); transition: all 0.3s ease;">
+                            📱 Used Phone Prices
+                        </button>
+                        <button class="condition-type-btn" id="newPriceToggle" onclick="switchPriceConditionType('new')" style="padding: 0.75rem 2rem; border: none; background: #e9ecef; color: #666; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;">
+                            📦 New Phone Prices
+                        </button>
+                    </div>
+
                     <div class="header-actions">
                         <select id="buybackPriceBrandFilter" class="filter-select" style="margin-right: 1rem;" onchange="renderPriceTable();">
                             <option value="">All Brands</option>
                             <option value="Apple">Apple</option>
                             <option value="Samsung">Samsung</option>
                         </select>
-                        <button class="btn btn-primary" id="bulkUpdateBuybackPricesBtn">
+                        <button class="btn btn-primary" id="bulkUpdateBuybackPricesBtn" onclick="openBulkUpdateModal()">
                             <span>📊</span> Bulk Update Prices
                         </button>
                     </div>

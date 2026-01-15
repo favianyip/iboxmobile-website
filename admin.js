@@ -3631,42 +3631,350 @@ let currentBuybackType = 'used'; // Default to used phones
 function switchBuybackConditionType(type) {
     currentBuybackType = type;
 
-    // Update button styles
+    // Update button styles with animation
     const usedBtn = document.getElementById('usedPhoneToggle');
     const newBtn = document.getElementById('newPhoneToggle');
+    const phonesGrid = document.getElementById('buybackPhonesGrid');
+
+    // Add transition for smooth animation
+    usedBtn.style.transition = 'all 0.3s ease';
+    newBtn.style.transition = 'all 0.3s ease';
 
     if (type === 'used') {
-        // Active style for used button
+        // Active style for used button with scale animation
         usedBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
         usedBtn.style.color = 'white';
-        usedBtn.style.boxShadow = '0 2px 8px rgba(201, 168, 76, 0.3)';
+        usedBtn.style.boxShadow = '0 4px 12px rgba(201, 168, 76, 0.4)';
+        usedBtn.style.transform = 'scale(1.05)';
         usedBtn.classList.add('active');
 
         // Inactive style for new button
         newBtn.style.background = '#e9ecef';
         newBtn.style.color = '#666';
         newBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+        newBtn.style.transform = 'scale(1)';
         newBtn.classList.remove('active');
     } else {
-        // Active style for new button
+        // Active style for new button with scale animation
         newBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
         newBtn.style.color = 'white';
-        newBtn.style.boxShadow = '0 2px 8px rgba(201, 168, 76, 0.3)';
+        newBtn.style.boxShadow = '0 4px 12px rgba(201, 168, 76, 0.4)';
+        newBtn.style.transform = 'scale(1.05)';
         newBtn.classList.add('active');
 
         // Inactive style for used button
         usedBtn.style.background = '#e9ecef';
         usedBtn.style.color = '#666';
         usedBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+        usedBtn.style.transform = 'scale(1)';
         usedBtn.classList.remove('active');
     }
 
-    // Re-render the phones grid with the new type
-    renderPhones();
+    // Animate the grid change
+    if (phonesGrid) {
+        phonesGrid.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        phonesGrid.style.opacity = '0';
+        phonesGrid.style.transform = 'translateY(10px)';
+
+        setTimeout(() => {
+            // Re-render the phones grid with the new type
+            renderPhones();
+
+            // Fade back in
+            phonesGrid.style.opacity = '1';
+            phonesGrid.style.transform = 'translateY(0)';
+        }, 300);
+    } else {
+        renderPhones();
+    }
+
+    // Show notification of change
+    showNotification(`Switched to ${type === 'used' ? 'Used' : 'New'} Phone Prices`, 'success');
 
     console.log(`Switched to ${type} phone prices view`);
 }
 
+/**
+ * Show notification message
+ */
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: ${type === 'success' ? 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)' : '#333'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10000;
+        font-weight: 600;
+        animation: slideInRight 0.3s ease;
+    `;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    // Remove after 2 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 2000);
+}
+
+// Add animation keyframes
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
 // Make function globally available
 window.switchBuybackConditionType = switchBuybackConditionType;
 window.currentBuybackType = currentBuybackType;
+
+// ============================================
+// BUYBACK BASE PRICES TOGGLE & BULK UPDATE
+// ============================================
+
+let currentPriceType = 'used'; // Default to used phone prices
+
+/**
+ * Switch between Used and New price views in Buyback Base Prices
+ */
+function switchPriceConditionType(type) {
+    currentPriceType = type;
+
+    // Update button styles with animation
+    const usedBtn = document.getElementById('usedPriceToggle');
+    const newBtn = document.getElementById('newPriceToggle');
+    const priceTable = document.getElementById('buybackPriceTableBody');
+
+    // Add transition for smooth animation
+    if (usedBtn && newBtn) {
+        usedBtn.style.transition = 'all 0.3s ease';
+        newBtn.style.transition = 'all 0.3s ease';
+
+        if (type === 'used') {
+            // Active style for used button
+            usedBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+            usedBtn.style.color = 'white';
+            usedBtn.style.boxShadow = '0 4px 12px rgba(201, 168, 76, 0.4)';
+            usedBtn.style.transform = 'scale(1.05)';
+            usedBtn.classList.add('active');
+
+            // Inactive style for new button
+            newBtn.style.background = '#e9ecef';
+            newBtn.style.color = '#666';
+            newBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+            newBtn.style.transform = 'scale(1)';
+            newBtn.classList.remove('active');
+        } else {
+            // Active style for new button
+            newBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+            newBtn.style.color = 'white';
+            newBtn.style.boxShadow = '0 4px 12px rgba(201, 168, 76, 0.4)';
+            newBtn.style.transform = 'scale(1.05)';
+            newBtn.classList.add('active');
+
+            // Inactive style for used button
+            usedBtn.style.background = '#e9ecef';
+            usedBtn.style.color = '#666';
+            usedBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+            usedBtn.style.transform = 'scale(1)';
+            usedBtn.classList.remove('active');
+        }
+    }
+
+    // Animate table change
+    if (priceTable) {
+        priceTable.style.transition = 'opacity 0.3s ease';
+        priceTable.style.opacity = '0';
+
+        setTimeout(() => {
+            renderPriceTable();
+            priceTable.style.opacity = '1';
+        }, 300);
+    } else {
+        renderPriceTable();
+    }
+
+    // Show notification
+    showNotification(`Switched to ${type === 'used' ? 'Used' : 'New'} Phone Base Prices`, 'success');
+}
+
+/**
+ * Open bulk update modal
+ */
+function openBulkUpdateModal() {
+    const brand = document.getElementById('buybackPriceBrandFilter').value || 'All';
+    const currentType = currentPriceType === 'used' ? 'Used' : 'New';
+
+    const modalHTML = `
+        <div class="modal-overlay" id="bulkUpdateModal" onclick="if(event.target === this) closeBulkUpdateModal()">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>Bulk Update ${currentType} Phone Prices</h3>
+                    <button onclick="closeBulkUpdateModal()" class="btn btn-secondary btn-sm">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 1.5rem; color: #666;">
+                        Update all ${brand} ${currentType.toLowerCase()} phone prices by a fixed amount.
+                    </p>
+
+                    <div class="form-group">
+                        <label>Brand Selection</label>
+                        <select id="bulkUpdateBrand" class="form-control">
+                            <option value="Apple">Apple</option>
+                            <option value="Samsung">Samsung</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Condition</label>
+                        <select id="bulkUpdateCondition" class="form-control">
+                            <option value="used" ${currentPriceType === 'used' ? 'selected' : ''}>Used Phones</option>
+                            <option value="new" ${currentPriceType === 'new' ? 'selected' : ''}>New Phones</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Price Change Amount (SGD)</label>
+                        <input type="number" id="bulkPriceChange" class="form-control" placeholder="e.g., -20 to decrease by $20, or 50 to increase by $50" step="1">
+                        <small style="color: #888; display: block; margin-top: 0.5rem;">
+                            Enter a negative number to decrease prices, or positive to increase.
+                        </small>
+                    </div>
+
+                    <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <strong>⚠️ Warning:</strong> This will update ALL base prices for the selected brand and condition.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeBulkUpdateModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="performBulkUpdate()" class="btn btn-primary">Update Prices</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+/**
+ * Close bulk update modal
+ */
+function closeBulkUpdateModal() {
+    const modal = document.getElementById('bulkUpdateModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+/**
+ * Perform bulk price update
+ */
+function performBulkUpdate() {
+    const brand = document.getElementById('bulkUpdateBrand').value;
+    const condition = document.getElementById('bulkUpdateCondition').value;
+    const priceChange = parseFloat(document.getElementById('bulkPriceChange').value);
+
+    if (isNaN(priceChange)) {
+        alert('Please enter a valid price change amount.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to ${priceChange > 0 ? 'increase' : 'decrease'} all ${brand} ${condition} phone prices by $${Math.abs(priceChange)}?`)) {
+        return;
+    }
+
+    // Get all phones
+    const phones = adminManager.phones || [];
+    let updatedCount = 0;
+
+    // Update prices for matching phones
+    phones.forEach(phone => {
+        if (phone.brand === brand) {
+            // Update base price (this is for used phones typically)
+            if (condition === 'used') {
+                phone.basePrice = Math.max(0, phone.basePrice + priceChange);
+
+                // Update storage prices if they exist
+                if (phone.storagePrices) {
+                    Object.keys(phone.storagePrices).forEach(storage => {
+                        phone.storagePrices[storage] = Math.max(0, phone.storagePrices[storage] + priceChange);
+                    });
+                }
+
+                // Update buy prices for all conditions
+                if (phone.buyPrices) {
+                    Object.keys(phone.buyPrices).forEach(storage => {
+                        Object.keys(phone.buyPrices[storage]).forEach(cond => {
+                            phone.buyPrices[storage][cond] = Math.max(0, phone.buyPrices[storage][cond] + priceChange);
+                        });
+                    });
+                }
+            } else {
+                // For new phones - update a separate property or use a multiplier
+                // If you have a newPhonePrices field, update that
+                if (phone.newPhonePrices) {
+                    Object.keys(phone.newPhonePrices).forEach(storage => {
+                        phone.newPhonePrices[storage] = Math.max(0, phone.newPhonePrices[storage] + priceChange);
+                    });
+                } else {
+                    // Create newPhonePrices based on current prices + change
+                    phone.newPhonePrices = {};
+                    if (phone.storagePrices) {
+                        Object.keys(phone.storagePrices).forEach(storage => {
+                            phone.newPhonePrices[storage] = Math.max(0, phone.storagePrices[storage] + priceChange);
+                        });
+                    }
+                }
+            }
+
+            phone.updatedAt = new Date().toISOString();
+            updatedCount++;
+        }
+    });
+
+    // Save to localStorage
+    adminManager.savePhones();
+
+    // Close modal and refresh
+    closeBulkUpdateModal();
+    renderPriceTable();
+
+    // Show success notification
+    showNotification(`✓ Updated ${updatedCount} ${brand} ${condition} phone models`, 'success');
+    alert(`Successfully updated ${updatedCount} ${brand} ${condition} phone models by ${priceChange > 0 ? '+' : ''}$${priceChange}`);
+}
+
+// Make functions globally available
+window.switchPriceConditionType = switchPriceConditionType;
+window.openBulkUpdateModal = openBulkUpdateModal;
+window.closeBulkUpdateModal = closeBulkUpdateModal;
+window.performBulkUpdate = performBulkUpdate;
+window.currentPriceType = currentPriceType;
