@@ -3525,3 +3525,96 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 window.updateModelFilter = updateModelFilter;
+
+// ============================================
+// DATA EXPORT/IMPORT SYSTEM
+// Ensures admin changes persist across git updates
+// ============================================
+
+/**
+ * Export all admin data to a JSON file
+ * This allows admins to save their changes and commit to git
+ */
+function exportAllData() {
+    try {
+        const exportData = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            data: {
+                phones: JSON.parse(localStorage.getItem('ktmobile_phones') || '[]'),
+                brands: JSON.parse(localStorage.getItem('ktmobile_brands') || '[]'),
+                conditionModifiers: JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}'),
+                heroImage: JSON.parse(localStorage.getItem('ktmobile_hero_image') || '{}'),
+                appointments: JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]'),
+                generalSettings: JSON.parse(localStorage.getItem('ibox_general_settings') || '{}')
+            }
+        };
+
+        // Create blob and download
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `admin-data-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert('✅ Data exported successfully! \n\nNext steps:\n1. Save this file to /data/ folder\n2. Commit to git: git add data/admin-data-*.json\n3. Your changes will persist forever!');
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('❌ Error exporting data: ' + error.message);
+    }
+}
+
+/**
+ * Import data from a JSON file
+ * Loads previously exported admin data
+ */
+function importAllData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importData = JSON.parse(e.target.result);
+
+            if (!importData.version || !importData.data) {
+                throw new Error('Invalid data file format');
+            }
+
+            // Import all data to localStorage
+            if (importData.data.phones) {
+                localStorage.setItem('ktmobile_phones', JSON.stringify(importData.data.phones));
+            }
+            if (importData.data.brands) {
+                localStorage.setItem('ktmobile_brands', JSON.stringify(importData.data.brands));
+            }
+            if (importData.data.conditionModifiers) {
+                localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(importData.data.conditionModifiers));
+            }
+            if (importData.data.heroImage) {
+                localStorage.setItem('ktmobile_hero_image', JSON.stringify(importData.data.heroImage));
+            }
+            if (importData.data.appointments) {
+                localStorage.setItem('ktmobile_appointments', JSON.stringify(importData.data.appointments));
+            }
+            if (importData.data.generalSettings) {
+                localStorage.setItem('ibox_general_settings', JSON.stringify(importData.data.generalSettings));
+            }
+
+            alert('✅ Data imported successfully! \n\nReloading admin panel to apply changes...');
+            location.reload();
+        } catch (error) {
+            console.error('Import error:', error);
+            alert('❌ Error importing data: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Make functions globally available
+window.exportAllData = exportAllData;
+window.importAllData = importAllData;
