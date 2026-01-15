@@ -61,20 +61,23 @@ body {
     text-decoration: none;
     display: flex;
     align-items: center;
+    gap: 1rem;
 }
 
 .logo-img {
-    height: 80px;
+    height: 50px;
     width: auto;
-    max-width: 350px;
+    max-width: 120px;
     object-fit: contain;
     background: transparent;
 }
 
 .logo-text {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 700;
-    color: var(--gold);
+    color: #2c3e50;
+    letter-spacing: 0.5px;
+    display: flex !important;
 }
 
 .nav-links {

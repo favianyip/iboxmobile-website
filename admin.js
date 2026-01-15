@@ -3618,3 +3618,55 @@ function importAllData(event) {
 // Make functions globally available
 window.exportAllData = exportAllData;
 window.importAllData = importAllData;
+
+// ============================================
+// USED/NEW PHONE TOGGLE FOR BUYBACK PRICES
+// ============================================
+
+let currentBuybackType = 'used'; // Default to used phones
+
+/**
+ * Switch between Used and New phone price views
+ */
+function switchBuybackConditionType(type) {
+    currentBuybackType = type;
+
+    // Update button styles
+    const usedBtn = document.getElementById('usedPhoneToggle');
+    const newBtn = document.getElementById('newPhoneToggle');
+
+    if (type === 'used') {
+        // Active style for used button
+        usedBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+        usedBtn.style.color = 'white';
+        usedBtn.style.boxShadow = '0 2px 8px rgba(201, 168, 76, 0.3)';
+        usedBtn.classList.add('active');
+
+        // Inactive style for new button
+        newBtn.style.background = '#e9ecef';
+        newBtn.style.color = '#666';
+        newBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+        newBtn.classList.remove('active');
+    } else {
+        // Active style for new button
+        newBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+        newBtn.style.color = 'white';
+        newBtn.style.boxShadow = '0 2px 8px rgba(201, 168, 76, 0.3)';
+        newBtn.classList.add('active');
+
+        // Inactive style for used button
+        usedBtn.style.background = '#e9ecef';
+        usedBtn.style.color = '#666';
+        usedBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+        usedBtn.classList.remove('active');
+    }
+
+    // Re-render the phones grid with the new type
+    renderPhones();
+
+    console.log(`Switched to ${type} phone prices view`);
+}
+
+// Make function globally available
+window.switchBuybackConditionType = switchBuybackConditionType;
+window.currentBuybackType = currentBuybackType;
