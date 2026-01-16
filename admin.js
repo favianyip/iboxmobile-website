@@ -1727,6 +1727,100 @@ function saveBrandImage(brandName) {
 }
 
 /**
+ * Color Selection Data - Official Apple and Samsung Colors
+ */
+const BRAND_COLORS = {
+    'Apple': [
+        'Black', 'White', 'Blue', 'Pink', 'Yellow', 'Green', 'Purple', 'Red',
+        'Space Gray', 'Space Black', 'Silver', 'Gold', 'Rose Gold',
+        'Midnight', 'Starlight', 'Blue', 'Pink', 'Green', 'Yellow',
+        'Deep Purple', 'Gold', 'Silver', 'Space Black',
+        'Natural Titanium', 'Blue Titanium', 'White Titanium', 'Black Titanium',
+        'Desert Titanium',
+        'Product Red', 'Coral', 'Sierra Blue', 'Graphite', 'Pacific Blue',
+        'Alpine Green', 'Jet Black', 'Matte Black'
+    ],
+    'Samsung': [
+        'Phantom Black', 'Phantom White', 'Phantom Gray', 'Phantom Silver',
+        'Phantom Violet', 'Phantom Pink', 'Phantom Green', 'Phantom Blue',
+        'Cream', 'Graphite', 'Lavender', 'Mint', 'Pink Gold',
+        'Cloud Navy', 'Cloud Pink', 'Cloud Blue', 'Cloud White',
+        'Prism Black', 'Prism White', 'Prism Blue', 'Prism Green',
+        'Aura Black', 'Aura White', 'Aura Glow', 'Aura Blue',
+        'Mystic Bronze', 'Mystic Black', 'Mystic White', 'Mystic Gray',
+        'Burgundy', 'Titanium Black', 'Titanium Gray', 'Titanium Violet',
+        'Titanium Yellow', 'Titanium Blue', 'Titanium Orange', 'Titanium Green',
+        'Icy Blue', 'Crafted Black', 'Shadow Gray',
+        'Black', 'White', 'Blue', 'Green', 'Red', 'Pink', 'Yellow', 'Purple'
+    ]
+};
+
+/**
+ * Update color checkboxes based on selected brand
+ */
+function updateColorCheckboxes(brand, selectedColors = []) {
+    const container = document.getElementById('colorCheckboxes');
+    if (!container) return;
+
+    const colors = BRAND_COLORS[brand] || [];
+
+    container.innerHTML = colors.map(color => {
+        const isChecked = selectedColors.includes(color) ? 'checked' : '';
+        const colorId = `color-${color.replace(/\s+/g, '-').toLowerCase()}`;
+        return `
+            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: white; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                <input type="checkbox" id="${colorId}" value="${color}" ${isChecked} style="width: 18px; height: 18px;">
+                <span style="font-size: 0.9rem;">${color}</span>
+            </label>
+        `;
+    }).join('');
+}
+
+/**
+ * Add custom color to the selection
+ */
+function addCustomColor() {
+    const input = document.getElementById('customColorInput');
+    const colorName = input.value.trim();
+
+    if (!colorName) {
+        alert('Please enter a color name');
+        return;
+    }
+
+    // Check if color already exists
+    const container = document.getElementById('colorCheckboxes');
+    const existingColors = Array.from(container.querySelectorAll('input[type="checkbox"]'))
+        .map(cb => cb.value);
+
+    if (existingColors.includes(colorName)) {
+        alert('This color already exists');
+        return;
+    }
+
+    // Add new color checkbox
+    const colorId = `color-${colorName.replace(/\s+/g, '-').toLowerCase()}`;
+    const newColorHTML = `
+        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: white; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+            <input type="checkbox" id="${colorId}" value="${colorName}" checked style="width: 18px; height: 18px;">
+            <span style="font-size: 0.9rem;">${colorName}</span>
+        </label>
+    `;
+
+    container.insertAdjacentHTML('beforeend', newColorHTML);
+    input.value = '';
+    alert(`Color "${colorName}" added successfully`);
+}
+
+/**
+ * Get selected colors from checkboxes
+ */
+function getSelectedColors() {
+    const checkboxes = document.querySelectorAll('#colorCheckboxes input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+/**
  * Phone Modal Functions
  */
 function initializePhoneModal() {
@@ -1736,8 +1830,10 @@ function initializePhoneModal() {
     const imageFileInput = document.getElementById('phoneImageFile');
     const imagePreview = document.getElementById('imagePreview');
 
-    // Storage checkboxes handler
+    // Brand change handler - update colors when brand changes
     brandSelect.addEventListener('change', function() {
+        const selectedBrand = this.value;
+        updateColorCheckboxes(selectedBrand);
         updateStoragePrices();
     });
 
@@ -1760,6 +1856,9 @@ function initializePhoneModal() {
     });
 }
 
+// Make functions globally available
+window.addCustomColor = addCustomColor;
+
 function openPhoneModal(phoneId = null) {
     const modal = document.getElementById('phoneModal');
     const form = document.getElementById('phoneForm');
@@ -1777,8 +1876,10 @@ function openPhoneModal(phoneId = null) {
         document.getElementById('phoneModel').value = phone.model;
         document.getElementById('phoneImageUrl').value = phone.image;
         document.getElementById('phoneBasePrice').value = phone.basePrice;
-        document.getElementById('phoneColors').value = phone.colors.join(', ');
-        
+
+        // Update color checkboxes for the brand with selected colors
+        updateColorCheckboxes(phone.brand, phone.colors || []);
+
         // Display toggle for refurbishment page
         const displayCheckbox = document.getElementById('phoneDisplay');
         if (displayCheckbox) {
@@ -1798,6 +1899,10 @@ function openPhoneModal(phoneId = null) {
         modalTitle.textContent = 'Add New Phone';
         form.reset();
         document.getElementById('imagePreview').innerHTML = '<span>No image selected</span>';
+
+        // Initialize with Apple colors by default
+        updateColorCheckboxes('Apple', []);
+
         const displayCheckbox = document.getElementById('phoneDisplay');
         if (displayCheckbox) displayCheckbox.checked = true;
         updateStoragePrices();
@@ -1935,8 +2040,8 @@ function savePhone() {
     const model = document.getElementById('phoneModel').value;
     const imageUrl = document.getElementById('phoneImageUrl').value;
     const basePrice = document.getElementById('phoneBasePrice').value;
-    const colors = document.getElementById('phoneColors').value;
-    
+    const colors = getSelectedColors(); // Get colors from checkboxes
+
     const checkedStorages = Array.from(document.querySelectorAll('.storage-checkboxes input:checked'))
         .map(cb => cb.value);
 
@@ -1950,6 +2055,11 @@ function savePhone() {
 
     if (!brand || !model || !basePrice || checkedStorages.length === 0) {
         alert('Please fill in all required fields');
+        return;
+    }
+
+    if (colors.length === 0) {
+        alert('Please select at least one color');
         return;
     }
 
@@ -1995,7 +2105,7 @@ function savePhone() {
         model,
         image: imageUrl || adminManager.getDefaultImage(brand),
         storages: checkedStorages,
-        colors: colors ? colors.split(',').map(c => c.trim()) : [],
+        colors: colors, // Already an array from getSelectedColors()
         basePrice: parseFloat(basePrice) || 0,
         storagePrices: storagePrices,
         display: display, // For refurbishment/buy page visibility
@@ -3571,37 +3681,130 @@ window.updateModelFilter = updateModelFilter;
 // ============================================
 
 /**
- * Export all admin data to a JSON file
- * This allows admins to save their changes and commit to git
+ * Export all admin data to an Excel file with proper table formatting
+ * This allows admins to save their changes in a readable, editable format
  */
 function exportAllData() {
     try {
-        const exportData = {
-            version: '1.0',
-            exportDate: new Date().toISOString(),
-            data: {
-                phones: JSON.parse(localStorage.getItem('ktmobile_phones') || '[]'),
-                brands: JSON.parse(localStorage.getItem('ktmobile_brands') || '[]'),
-                conditionModifiers: JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}'),
-                heroImage: JSON.parse(localStorage.getItem('ktmobile_hero_image') || '{}'),
-                appointments: JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]'),
-                generalSettings: JSON.parse(localStorage.getItem('ibox_general_settings') || '{}')
+        // Check if XLSX library is loaded
+        if (typeof XLSX === 'undefined') {
+            alert('❌ Excel export library not loaded. Please refresh the page.');
+            return;
+        }
+
+        // Get all data from localStorage
+        const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+        const brands = JSON.parse(localStorage.getItem('ktmobile_brands') || '[]');
+        const conditionModifiers = JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}');
+        const appointments = JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]');
+        const generalSettings = JSON.parse(localStorage.getItem('ibox_general_settings') || '{}');
+
+        // Create a new workbook
+        const wb = XLSX.utils.book_new();
+
+        // === SHEET 1: Phone Models & Prices ===
+        const phonesData = phones.map(phone => ({
+            'Brand': phone.brand || '',
+            'Model': phone.model || '',
+            'Base Price (Used)': phone.basePrice || 0,
+            'Storages': (phone.storages || []).join(', '),
+            'Colors': (phone.colors || []).join(', '),
+            'Display on Website': phone.display ? 'Yes' : 'No',
+            'Buyback Enabled': phone.buybackEnabled !== false ? 'Yes' : 'No',
+            'Image URL': phone.image || '',
+            'Created At': phone.createdAt || '',
+            'Updated At': phone.updatedAt || ''
+        }));
+        const ws1 = XLSX.utils.json_to_sheet(phonesData);
+        XLSX.utils.book_append_sheet(wb, ws1, 'Phone Models');
+
+        // === SHEET 2: Used Phone Prices ===
+        const usedPricesData = [];
+        phones.forEach(phone => {
+            const storages = phone.storages || [];
+            storages.forEach(storage => {
+                usedPricesData.push({
+                    'Brand': phone.brand,
+                    'Model': phone.model,
+                    'Storage': storage,
+                    'Price': phone.storagePrices?.[storage] || phone.basePrice || 0
+                });
+            });
+        });
+        const ws2 = XLSX.utils.json_to_sheet(usedPricesData);
+        XLSX.utils.book_append_sheet(wb, ws2, 'Used Phone Prices');
+
+        // === SHEET 3: New Phone Prices ===
+        const newPricesData = [];
+        phones.forEach(phone => {
+            if (phone.newPhonePrices) {
+                Object.keys(phone.newPhonePrices).forEach(storage => {
+                    newPricesData.push({
+                        'Brand': phone.brand,
+                        'Model': phone.model,
+                        'Storage': storage,
+                        'Price': phone.newPhonePrices[storage]
+                    });
+                });
             }
-        };
+        });
+        if (newPricesData.length > 0) {
+            const ws3 = XLSX.utils.json_to_sheet(newPricesData);
+            XLSX.utils.book_append_sheet(wb, ws3, 'New Phone Prices');
+        }
 
-        // Create blob and download
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `admin-data-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        // === SHEET 4: Condition Modifiers ===
+        const conditionData = [];
+        Object.keys(conditionModifiers).forEach(category => {
+            Object.keys(conditionModifiers[category]).forEach(grade => {
+                conditionData.push({
+                    'Category': category,
+                    'Grade': grade,
+                    'Modifier (SGD)': conditionModifiers[category][grade]
+                });
+            });
+        });
+        if (conditionData.length > 0) {
+            const ws4 = XLSX.utils.json_to_sheet(conditionData);
+            XLSX.utils.book_append_sheet(wb, ws4, 'Condition Modifiers');
+        }
 
-        showNotification('✓ All prices and settings exported successfully!', 'success');
-        alert('✅ Data Backup Saved Successfully!\n\n📊 All Prices & Settings Exported:\n• Phone models and prices (Used & New)\n• Buyback base prices\n• Condition modifiers\n• All settings\n\n💾 File saved to your Downloads\n\n⚠️ IMPORTANT:\n1. Save this file to /data/ folder in your repository\n2. Commit to git: git add data/admin-data-*.json\n3. This ensures your prices persist after updates!\n\n💡 TIP: Export after every major price update!');
+        // === SHEET 5: Appointments ===
+        if (appointments.length > 0) {
+            const appointmentsData = appointments.map(apt => ({
+                'Reference': apt.reference || '',
+                'Customer Name': apt.customerName || '',
+                'Mobile': apt.customerMobile || '',
+                'Email': apt.customerEmail || '',
+                'Device': `${apt.deviceBrand} ${apt.deviceModel} ${apt.deviceStorage}`,
+                'Type': apt.bookingType || '',
+                'Date': apt.bookingDate || '',
+                'Time': apt.bookingTime || '',
+                'Location': apt.location || '',
+                'Quote Amount': apt.quoteAmount || 0,
+                'Status': apt.status || ''
+            }));
+            const ws5 = XLSX.utils.json_to_sheet(appointmentsData);
+            XLSX.utils.book_append_sheet(wb, ws5, 'Appointments');
+        }
+
+        // === SHEET 6: General Settings ===
+        const settingsData = [
+            { 'Setting': 'Company Name', 'Value': generalSettings.companyName || '' },
+            { 'Setting': 'Company Address', 'Value': generalSettings.companyAddress || '' },
+            { 'Setting': 'Contact Phone', 'Value': generalSettings.contactPhone || '' },
+            { 'Setting': 'Contact Email', 'Value': generalSettings.contactEmail || '' },
+            { 'Setting': 'WhatsApp Number', 'Value': generalSettings.whatsApp || '' }
+        ];
+        const ws6 = XLSX.utils.json_to_sheet(settingsData);
+        XLSX.utils.book_append_sheet(wb, ws6, 'General Settings');
+
+        // Generate Excel file and download
+        const fileName = `admin-data-${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+
+        showNotification('✓ All data exported to Excel successfully!', 'success');
+        alert('✅ Data Backup Saved Successfully!\n\n📊 Excel File Created with:\n• Phone Models sheet\n• Used Phone Prices sheet\n• New Phone Prices sheet\n• Condition Modifiers sheet\n• Appointments sheet\n• General Settings sheet\n\n💾 File saved to your Downloads\n\n⚠️ IMPORTANT:\n1. Keep this file as your backup\n2. You can edit prices in Excel and re-import\n3. Export after every major update!\n\n💡 TIP: The Excel file is fully editable!');
     } catch (error) {
         console.error('Export error:', error);
         alert('❌ Error exporting data: ' + error.message);

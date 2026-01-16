@@ -6,6 +6,8 @@
     <title>Admin Dashboard - IBOX MOBILE SINGAPORE</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="admin.css">
+    <!-- SheetJS library for Excel export/import -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body class="admin-page">
     <header class="admin-header">
@@ -784,12 +786,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Available Colors</label>
-                    <div class="colors-input">
-                        <input type="text" id="phoneColors" class="form-control" placeholder="Comma-separated: Black, White, Blue">
+                    <label>Available Colors *</label>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
+                        Select all colors available for this model. Color options will update based on the selected brand.
+                    </p>
+                    <div id="colorCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem;">
+                        <!-- Color checkboxes will be dynamically generated based on brand -->
                     </div>
-                    <div id="colorToggles" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        <!-- Color toggle switches will be dynamically generated -->
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Or add custom color:</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="customColorInput" class="form-control" placeholder="Enter custom color name" style="flex: 1;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addCustomColor()" style="white-space: nowrap;">Add Color</button>
+                        </div>
                     </div>
                 </div>
 

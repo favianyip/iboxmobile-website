@@ -127,10 +127,9 @@ const phoneDatabase = {
             image: 'images/phones/iphone-16-pro-max.jpg',
             storage: { '256GB': 0, '512GB': 100, '1TB': 200 },
             colors: [
-                { name: 'Desert Titanium', hex: '#8B7355' },
-                { name: 'Natural Titanium', hex: '#A8A8A0' },
-                { name: 'White Titanium', hex: '#F5F5F0' },
-                { name: 'Black Titanium', hex: '#2C2C2C' }
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D5B' },
+                { name: 'Silver', hex: '#C0C0C0' }
             ]
         },
         'iPhone 17 Pro': {
@@ -138,10 +137,9 @@ const phoneDatabase = {
             image: 'images/phones/iphone-16-pro.jpg',
             storage: { '256GB': 0, '512GB': 100, '1TB': 200 },
             colors: [
-                { name: 'Desert Titanium', hex: '#8B7355' },
-                { name: 'Natural Titanium', hex: '#A8A8A0' },
-                { name: 'White Titanium', hex: '#F5F5F0' },
-                { name: 'Black Titanium', hex: '#2C2C2C' }
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D5B' },
+                { name: 'Silver', hex: '#C0C0C0' }
             ]
         },
         'iPhone 17': {
@@ -151,9 +149,9 @@ const phoneDatabase = {
             colors: [
                 { name: 'Black', hex: '#1C1C1E' },
                 { name: 'White', hex: '#FFFFFF' },
-                { name: 'Pink', hex: '#FFB6C1' },
-                { name: 'Blue', hex: '#4169E1' },
-                { name: 'Green', hex: '#2E7D32' }
+                { name: 'Lavender', hex: '#C4B5D6' },
+                { name: 'Mist Blue', hex: '#B4C8D8' },
+                { name: 'Sage', hex: '#9CAF88' }
             ]
         },
         'iPhone Air': {
@@ -161,9 +159,10 @@ const phoneDatabase = {
             image: 'images/phones/iphone-16.jpg',
             storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
             colors: [
-                { name: 'Starlight', hex: '#F5F5DC' },
-                { name: 'Midnight', hex: '#1C1C1E' },
-                { name: 'Blue', hex: '#4169E1' }
+                { name: 'Space Black', hex: '#1C1C1E' },
+                { name: 'Cloud White', hex: '#F5F5F5' },
+                { name: 'Light Gold', hex: '#F4E8D0' },
+                { name: 'Sky Blue', hex: '#87CEEB' }
             ]
         },
         'iPhone 16e': {
@@ -171,9 +170,8 @@ const phoneDatabase = {
             image: 'images/phones/iphone-se-3rd-gen.jpg',
             storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
             colors: [
-                { name: 'Black', hex: '#000000' },
-                { name: 'White', hex: '#FFFFFF' },
-                { name: 'Blue', hex: '#4169E1' }
+                { name: 'Black', hex: '#1C1C1E' },
+                { name: 'White', hex: '#FFFFFF' }
             ]
         },
         'iPhone 16 Pro Max': {
