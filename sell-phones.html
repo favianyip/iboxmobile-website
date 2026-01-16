@@ -385,7 +385,6 @@
     <header class="header">
         <nav class="nav">
             <a href="index.html" class="logo">
-                <img src="images/ibox-logo.png" alt="IBOX MOBILE SINGAPORE" class="logo-img" onerror="this.src='images/ibox-logo.svg';" style="display: block;">
                 <span class="logo-text" style="display: flex;">IBox Mobile Singapore</span>
             </a>
             <div class="hamburger-menu" id="hamburgerMenu">
@@ -733,23 +732,60 @@
                 return;
             }
 
-            // Get all phone models
-            const allModels = [...phoneModels.apple, ...phoneModels.samsung];
+            // Get all phone models - first try localStorage (backend admin data), then fallback to hardcoded
+            let allModels = [];
 
-            // Filter models based on search term
-            const matches = allModels.filter(model =>
-                model.name.toLowerCase().includes(term)
-            );
+            try {
+                // Try to get models from localStorage (admin panel managed data)
+                const storedPhones = localStorage.getItem('ktmobile_phones');
+                if (storedPhones) {
+                    const phonesData = JSON.parse(storedPhones);
+                    // Convert admin data format to search format
+                    allModels = phonesData.map(phone => ({
+                        name: phone.model,
+                        brand: phone.brand,
+                        storage: phone.storages || [],
+                        img: phone.img || 'default.jpg'
+                    }));
+                } else {
+                    // Fallback to hardcoded phoneModels
+                    allModels = [...phoneModels.apple, ...phoneModels.samsung];
+                }
+            } catch (e) {
+                console.error('Error loading phone data:', e);
+                // Fallback to hardcoded phoneModels
+                allModels = [...phoneModels.apple, ...phoneModels.samsung];
+            }
+
+            // Filter models based on search term - match model name, brand, or storage
+            const matches = allModels.filter(model => {
+                const modelName = model.name.toLowerCase();
+                const brandName = (model.brand || '').toLowerCase();
+                const storageStr = (model.storage || []).join(' ').toLowerCase();
+
+                return modelName.includes(term) ||
+                       brandName.includes(term) ||
+                       storageStr.includes(term);
+            });
 
             // Show suggestions
             if (matches.length > 0) {
                 suggestionsContainer.innerHTML = matches.slice(0, 8).map(model => {
-                    const brand = phoneModels.apple.includes(model) ? 'Apple' : 'Samsung';
+                    // Determine brand - check model.brand first, then fall back to checking phoneModels arrays
+                    let brand = model.brand || 'Apple';
+                    if (!model.brand) {
+                        brand = phoneModels.apple.some(m => m.name === model.name) ? 'Apple' : 'Samsung';
+                    }
+
+                    const storageDisplay = (model.storage && model.storage.length > 0)
+                        ? model.storage.join(', ')
+                        : 'Various storage options';
+
                     return `
-                        <div class="autocomplete-item" onclick="selectModel('${brand}', '${model.name}')">
+                        <div class="autocomplete-item" onclick="selectModel('${brand}', '${model.name.replace(/'/g, "\\'")}')">
                             <div>
                                 <div class="model-name">${model.name}</div>
-                                <div class="model-storage">${model.storage.join(', ')}</div>
+                                <div class="model-storage">${storageDisplay}</div>
                             </div>
                             <div style="color: #C9A84C; font-weight: 600;">→</div>
                         </div>
