@@ -1481,11 +1481,20 @@ function renderPriceTable() {
             : (phone.storagePrices ? Object.keys(phone.storagePrices) : ['128GB', '256GB']);
         
         return storages.map(storage => {
-            // Get price from storagePrices or fallback to basePrice
-            const price = phone.storagePrices && phone.storagePrices[storage] 
-                ? phone.storagePrices[storage] 
-                : (phone.basePrice || 0);
-            
+            // Get price based on currentPriceType (used vs new)
+            let price;
+            if (currentPriceType === 'new') {
+                // For new phones, use newPhonePrices
+                price = phone.newPhonePrices && phone.newPhonePrices[storage]
+                    ? phone.newPhonePrices[storage]
+                    : 0;
+            } else {
+                // For used phones, use storagePrices or basePrice
+                price = phone.storagePrices && phone.storagePrices[storage]
+                    ? phone.storagePrices[storage]
+                    : (phone.basePrice || 0);
+            }
+
             return `
                 <tr>
                     <td><strong>${phone.brand}</strong></td>
@@ -1493,18 +1502,18 @@ function renderPriceTable() {
                     <td><span style="font-weight: 500;">${storage}</span></td>
                     <td style="color: var(--text-dark); font-weight: 600;">SGD $${price.toLocaleString()}</td>
                     <td>
-                        <input type="number" 
-                               class="price-input" 
-                               value="${price}" 
-                               data-phone-id="${phone.id}" 
+                        <input type="number"
+                               class="price-input"
+                               value="${price}"
+                               data-phone-id="${phone.id}"
                                data-storage="${storage}"
                                onchange="updatePrice('${phone.id}', '${storage}', this.value)"
-                               min="0" 
+                               min="0"
                                step="10"
                                style="width: 120px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-sm" 
+                        <button class="btn btn-primary btn-sm"
                                 onclick="savePrice('${phone.id}', '${storage}')"
                                 style="pointer-events: auto;">
                             Save
@@ -1531,22 +1540,34 @@ function updatePrice(phoneId, storage, newPrice) {
         return;
     }
 
-    if (!phone.storagePrices) {
-        phone.storagePrices = {};
-    }
     const priceValue = parseFloat(newPrice) || 0;
-    phone.storagePrices[storage] = priceValue;
+
+    // Update the correct price field based on currentPriceType
+    if (currentPriceType === 'new') {
+        // Update new phone prices
+        if (!phone.newPhonePrices) {
+            phone.newPhonePrices = {};
+        }
+        phone.newPhonePrices[storage] = priceValue;
+    } else {
+        // Update used phone prices
+        if (!phone.storagePrices) {
+            phone.storagePrices = {};
+        }
+        const oldBasePrice = phone.storagePrices[storage] || phone.basePrice;
+        phone.storagePrices[storage] = priceValue;
+
+        // Update buy prices proportionally if they exist (only for used phones)
+        if (phone.buyPrices && phone.buyPrices[storage]) {
+            const priceDiff = priceValue - oldBasePrice;
+            Object.keys(phone.buyPrices[storage]).forEach(condition => {
+                phone.buyPrices[storage][condition] = Math.max(0, (phone.buyPrices[storage][condition] || 0) + priceDiff);
+            });
+        }
+    }
+
     phone.updatedAt = new Date().toISOString();
     adminManager.savePhones();
-    
-    // Update buy prices proportionally if they exist
-    if (phone.buyPrices && phone.buyPrices[storage]) {
-        const oldBasePrice = phone.storagePrices[storage] || phone.basePrice;
-        const priceDiff = priceValue - oldBasePrice;
-        Object.keys(phone.buyPrices[storage]).forEach(condition => {
-            phone.buyPrices[storage][condition] = Math.max(0, (phone.buyPrices[storage][condition] || 0) + priceDiff);
-        });
-    }
 }
 
 function savePrice(phoneId, storage) {
@@ -3341,48 +3362,66 @@ function updateBulkPricePreview() {
 function applyBulkPriceUpdate() {
     const brand = document.getElementById('bulkPriceBrand')?.value || '';
     const amount = parseInt(document.getElementById('bulkPriceAmount')?.value) || 0;
-    
+
     if (amount === 0) {
         alert('Please enter a price adjustment amount.');
         return;
     }
-    
+
     let phones = adminManager.phones || [];
     let affectedCount = 0;
-    
+
     phones.forEach(phone => {
         // Only update Apple and Samsung
         if (phone.brand !== 'Apple' && phone.brand !== 'Samsung') return;
-        
+
         // Filter by brand if selected
         if (brand && phone.brand !== brand) return;
-        
-        // Update base price
-        phone.basePrice = Math.max(0, (phone.basePrice || 0) + amount);
-        
-        // Update storage prices if they exist
-        if (phone.storagePrices) {
-            Object.keys(phone.storagePrices).forEach(storage => {
-                phone.storagePrices[storage] = Math.max(0, (phone.storagePrices[storage] || 0) + amount);
+
+        // Update prices based on currentPriceType (used vs new)
+        if (currentPriceType === 'new') {
+            // Update new phone prices
+            if (!phone.newPhonePrices) {
+                phone.newPhonePrices = {};
+            }
+
+            // Get all available storages
+            const storages = phone.storages && phone.storages.length > 0
+                ? phone.storages
+                : (phone.storagePrices ? Object.keys(phone.storagePrices) : ['128GB', '256GB']);
+
+            storages.forEach(storage => {
+                const currentPrice = phone.newPhonePrices[storage] || 0;
+                phone.newPhonePrices[storage] = Math.max(0, currentPrice + amount);
             });
+        } else {
+            // Update used phone prices
+            phone.basePrice = Math.max(0, (phone.basePrice || 0) + amount);
+
+            if (phone.storagePrices) {
+                Object.keys(phone.storagePrices).forEach(storage => {
+                    phone.storagePrices[storage] = Math.max(0, (phone.storagePrices[storage] || 0) + amount);
+                });
+            }
         }
-        
+
         phone.updatedAt = new Date().toISOString();
         affectedCount++;
     });
-    
+
     // Save changes
     adminManager.savePhones();
-    
+
     // Refresh the price table
     renderPriceTable();
-    
+
     // Close modal
     closeBulkPriceModal();
-    
+
     // Show success message
+    const priceTypeLabel = currentPriceType === 'new' ? 'new' : 'used';
     const action = amount >= 0 ? 'increased' : 'decreased';
-    alert(`Success! ${affectedCount} phone prices ${action} by SGD $${Math.abs(amount)}`);
+    alert(`Success! ${affectedCount} ${priceTypeLabel} phone prices ${action} by SGD $${Math.abs(amount)}`);
 }
 
 // Add event listener for bulk price button
