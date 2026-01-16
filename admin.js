@@ -498,6 +498,152 @@ class AdminDataManager {
 const adminManager = new AdminDataManager();
 
 // ============================================================================
+// GLOBAL COLOR MANAGEMENT
+// ============================================================================
+
+// Load available colors from localStorage or use defaults
+function loadAvailableColors() {
+    const stored = localStorage.getItem('ktmobile_available_colors');
+    if (stored) {
+        return JSON.parse(stored);
+    }
+    // Default colors for common phone models
+    return [
+        // iPhone colors
+        'Desert Titanium',
+        'Natural Titanium',
+        'White Titanium',
+        'Black Titanium',
+        'Blue Titanium',
+        'Space Black',
+        'Silver',
+        'Gold',
+        'Deep Purple',
+        'Midnight',
+        'Starlight',
+        'Blue',
+        'Pink',
+        'Red',
+        'Green',
+        'Yellow',
+        // Samsung colors
+        'Titanium Gray',
+        'Titanium Black',
+        'Titanium Violet',
+        'Titanium Yellow',
+        'Phantom Black',
+        'Phantom Silver',
+        'Phantom White',
+        'Cream',
+        'Graphite',
+        'Lavender',
+        'Mint',
+        'Navy',
+        'Orange',
+        // Generic
+        'Black',
+        'White',
+        'Grey',
+        'Rose Gold'
+    ].sort();
+}
+
+function saveAvailableColors(colors) {
+    localStorage.setItem('ktmobile_available_colors', JSON.stringify(colors));
+}
+
+// Global colors list
+let availableColors = loadAvailableColors();
+
+// Add new color to global list
+function addNewColor() {
+    const colorName = prompt('Enter new color name:');
+    if (!colorName || colorName.trim() === '') return;
+
+    const trimmedName = colorName.trim();
+
+    // Check if color already exists (case-insensitive)
+    if (availableColors.some(c => c.toLowerCase() === trimmedName.toLowerCase())) {
+        alert('This color already exists!');
+        return;
+    }
+
+    // Add to list
+    availableColors.push(trimmedName);
+    availableColors.sort();
+    saveAvailableColors(availableColors);
+
+    // Refresh color dropdown
+    populateColorDropdown();
+
+    // Select the newly added color
+    const select = document.getElementById('phoneColorsSelect');
+    const options = Array.from(select.options);
+    const newOption = options.find(opt => opt.value === trimmedName);
+    if (newOption) {
+        newOption.selected = true;
+    }
+
+    updateSelectedColorsList();
+}
+
+// Remove selected color from global list
+function removeSelectedColor() {
+    const select = document.getElementById('phoneColorsSelect');
+    const selectedOptions = Array.from(select.selectedOptions);
+
+    if (selectedOptions.length === 0) {
+        alert('Please select a color to remove from the list.');
+        return;
+    }
+
+    const colorsToRemove = selectedOptions.map(opt => opt.value);
+    const confirmMsg = `Are you sure you want to remove ${colorsToRemove.join(', ')} from the global color list?\n\nNote: This will not affect existing phones that already have these colors.`;
+
+    if (!confirm(confirmMsg)) return;
+
+    // Remove from list
+    availableColors = availableColors.filter(c => !colorsToRemove.includes(c));
+    saveAvailableColors(availableColors);
+
+    // Refresh color dropdown
+    populateColorDropdown();
+    updateSelectedColorsList();
+}
+
+// Populate the color dropdown
+function populateColorDropdown() {
+    const select = document.getElementById('phoneColorsSelect');
+    if (!select) return;
+
+    const currentSelections = Array.from(select.selectedOptions).map(opt => opt.value);
+
+    select.innerHTML = availableColors.map(color =>
+        `<option value="${color}" ${currentSelections.includes(color) ? 'selected' : ''}>${color}</option>`
+    ).join('');
+}
+
+// Update selected colors list display
+function updateSelectedColorsList() {
+    const select = document.getElementById('phoneColorsSelect');
+    const listContainer = document.getElementById('selectedColorsList');
+    if (!select || !listContainer) return;
+
+    const selectedColors = Array.from(select.selectedOptions).map(opt => opt.value);
+
+    if (selectedColors.length === 0) {
+        listContainer.innerHTML = '<small style="color: var(--text-light);">No colors selected</small>';
+        return;
+    }
+
+    listContainer.innerHTML = selectedColors.map(color =>
+        `<span style="display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; background: var(--gold); color: white; border-radius: 16px; font-size: 0.875rem; font-weight: 600;">
+            ${color}
+        </span>`
+    ).join('');
+}
+
+// ============================================================================
 // ADMIN UI FUNCTIONS
 // ============================================================================
 
@@ -1746,6 +1892,9 @@ function openPhoneModal(phoneId = null) {
 
     adminManager.currentEditingPhone = phoneId;
 
+    // Populate color dropdown
+    populateColorDropdown();
+
     if (phoneId) {
         // Edit mode
         const phone = adminManager.getPhone(phoneId);
@@ -1755,9 +1904,16 @@ function openPhoneModal(phoneId = null) {
         document.getElementById('phoneBrand').value = phone.brand;
         document.getElementById('phoneModel').value = phone.model;
         document.getElementById('phoneImageUrl').value = phone.image;
-        document.getElementById('phoneBasePrice').value = phone.basePrice;
-        document.getElementById('phoneColors').value = phone.colors.join(', ');
-        
+
+        // Set selected colors in dropdown
+        const colorSelect = document.getElementById('phoneColorsSelect');
+        if (colorSelect && phone.colors) {
+            Array.from(colorSelect.options).forEach(option => {
+                option.selected = phone.colors.includes(option.value);
+            });
+        }
+        updateSelectedColorsList();
+
         // Display toggle for refurbishment page
         const displayCheckbox = document.getElementById('phoneDisplay');
         if (displayCheckbox) {
@@ -1779,6 +1935,16 @@ function openPhoneModal(phoneId = null) {
         document.getElementById('imagePreview').innerHTML = '<span>No image selected</span>';
         const displayCheckbox = document.getElementById('phoneDisplay');
         if (displayCheckbox) displayCheckbox.checked = true;
+
+        // Clear color selection
+        const colorSelect = document.getElementById('phoneColorsSelect');
+        if (colorSelect) {
+            Array.from(colorSelect.options).forEach(option => {
+                option.selected = false;
+            });
+        }
+        updateSelectedColorsList();
+
         updateStoragePrices();
         updateBuyPricesStockSection(null);
     }
@@ -1797,16 +1963,29 @@ function updateStoragePrices() {
     const checkedStorages = Array.from(document.querySelectorAll('.storage-checkboxes input:checked'))
         .map(cb => cb.value);
 
+    if (checkedStorages.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-light); font-size: 0.875rem;">Select storage options above</p>';
+        return;
+    }
+
     container.innerHTML = checkedStorages.map(storage => `
-        <div class="storage-price-item">
-            <label>${storage}:</label>
-            <input type="number" class="form-control storage-price-input" 
-                   data-storage="${storage}" placeholder="Price modifier" 
-                   value="${adminManager.currentEditingPhone ? 
-                       (adminManager.getPhone(adminManager.currentEditingPhone)?.storagePrices?.[storage] || 0) : 0}">
+        <div class="storage-price-item" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+            <label style="min-width: 80px; font-weight: 600; color: var(--text-dark);">${storage}:</label>
+            <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--text-light); font-size: 0.875rem;">SGD</span>
+                <input type="number" class="form-control storage-price-input"
+                       data-storage="${storage}"
+                       placeholder="Enter base price"
+                       value="${adminManager.currentEditingPhone ?
+                           (adminManager.getPhone(adminManager.currentEditingPhone)?.storagePrices?.[storage] || 0) : 0}"
+                       min="0"
+                       step="10"
+                       required
+                       style="max-width: 200px;">
+            </div>
         </div>
     `).join('');
-    
+
     // Update buy prices section when storages change
     if (adminManager.currentEditingPhone) {
         const phone = adminManager.getPhone(adminManager.currentEditingPhone);
@@ -1901,6 +2080,10 @@ document.addEventListener('change', function(e) {
     if (e.target.matches('.storage-checkboxes input[type="checkbox"]')) {
         updateStoragePrices();
     }
+    // Update selected colors display when color dropdown changes
+    if (e.target.id === 'phoneColorsSelect') {
+        updateSelectedColorsList();
+    }
 });
 
 function savePhone() {
@@ -1913,9 +2096,11 @@ function savePhone() {
     const brand = document.getElementById('phoneBrand').value;
     const model = document.getElementById('phoneModel').value;
     const imageUrl = document.getElementById('phoneImageUrl').value;
-    const basePrice = document.getElementById('phoneBasePrice').value;
-    const colors = document.getElementById('phoneColors').value;
-    
+
+    // Get colors from dropdown
+    const colorSelect = document.getElementById('phoneColorsSelect');
+    const colors = colorSelect ? Array.from(colorSelect.selectedOptions).map(opt => opt.value) : [];
+
     const checkedStorages = Array.from(document.querySelectorAll('.storage-checkboxes input:checked'))
         .map(cb => cb.value);
 
@@ -1927,10 +2112,21 @@ function savePhone() {
         }
     });
 
-    if (!brand || !model || !basePrice || checkedStorages.length === 0) {
-        alert('Please fill in all required fields');
+    // Validate required fields
+    if (!brand || !model || checkedStorages.length === 0) {
+        alert('Please fill in all required fields (Brand, Model, and at least one Storage option with price)');
         return;
     }
+
+    // Validate that all storage prices are set
+    const missingPrices = checkedStorages.filter(storage => !storagePrices[storage] || storagePrices[storage] <= 0);
+    if (missingPrices.length > 0) {
+        alert(`Please set base prices for: ${missingPrices.join(', ')}`);
+        return;
+    }
+
+    // Calculate basePrice as the minimum storage price (for backwards compatibility)
+    const basePrice = Math.min(...Object.values(storagePrices));
 
     // Get display toggle for refurbishment page
     const displayCheckbox = document.getElementById('phoneDisplay');
@@ -1974,8 +2170,8 @@ function savePhone() {
         model,
         image: imageUrl || adminManager.getDefaultImage(brand),
         storages: checkedStorages,
-        colors: colors ? colors.split(',').map(c => c.trim()) : [],
-        basePrice: parseFloat(basePrice) || 0,
+        colors: colors, // Already an array from dropdown
+        basePrice: basePrice, // Calculated from minimum storage price
         storagePrices: storagePrices,
         display: display, // For refurbishment/buy page visibility
         buyPrices: buyPrices, // For REFURBISHED PHONE SALES (not buyback)
