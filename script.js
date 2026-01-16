@@ -905,29 +905,66 @@ document.addEventListener('DOMContentLoaded', function() {
     deviceCards.forEach(card => {
         // Skip if already has onclick
         if (card.onclick) return;
-        
+
         card.style.cursor = 'pointer';
-        
+
         card.addEventListener('click', function(e) {
             // Don't trigger if clicking a button inside
             if (e.target.tagName === 'BUTTON') return;
-            
+
             // Get the model name from h4
             const modelName = this.querySelector('h4')?.textContent?.trim();
             if (!modelName) return;
-            
+
             // Determine brand
             let brand = 'Apple';
-            if (modelName.toLowerCase().includes('galaxy') || 
+            if (modelName.toLowerCase().includes('galaxy') ||
                 modelName.toLowerCase().includes('samsung') ||
                 modelName.toLowerCase().includes('note')) {
                 brand = 'Samsung';
             }
-            
+
             // Navigate to quote page
             window.location.href = `quote.html?brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(modelName)}`;
         });
     });
-    
+
     console.log(`Added click handlers to ${deviceCards.length} device cards`);
+
+    // ============================================================================
+    // MOBILE MENU TOGGLE
+    // ============================================================================
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const navLinks = document.getElementById('navLinks');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    if (hamburgerMenu && navLinks && mobileOverlay) {
+        // Toggle menu when hamburger is clicked
+        hamburgerMenu.addEventListener('click', function() {
+            hamburgerMenu.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            mobileOverlay.classList.toggle('active');
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+        });
+
+        // Close menu when overlay is clicked
+        mobileOverlay.addEventListener('click', function() {
+            hamburgerMenu.classList.remove('active');
+            navLinks.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // Close menu when a nav link is clicked
+        const allNavLinks = navLinks.querySelectorAll('a');
+        allNavLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                hamburgerMenu.classList.remove('active');
+                navLinks.classList.remove('active');
+                mobileOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
 });

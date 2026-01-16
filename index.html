@@ -18,7 +18,12 @@
                 <img src="images/ibox-logo.png" alt="IBOX MOBILE SINGAPORE" class="logo-img" onerror="this.src='images/ibox-logo.svg';" style="display: block;">
                 <span class="logo-text" style="display: flex;">IBox Mobile Singapore</span>
             </a>
-            <ul class="nav-links">
+            <div class="hamburger-menu" id="hamburgerMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-links" id="navLinks">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle">Sell Phones <span style="font-size: 0.7rem;">▼</span></a>
                     <ul class="dropdown-menu" style="position: absolute; top: 100%; left: 0; background: white; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; padding: 0.5rem 0; margin-top: 0.5rem; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 1000;">
@@ -34,6 +39,7 @@
                 </li>
             </ul>
         </nav>
+        <div class="mobile-overlay" id="mobileOverlay"></div>
     </header>
 
     <main>
