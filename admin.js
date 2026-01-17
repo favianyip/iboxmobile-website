@@ -37,6 +37,7 @@ class AdminDataManager {
     migratePhoneData(phones) {
         console.log('🔄 Running phone data migration...');
         let migrated = 0;
+        let recalculated = 0;
         let backupCreated = false;
 
         phones.forEach(phone => {
@@ -48,24 +49,33 @@ class AdminDataManager {
                 needsUpdate = true;
             }
 
-            // Calculate newPhonePrices from storagePrices if empty
-            if (phone.storagePrices && Object.keys(phone.newPhonePrices).length === 0) {
+            // Check each storage option and recalculate if incorrect
+            if (phone.storagePrices && phone.storages) {
                 phone.storages.forEach(storage => {
                     const usedPrice = phone.storagePrices[storage] || phone.basePrice || 0;
-                    phone.newPhonePrices[storage] = Math.round(usedPrice * 1.15);
+                    const expectedNewPrice = Math.round(usedPrice * 1.15);
+                    const currentNewPrice = phone.newPhonePrices[storage];
+
+                    // Recalculate if missing OR incorrect
+                    if (!currentNewPrice || currentNewPrice !== expectedNewPrice) {
+                        // Create backup before first modification
+                        if (!backupCreated) {
+                            const backup = localStorage.getItem('ktmobile_phones');
+                            localStorage.setItem('ktmobile_phones_backup', backup);
+                            backupCreated = true;
+                            console.log('📦 Backup created: ktmobile_phones_backup');
+                        }
+
+                        phone.newPhonePrices[storage] = expectedNewPrice;
+                        needsUpdate = true;
+                        recalculated++;
+
+                        console.log(`🔧 Fixed ${phone.brand} ${phone.model} ${storage}: Used=$${usedPrice} → New=$${expectedNewPrice} (was: $${currentNewPrice || 'missing'})`);
+                    }
                 });
-                needsUpdate = true;
             }
 
             if (needsUpdate) {
-                // Create backup before first migration
-                if (!backupCreated) {
-                    const backup = localStorage.getItem('ktmobile_phones');
-                    localStorage.setItem('ktmobile_phones_backup', backup);
-                    backupCreated = true;
-                    console.log('📦 Backup created: ktmobile_phones_backup');
-                }
-
                 phone.updatedAt = new Date().toISOString();
                 migrated++;
             }
@@ -73,10 +83,10 @@ class AdminDataManager {
 
         if (migrated > 0) {
             localStorage.setItem('ktmobile_phones', JSON.stringify(phones));
-            console.log(`✅ Migrated ${migrated} phones to add newPhonePrices`);
+            console.log(`✅ Migration complete: ${migrated} phones updated, ${recalculated} prices recalculated`);
             console.log(`💡 To rollback: localStorage.setItem('ktmobile_phones', localStorage.getItem('ktmobile_phones_backup'))`);
         } else {
-            console.log('✅ All phones already have newPhonePrices - no migration needed');
+            console.log('✅ No migration needed - all prices correct');
         }
 
         return migrated;
@@ -4468,6 +4478,69 @@ async function runBulkImport() {
     }
 }
 
+// ============================================
+// MODAL PRICE TYPE TOGGLE (USED vs NEW)
+// ============================================
+
+function switchModalPriceType(type) {
+    const usedToggle = document.getElementById('modalUsedToggle');
+    const newToggle = document.getElementById('modalNewToggle');
+    const usedSection = document.querySelector('.modal-used-section');
+    const newSection = document.querySelector('.modal-new-section');
+
+    if (type === 'used') {
+        // Switch to Used prices
+        usedToggle.classList.add('active');
+        newToggle.classList.remove('active');
+        usedToggle.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+        usedToggle.style.color = 'white';
+        usedToggle.style.boxShadow = '0 2px 8px rgba(201, 168, 76, 0.3)';
+        newToggle.style.background = '#e9ecef';
+        newToggle.style.color = '#666';
+        newToggle.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+
+        if (usedSection) usedSection.style.display = 'block';
+        if (newSection) newSection.style.display = 'none';
+    } else {
+        // Switch to New prices
+        newToggle.classList.add('active');
+        usedToggle.classList.remove('active');
+        newToggle.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+        newToggle.style.color = 'white';
+        newToggle.style.boxShadow = '0 2px 8px rgba(201, 168, 76, 0.3)';
+        usedToggle.style.background = '#e9ecef';
+        usedToggle.style.color = '#666';
+        usedToggle.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+
+        if (usedSection) usedSection.style.display = 'none';
+        if (newSection) newSection.style.display = 'block';
+    }
+}
+
+function recalculateModalNewPrices() {
+    const checkedStorages = Array.from(document.querySelectorAll('.storage-checkboxes input:checked'))
+        .map(cb => cb.value);
+
+    let recalculated = 0;
+    checkedStorages.forEach(storage => {
+        const usedInput = document.querySelector(`.storage-price-input[data-storage="${storage}"]`);
+        const newInput = document.querySelector(`.new-price-input[data-storage="${storage}"]`);
+
+        if (usedInput && newInput) {
+            const usedPrice = parseFloat(usedInput.value) || 0;
+            const calculatedNewPrice = Math.round(usedPrice * 1.15);
+            newInput.value = calculatedNewPrice;
+            recalculated++;
+        }
+    });
+
+    if (recalculated > 0) {
+        showNotification(`✅ Recalculated ${recalculated} new phone prices from used prices`, 'success');
+    } else {
+        showNotification('⚠️ No prices to recalculate. Please select storage options and set used prices first.', 'warning');
+    }
+}
+
 // Make functions globally available
 window.switchPriceConditionType = switchPriceConditionType;
 window.openBulkUpdateModal = openBulkUpdateModal;
@@ -4477,3 +4550,5 @@ window.showImportModal = showImportModal;
 window.closeImportModal = closeImportModal;
 window.runBulkImport = runBulkImport;
 window.currentPriceType = currentPriceType;
+window.switchModalPriceType = switchModalPriceType;
+window.recalculateModalNewPrices = recalculateModalNewPrices;
