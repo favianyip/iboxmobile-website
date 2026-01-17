@@ -1,0 +1,221 @@
+Brand,Model,Storage,Used Price (SGD),New Price (SGD),Colors,Image Path
+Apple,iPhone 17 Pro Max Orange,256GB,1520,1720,Orange,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Orange,512GB,1750,2000,Orange,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Orange,1TB,1920,2170,Orange,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Orange,2TB,2070,2420,Orange,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Silver,256GB,1520,1730,Silver,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Silver,512GB,1750,1960,Silver,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Silver,1TB,1920,2220,Silver,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Silver,2TB,2070,2450,Silver,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Blue,256GB,1520,1710,Blue,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Blue,512GB,1750,1950,Blue,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Blue,1TB,1920,2230,Blue,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Max Blue,2TB,2070,2360,Blue,images/phones/iphone-17-pro-max.jpg
+Apple,iPhone 17 Pro Blue,256GB,1350,1600,Blue,images/phones/iphone-17-pro.jpg
+Apple,iPhone 17 Pro Blue,512GB,1550,1750,Blue,images/phones/iphone-17-pro.jpg
+Apple,iPhone 17 Pro Blue,1TB,1750,1950,Blue,images/phones/iphone-17-pro.jpg
+Apple,iPhone 17 Air,256GB,900,1050,,images/phones/iphone-17-air.jpg
+Apple,iPhone 17 Air,512GB,1000,1220,,images/phones/iphone-17-air.jpg
+Apple,iPhone 17 Air,1TB,1100,1320,,images/phones/iphone-17-air.jpg
+Apple,iPhone 17,256GB,900,1200,,images/phones/iphone-17.jpg
+Apple,iPhone 17,512GB,1150,1450,,images/phones/iphone-17.jpg
+Apple,iPhone 16e,128GB,520,660,,images/phones/iphone-16e.jpg
+Apple,iPhone 16e,256GB,620,770,,images/phones/iphone-16e.jpg
+Apple,iPhone 16e,512GB,720,870,,images/phones/iphone-16e.jpg
+Apple,iPhone 16,128GB,670,920,,images/phones/iphone-16.jpg
+Apple,iPhone 16,256GB,720,1020,,images/phones/iphone-16.jpg
+Apple,iPhone 16,512GB,770,1000,,images/phones/iphone-16.jpg
+Apple,iPhone 16 Plus,128GB,750,1050,,images/phones/iphone-16-plus.jpg
+Apple,iPhone 16 Plus,256GB,850,1150,,images/phones/iphone-16-plus.jpg
+Apple,iPhone 16 Plus,512GB,850,1150,,images/phones/iphone-16-plus.jpg
+Apple,iPhone 16 Pro,128GB,870,1300,,images/phones/iphone-16-pro.jpg
+Apple,iPhone 16 Pro,256GB,970,1500,,images/phones/iphone-16-pro.jpg
+Apple,iPhone 16 Pro,512GB,970,1500,,images/phones/iphone-16-pro.jpg
+Apple,iPhone 16 Pro,1TB,1020,1300,,images/phones/iphone-16-pro.jpg
+Apple,iPhone 16 Pro Max,256GB,1100,1630,,images/phones/iphone-16-pro-max.jpg
+Apple,iPhone 16 Pro Max,512GB,1100,1630,,images/phones/iphone-16-pro-max.jpg
+Apple,iPhone 16 Pro Max,1TB,1150,1630,,images/phones/iphone-16-pro-max.jpg
+Apple,iPhone 15,128GB,500,575,,images/phones/iphone-15.jpg
+Apple,iPhone 15,256GB,550,633,,images/phones/iphone-15.jpg
+Apple,iPhone 15,512GB,600,690,,images/phones/iphone-15.jpg
+Apple,iPhone 15 Plus,128GB,550,633,,images/phones/iphone-15-plus.jpg
+Apple,iPhone 15 Plus,256GB,600,690,,images/phones/iphone-15-plus.jpg
+Apple,iPhone 15 Plus,512GB,650,748,,images/phones/iphone-15-plus.jpg
+Apple,iPhone 15 Pro,128GB,600,690,,images/phones/iphone-15-pro.jpg
+Apple,iPhone 15 Pro,256GB,660,759,,images/phones/iphone-15-pro.jpg
+Apple,iPhone 15 Pro,512GB,750,863,,images/phones/iphone-15-pro.jpg
+Apple,iPhone 15 Pro,1TB,800,920,,images/phones/iphone-15-pro.jpg
+Apple,iPhone 15 Pro Max,256GB,800,920,,images/phones/iphone-15-pro-max.jpg
+Apple,iPhone 15 Pro Max,512GB,850,978,,images/phones/iphone-15-pro-max.jpg
+Apple,iPhone 15 Pro Max,1TB,900,1035,,images/phones/iphone-15-pro-max.jpg
+Apple,iPhone 14,128GB,350,403,,images/phones/iphone-14.jpg
+Apple,iPhone 14,256GB,400,460,,images/phones/iphone-14.jpg
+Apple,iPhone 14,512GB,450,518,,images/phones/iphone-14.jpg
+Apple,iPhone 14 Plus,128GB,420,483,,images/phones/iphone-14-plus.jpg
+Apple,iPhone 14 Plus,256GB,470,541,,images/phones/iphone-14-plus.jpg
+Apple,iPhone 14 Plus,512GB,520,598,,images/phones/iphone-14-plus.jpg
+Apple,iPhone 14 Pro,128GB,500,575,,images/phones/iphone-14-pro.jpg
+Apple,iPhone 14 Pro,256GB,550,633,,images/phones/iphone-14-pro.jpg
+Apple,iPhone 14 Pro,512GB,600,690,,images/phones/iphone-14-pro.jpg
+Apple,iPhone 14 Pro,1TB,650,748,,images/phones/iphone-14-pro.jpg
+Apple,iPhone 14 Pro Max,128GB,600,690,,images/phones/iphone-14-pro-max.jpg
+Apple,iPhone 14 Pro Max,256GB,650,748,,images/phones/iphone-14-pro-max.jpg
+Apple,iPhone 14 Pro Max,512GB,700,805,,images/phones/iphone-14-pro-max.jpg
+Apple,iPhone 14 Pro Max,1TB,750,863,,images/phones/iphone-14-pro-max.jpg
+Apple,iPhone 13 mini,128GB,250,288,,images/phones/iphone-13-mini.jpg
+Apple,iPhone 13 mini,256GB,300,345,,images/phones/iphone-13-mini.jpg
+Apple,iPhone 13 mini,512GB,350,403,,images/phones/iphone-13-mini.jpg
+Apple,iPhone 13,128GB,300,345,,images/phones/iphone-13.jpg
+Apple,iPhone 13,256GB,350,403,,images/phones/iphone-13.jpg
+Apple,iPhone 13,512GB,400,460,,images/phones/iphone-13.jpg
+Apple,iPhone 13 Pro,128GB,380,437,,images/phones/iphone-13-pro.jpg
+Apple,iPhone 13 Pro,256GB,430,495,,images/phones/iphone-13-pro.jpg
+Apple,iPhone 13 Pro,512GB,480,552,,images/phones/iphone-13-pro.jpg
+Apple,iPhone 13 Pro,1TB,530,610,,images/phones/iphone-13-pro.jpg
+Apple,iPhone 13 Pro Max,128GB,460,529,,images/phones/iphone-13-pro-max.jpg
+Apple,iPhone 13 Pro Max,256GB,510,587,,images/phones/iphone-13-pro-max.jpg
+Apple,iPhone 13 Pro Max,512GB,560,644,,images/phones/iphone-13-pro-max.jpg
+Apple,iPhone 13 Pro Max,1TB,610,702,,images/phones/iphone-13-pro-max.jpg
+Apple,iPhone 12 mini,64GB,120,138,,images/phones/iphone-12-mini.jpg
+Apple,iPhone 12 mini,128GB,150,173,,images/phones/iphone-12-mini.jpg
+Apple,iPhone 12 mini,256GB,180,207,,images/phones/iphone-12-mini.jpg
+Apple,iPhone 12,64GB,200,230,,images/phones/iphone-12.jpg
+Apple,iPhone 12,128GB,250,288,,images/phones/iphone-12.jpg
+Apple,iPhone 12,256GB,300,345,,images/phones/iphone-12.jpg
+Apple,iPhone 12 Pro,128GB,300,345,,images/phones/iphone-12-pro.jpg
+Apple,iPhone 12 Pro,256GB,350,403,,images/phones/iphone-12-pro.jpg
+Apple,iPhone 12 Pro,512GB,400,460,,images/phones/iphone-12-pro.jpg
+Apple,iPhone 12 Pro Max,128GB,350,403,,images/phones/iphone-12-pro-max.jpg
+Apple,iPhone 12 Pro Max,256GB,400,460,,images/phones/iphone-12-pro-max.jpg
+Apple,iPhone 12 Pro Max,512GB,450,518,,images/phones/iphone-12-pro-max.jpg
+Apple,iPhone 11,64GB,120,138,,images/phones/iphone-11.jpg
+Apple,iPhone 11,128GB,160,184,,images/phones/iphone-11.jpg
+Apple,iPhone 11,256GB,200,230,,images/phones/iphone-11.jpg
+Apple,iPhone 11 Pro,64GB,170,196,,images/phones/iphone-11-pro.jpg
+Apple,iPhone 11 Pro,256GB,220,253,,images/phones/iphone-11-pro.jpg
+Apple,iPhone 11 Pro,512GB,250,288,,images/phones/iphone-11-pro.jpg
+Apple,iPhone 11 Pro Max,64GB,220,253,,images/phones/iphone-11-pro-max.jpg
+Apple,iPhone 11 Pro Max,256GB,260,299,,images/phones/iphone-11-pro-max.jpg
+Apple,iPhone 11 Pro Max,512GB,300,345,,images/phones/iphone-11-pro-max.jpg
+Apple,iPhone SE 2022,64GB,120,138,,images/phones/iphone-se-2022.jpg
+Apple,iPhone SE 2022,128GB,170,196,,images/phones/iphone-se-2022.jpg
+Apple,iPhone SE 2022,256GB,220,253,,images/phones/iphone-se-2022.jpg
+Apple,iPhone XS,64GB,70,81,,images/phones/iphone-xs.jpg
+Apple,iPhone XS,256GB,100,115,,images/phones/iphone-xs.jpg
+Apple,iPhone XS,512GB,130,150,,images/phones/iphone-xs.jpg
+Apple,iPhone XS Max,64GB,120,138,,images/phones/iphone-xs-max.jpg
+Apple,iPhone XS Max,256GB,150,173,,images/phones/iphone-xs-max.jpg
+Apple,iPhone XS Max,512GB,180,207,,images/phones/iphone-xs-max.jpg
+Apple,iPhone XR,64GB,50,58,,images/phones/iphone-xr.jpg
+Apple,iPhone XR,128GB,80,92,,images/phones/iphone-xr.jpg
+Apple,iPhone XR,256GB,110,127,,images/phones/iphone-xr.jpg
+Apple,iPad 11th (2025) WiFi,128GB,250,380,,images/phones/ipad-11.jpg
+Apple,iPad 11th (2025) WiFi,256GB,380,470,,images/phones/ipad-11.jpg
+Apple,iPad 11th (2025) Cellular,128GB,380,520,,images/phones/ipad-11.jpg
+Apple,iPad 11th (2025) Cellular,256GB,480,620,,images/phones/ipad-11.jpg
+Apple,iPad 10th (2022) WiFi,64GB,130,320,,images/phones/ipad-10.jpg
+Apple,iPad 10th (2022) WiFi,256GB,180,370,,images/phones/ipad-10.jpg
+Apple,iPad 10th (2022) Cellular,64GB,180,370,,images/phones/ipad-10.jpg
+Apple,iPad 10th (2022) Cellular,256GB,230,420,,images/phones/ipad-10.jpg
+Apple,iPad 9th (2021) WiFi,64GB,80,92,,images/phones/ipad-9.jpg
+Apple,iPad 9th (2021) WiFi,256GB,120,138,,images/phones/ipad-9.jpg
+Apple,iPad 9th (2021) Cellular,64GB,130,150,,images/phones/ipad-9.jpg
+Apple,iPad 9th (2021) Cellular,256GB,180,207,,images/phones/ipad-9.jpg
+Apple,iPad Pro 13 M5 (2025) WiFi,256GB,1120,1470,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 13 M5 (2025) WiFi,512GB,1220,1670,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 13 M5 (2025) WiFi,1TB,1320,1920,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 13 M5 (2025) WiFi,2TB,1420,2020,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 13 M5 (2025) Cellular,256GB,1220,1570,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 13 M5 (2025) Cellular,512GB,1320,1770,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 13 M5 (2025) Cellular,1TB,1420,2020,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 13 M5 (2025) Cellular,2TB,1520,2120,,images/phones/ipad-pro-13-m5.jpg
+Apple,iPad Pro 11 M5 (2025) WiFi,256GB,820,1180,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 11 M5 (2025) WiFi,512GB,920,1370,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 11 M5 (2025) WiFi,1TB,1020,1570,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 11 M5 (2025) WiFi,2TB,1120,1770,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 11 M5 (2025) Cellular,256GB,920,1370,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 11 M5 (2025) Cellular,512GB,1020,1570,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 11 M5 (2025) Cellular,1TB,1120,1770,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 11 M5 (2025) Cellular,2TB,1220,1970,,images/phones/ipad-pro-11-m5.jpg
+Apple,iPad Pro 12.9 (2022) WiFi,128GB,650,748,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) WiFi,256GB,700,805,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) WiFi,512GB,750,863,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) WiFi,1TB,800,920,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) WiFi,2TB,850,978,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) Cellular,128GB,700,805,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) Cellular,256GB,750,863,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) Cellular,512GB,800,920,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) Cellular,1TB,850,978,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2022) Cellular,2TB,900,1035,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) WiFi,128GB,450,518,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) WiFi,256GB,500,575,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) WiFi,512GB,550,633,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) WiFi,1TB,600,690,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) WiFi,2TB,650,748,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) Cellular,128GB,500,575,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) Cellular,256GB,550,633,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) Cellular,512GB,600,690,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) Cellular,1TB,650,748,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Pro 12.9 (2021) Cellular,2TB,700,805,,images/phones/ipad-pro-12-9.jpg
+Apple,iPad Air 6 13 M3 (2025) WiFi,128GB,670,870,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 13 M3 (2025) WiFi,256GB,770,970,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 13 M3 (2025) WiFi,512GB,970,1170,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 13 M3 (2025) WiFi,1TB,1070,1320,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 13 M3 (2025) Cellular,128GB,830,1080,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 13 M3 (2025) Cellular,256GB,950,1200,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 13 M3 (2025) Cellular,512GB,1050,1350,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 13 M3 (2025) Cellular,1TB,1150,1500,,images/phones/ipad-air-13.jpg
+Apple,iPad Air 6 11 M3 (2025) WiFi,128GB,420,600,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 6 11 M3 (2025) WiFi,256GB,570,770,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 6 11 M3 (2025) WiFi,512GB,670,870,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 6 11 M3 (2025) WiFi,1TB,770,970,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 6 11 M3 (2025) Cellular,128GB,650,800,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 6 11 M3 (2025) Cellular,256GB,750,950,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 6 11 M3 (2025) Cellular,512GB,850,1050,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 6 11 M3 (2025) Cellular,1TB,950,1150,,images/phones/ipad-air-11.jpg
+Apple,iPad Air 5 WiFi,64GB,300,345,,images/phones/ipad-air-5.jpg
+Apple,iPad Air 5 WiFi,256GB,350,403,,images/phones/ipad-air-5.jpg
+Apple,iPad Air 5 Cellular,64GB,350,403,,images/phones/ipad-air-5.jpg
+Apple,iPad Air 5 Cellular,256GB,400,460,,images/phones/ipad-air-5.jpg
+Apple,iPad Air 4 WiFi,64GB,150,173,,images/phones/ipad-air-4.jpg
+Apple,iPad Air 4 WiFi,256GB,200,230,,images/phones/ipad-air-4.jpg
+Apple,iPad Air 4 Cellular,64GB,200,230,,images/phones/ipad-air-4.jpg
+Apple,iPad Air 4 Cellular,256GB,250,288,,images/phones/ipad-air-4.jpg
+Apple,iPad Mini 7 WiFi,128GB,370,520,,images/phones/ipad-mini-7.jpg
+Apple,iPad Mini 7 WiFi,256GB,470,620,,images/phones/ipad-mini-7.jpg
+Apple,iPad Mini 7 WiFi,512GB,570,750,,images/phones/ipad-mini-7.jpg
+Apple,iPad Mini 7 Cellular,128GB,470,650,,images/phones/ipad-mini-7.jpg
+Apple,iPad Mini 7 Cellular,256GB,570,770,,images/phones/ipad-mini-7.jpg
+Apple,iPad Mini 7 Cellular,512GB,670,900,,images/phones/ipad-mini-7.jpg
+Apple,iPad Mini 6 WiFi,64GB,250,288,,images/phones/ipad-mini-6.jpg
+Apple,iPad Mini 6 WiFi,256GB,300,345,,images/phones/ipad-mini-6.jpg
+Apple,iPad Mini 6 Cellular,64GB,300,345,,images/phones/ipad-mini-6.jpg
+Apple,iPad Mini 6 Cellular,256GB,400,460,,images/phones/ipad-mini-6.jpg
+Apple,iPad Mini 5 WiFi,64GB,130,150,,images/phones/ipad-mini-5.jpg
+Apple,iPad Mini 5 WiFi,256GB,170,196,,images/phones/ipad-mini-5.jpg
+Apple,iPad Mini 5 Cellular,64GB,210,242,,images/phones/ipad-mini-5.jpg
+Apple,iPad Mini 5 Cellular,256GB,250,288,,images/phones/ipad-mini-5.jpg
+Apple,Apple Watch Ultra 3,49mm,820,1020,,images/phones/apple-watch-ultra-3.jpg
+Apple,Apple Watch Ultra 2,49mm,520,598,,images/phones/apple-watch-ultra-2.jpg
+Apple,Apple Watch Ultra,49mm,320,368,,images/phones/apple-watch-ultra.jpg
+Apple,Apple Watch Series 11 GPS 42mm,42mm,300,450,,images/phones/apple-watch-series-11.jpg
+Apple,Apple Watch Series 11 GPS 46mm,46mm,350,500,,images/phones/apple-watch-series-11.jpg
+Apple,Apple Watch Series 11 Cellular 42mm,42mm,350,500,,images/phones/apple-watch-series-11.jpg
+Apple,Apple Watch Series 11 Cellular 46mm,46mm,400,550,,images/phones/apple-watch-series-11.jpg
+Apple,Apple Watch Series 10 GPS 42mm,42mm,220,253,,images/phones/apple-watch-series-10.jpg
+Apple,Apple Watch Series 10 GPS 46mm,46mm,270,311,,images/phones/apple-watch-series-10.jpg
+Apple,Apple Watch Series 10 Cellular 42mm,42mm,270,311,,images/phones/apple-watch-series-10.jpg
+Apple,Apple Watch Series 10 Cellular 46mm,46mm,320,368,,images/phones/apple-watch-series-10.jpg
+Apple,Apple Watch Series 9 GPS 41mm,41mm,120,138,,images/phones/apple-watch-series-9.jpg
+Apple,Apple Watch Series 9 GPS 45mm,45mm,170,196,,images/phones/apple-watch-series-9.jpg
+Apple,Apple Watch Series 9 Cellular 41mm,41mm,170,196,,images/phones/apple-watch-series-9.jpg
+Apple,Apple Watch Series 9 Cellular 45mm,45mm,220,253,,images/phones/apple-watch-series-9.jpg
+Apple,Apple Watch SE 3 GPS 40mm,40mm,80,210,,images/phones/apple-watch-se-3.jpg
+Apple,Apple Watch SE 3 GPS 44mm,44mm,120,250,,images/phones/apple-watch-se-3.jpg
+Apple,Apple Watch SE 3 Cellular 40mm,40mm,120,250,,images/phones/apple-watch-se-3.jpg
+Apple,Apple Watch SE 3 Cellular 44mm,44mm,150,290,,images/phones/apple-watch-se-3.jpg
+Apple,AirPods Pro 3,Standard,150,280,,images/phones/airpods-pro-3.jpg
+Apple,AirPods Pro 2 (USB-C),Standard,90,200,,images/phones/airpods-pro-2.jpg
+Apple,AirPods 4,Standard,70,120,,images/phones/airpods-4.jpg
+Apple,AirPods 4 (ANC),Standard,100,170,,images/phones/airpods-4-anc.jpg
+Apple,AirPods Max (USB-C),Standard,320,368,,images/phones/airpods-max.jpg
