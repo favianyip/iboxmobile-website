@@ -826,7 +826,17 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="background: rgba(201, 168, 76, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.2);">
+                <!-- Used/New Toggle for Edit Modal -->
+                <div style="display: flex; justify-content: center; gap: 1rem; margin: 1.5rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <button type="button" class="modal-price-type-btn active" id="modalUsedToggle" onclick="switchModalPriceType('used')" style="padding: 0.75rem 2rem; border: none; background: linear-gradient(135deg, #C9A84C 0%, #B8973B 100%); color: white; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3); transition: all 0.3s ease;">
+                        📱 Used Phone Prices
+                    </button>
+                    <button type="button" class="modal-price-type-btn" id="modalNewToggle" onclick="switchModalPriceType('new')" style="padding: 0.75rem 2rem; border: none; background: #e9ecef; color: #666; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;">
+                        📦 New Phone Prices
+                    </button>
+                </div>
+
+                <div class="form-group modal-used-section" style="background: rgba(201, 168, 76, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.2);">
                     <label style="color: var(--gold); font-weight: 700;">💰 Storage Base Prices (SGD) *</label>
                     <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
                         Set the base buyback price for each storage option. These are the USED phone prices.
@@ -836,11 +846,14 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="background: rgba(201, 168, 76, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.2);">
+                <div class="form-group modal-new-section" style="background: rgba(201, 168, 76, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.2); display: none;">
                     <label style="color: var(--gold); font-weight: 700;">📦 New Phone Prices (SGD)</label>
                     <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
                         Set prices for brand new sealed phones. Leave empty to auto-calculate as Used × 1.15.
                     </p>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="recalculateModalNewPrices()" style="margin-bottom: 1rem;">
+                        🔄 Recalculate from Used Prices
+                    </button>
                     <div class="new-phone-prices" id="newPhonePrices">
                         <!-- Dynamic new phone price inputs -->
                     </div>
