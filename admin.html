@@ -824,10 +824,20 @@
                 <div class="form-group" style="background: rgba(201, 168, 76, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.2);">
                     <label style="color: var(--gold); font-weight: 700;">💰 Storage Base Prices (SGD) *</label>
                     <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
-                        Set the base buyback price for each storage option. These are the primary prices used for quotes.
+                        Set the base buyback price for each storage option. These are the USED phone prices.
                     </p>
                     <div class="storage-prices" id="storagePrices">
                         <!-- Dynamic storage price inputs -->
+                    </div>
+                </div>
+
+                <div class="form-group" style="background: rgba(201, 168, 76, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.2);">
+                    <label style="color: var(--gold); font-weight: 700;">📦 New Phone Prices (SGD)</label>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
+                        Set prices for brand new sealed phones. Leave empty to auto-calculate as Used × 1.15.
+                    </p>
+                    <div class="new-phone-prices" id="newPhonePrices">
+                        <!-- Dynamic new phone price inputs -->
                     </div>
                 </div>
 
