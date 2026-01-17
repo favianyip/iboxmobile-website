@@ -20,11 +20,66 @@ class AdminDataManager {
     loadPhones() {
         const stored = localStorage.getItem('ktmobile_phones');
         if (stored) {
-            return JSON.parse(stored);
+            const phones = JSON.parse(stored);
+            // Run migration to add missing fields
+            this.migratePhoneData(phones);
+            return phones;
         }
-        
+
         // Initialize from existing quote.js data structure
         return this.initializePhones();
+    }
+
+    /**
+     * Migrate phone data to add missing newPhonePrices field
+     * Runs automatically on load to ensure all phones have required fields
+     */
+    migratePhoneData(phones) {
+        console.log('🔄 Running phone data migration...');
+        let migrated = 0;
+        let backupCreated = false;
+
+        phones.forEach(phone => {
+            let needsUpdate = false;
+
+            // Add newPhonePrices if missing
+            if (!phone.newPhonePrices) {
+                phone.newPhonePrices = {};
+                needsUpdate = true;
+            }
+
+            // Calculate newPhonePrices from storagePrices if empty
+            if (phone.storagePrices && Object.keys(phone.newPhonePrices).length === 0) {
+                phone.storages.forEach(storage => {
+                    const usedPrice = phone.storagePrices[storage] || phone.basePrice || 0;
+                    phone.newPhonePrices[storage] = Math.round(usedPrice * 1.15);
+                });
+                needsUpdate = true;
+            }
+
+            if (needsUpdate) {
+                // Create backup before first migration
+                if (!backupCreated) {
+                    const backup = localStorage.getItem('ktmobile_phones');
+                    localStorage.setItem('ktmobile_phones_backup', backup);
+                    backupCreated = true;
+                    console.log('📦 Backup created: ktmobile_phones_backup');
+                }
+
+                phone.updatedAt = new Date().toISOString();
+                migrated++;
+            }
+        });
+
+        if (migrated > 0) {
+            localStorage.setItem('ktmobile_phones', JSON.stringify(phones));
+            console.log(`✅ Migrated ${migrated} phones to add newPhonePrices`);
+            console.log(`💡 To rollback: localStorage.setItem('ktmobile_phones', localStorage.getItem('ktmobile_phones_backup'))`);
+        } else {
+            console.log('✅ All phones already have newPhonePrices - no migration needed');
+        }
+
+        return migrated;
     }
 
     /**
@@ -77,6 +132,12 @@ class AdminDataManager {
                         };
                     });
                     
+                    // Calculate newPhonePrices (new sealed prices) as used * 1.15
+                    const newPhonePrices = {};
+                    Object.entries(storagePrices).forEach(([storage, usedPrice]) => {
+                        newPhonePrices[storage] = Math.round(usedPrice * 1.15);
+                    });
+
                     phones.push({
                         id: `${brand}-${model.replace(/\s+/g, '-')}-${Date.now()}`,
                         brand: brand,
@@ -85,7 +146,8 @@ class AdminDataManager {
                         storages: storages.length > 0 ? storages : ['128GB', '256GB'],
                         colors: data.colors ? data.colors.map(c => typeof c === 'string' ? c : c.name) : [],
                         basePrice: data.basePrice || 0,
-                        storagePrices: storagePrices,
+                        storagePrices: storagePrices,        // USED prices
+                        newPhonePrices: newPhonePrices,      // NEW SEALED prices
                         // Buy prices for refurbished phones
                         buyPrices: buyPrices,
                         quantities: quantities,
@@ -122,6 +184,7 @@ class AdminDataManager {
                 colors: ['Desert Titanium', 'Natural Titanium', 'White Titanium', 'Black Titanium'],
                 basePrice: 1800,
                 storagePrices: { '256GB': 1800, '512GB': 1900, '1TB': 2000 },
+                newPhonePrices: { '256GB': 2070, '512GB': 2185, '1TB': 2300 },
                 buyPrices: {
                     '256GB': { excellent: 1800, good: 1710, fair: 1530 },
                     '512GB': { excellent: 1900, good: 1805, fair: 1615 },
@@ -146,6 +209,7 @@ class AdminDataManager {
                 colors: ['Desert Titanium', 'Natural Titanium', 'White Titanium', 'Black Titanium'],
                 basePrice: 1600,
                 storagePrices: { '128GB': 1550, '256GB': 1600, '512GB': 1680, '1TB': 1750 },
+                newPhonePrices: { '128GB': 1783, '256GB': 1840, '512GB': 1932, '1TB': 2013 },
                 buyPrices: {
                     '128GB': { excellent: 1550, good: 1473, fair: 1318 },
                     '256GB': { excellent: 1600, good: 1520, fair: 1360 },
@@ -172,6 +236,7 @@ class AdminDataManager {
                 colors: ['Natural Titanium', 'Blue Titanium', 'White Titanium', 'Black Titanium'],
                 basePrice: 1500,
                 storagePrices: { '256GB': 1500, '512GB': 1600, '1TB': 1700 },
+                newPhonePrices: { '256GB': 1725, '512GB': 1840, '1TB': 1955 },
                 buyPrices: {
                     '256GB': { excellent: 1500, good: 1425, fair: 1275 },
                     '512GB': { excellent: 1600, good: 1520, fair: 1360 },
@@ -196,6 +261,7 @@ class AdminDataManager {
                 colors: ['Titanium Gray', 'Titanium Black', 'Titanium Violet', 'Titanium Yellow'],
                 basePrice: 1200,
                 storagePrices: { '256GB': 1200, '512GB': 1300, '1TB': 1400 },
+                newPhonePrices: { '256GB': 1380, '512GB': 1495, '1TB': 1610 },
                 buyPrices: {
                     '256GB': { excellent: 1200, good: 1140, fair: 1020 },
                     '512GB': { excellent: 1300, good: 1235, fair: 1105 },
@@ -220,6 +286,7 @@ class AdminDataManager {
                 colors: ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow'],
                 basePrice: 800,
                 storagePrices: { '128GB': 800, '256GB': 850 },
+                newPhonePrices: { '128GB': 920, '256GB': 978 },
                 buyPrices: {
                     '128GB': { excellent: 800, good: 760, fair: 680 },
                     '256GB': { excellent: 850, good: 808, fair: 723 }
@@ -4325,9 +4392,88 @@ function performBulkUpdate() {
     alert(`Successfully updated ${updatedCount} ${brand} ${condition} phone models by ${priceChange > 0 ? '+' : ''}$${priceChange}`);
 }
 
+// ============================================
+// PRICE IMPORT MODAL FUNCTIONS
+// ============================================
+
+function showImportModal() {
+    const modal = document.getElementById('importModal');
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+    }
+}
+
+function closeImportModal() {
+    const modal = document.getElementById('importModal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+}
+
+async function runBulkImport() {
+    try {
+        console.log('🚀 Starting bulk import...');
+
+        // Show loading indicator
+        const importButton = event.target;
+        const originalText = importButton.innerHTML;
+        importButton.innerHTML = '⏳ Importing...';
+        importButton.disabled = true;
+
+        // Fetch the bulk import script
+        const response = await fetch('bulk-import-apple-prices.js');
+        if (!response.ok) {
+            throw new Error(`Failed to load import script: ${response.status}`);
+        }
+
+        const scriptText = await response.text();
+        console.log('📥 Loaded bulk import script');
+
+        // Execute the script (this will define the importApplePrices function)
+        eval(scriptText);
+
+        // Run the import function if it exists
+        if (typeof importApplePrices === 'function') {
+            console.log('▶️ Running importApplePrices()...');
+            importApplePrices();
+
+            // Reload phone data from localStorage
+            adminManager.phones = adminManager.loadPhones();
+
+            // Refresh the UI
+            renderPhones();
+            renderPriceTable();
+
+            // Close modal
+            closeImportModal();
+
+            // Show success notification
+            alert('✅ Successfully imported Apple product prices!\n\nPlease check the phone models list to verify all products were imported correctly.');
+            console.log('✅ Import completed successfully');
+        } else {
+            throw new Error('importApplePrices function not found in script');
+        }
+
+    } catch (error) {
+        console.error('❌ Import failed:', error);
+        alert('Import failed: ' + error.message + '\n\nPlease check the browser console for more details.');
+
+        // Reset button
+        if (importButton) {
+            importButton.innerHTML = originalText;
+            importButton.disabled = false;
+        }
+    }
+}
+
 // Make functions globally available
 window.switchPriceConditionType = switchPriceConditionType;
 window.openBulkUpdateModal = openBulkUpdateModal;
 window.closeBulkUpdateModal = closeBulkUpdateModal;
 window.performBulkUpdate = performBulkUpdate;
+window.showImportModal = showImportModal;
+window.closeImportModal = closeImportModal;
+window.runBulkImport = runBulkImport;
 window.currentPriceType = currentPriceType;

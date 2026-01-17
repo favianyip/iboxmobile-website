@@ -105,9 +105,14 @@
                         </button>
                     </div>
 
-                    <button class="btn btn-primary" id="addPhoneBtn">
-                        <span>+</span> Add New Phone Model
-                    </button>
+                    <div class="header-actions" style="display: flex; gap: 1rem; justify-content: center;">
+                        <button class="btn btn-warning" onclick="showImportModal()" title="Import prices from bulk import or file">
+                            📥 Import Prices
+                        </button>
+                        <button class="btn btn-primary" id="addPhoneBtn">
+                            <span>+</span> Add New Phone Model
+                        </button>
+                    </div>
                 </div>
 
                 <div class="filters-bar">
@@ -1241,6 +1246,49 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeAppointmentDetailsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Prices Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>📥 Import Prices</h2>
+                <button class="modal-close" onclick="closeImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-options">
+                    <h3>Choose Import Method:</h3>
+
+                    <!-- Option 1: Bulk Import JS -->
+                    <div class="import-option" style="margin-bottom: 2rem; padding: 1.5rem; border: 2px solid var(--gold); border-radius: 8px;">
+                        <h4 style="color: var(--gold);">🚀 Quick Import - Apple Products (Recommended)</h4>
+                        <p>Import 90+ pre-configured Apple products with verified competitor prices</p>
+                        <button class="btn btn-primary" onclick="runBulkImport()" style="width: 100%;">
+                            Import Apple Products Now
+                        </button>
+                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
+                            Includes: iPhones, iPads, Apple Watch, AirPods with Used & New prices
+                        </p>
+                    </div>
+
+                    <!-- Option 2: Excel Upload (Coming Soon) -->
+                    <div class="import-option" style="padding: 1.5rem; border: 2px solid #6c757d; border-radius: 8px;">
+                        <h4>📊 Excel/CSV Import (Coming Soon)</h4>
+                        <p>Upload Excel file with custom price data</p>
+                        <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" disabled style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1rem;">
+                        <button class="btn btn-secondary" disabled style="width: 100%;">
+                            Upload Excel File
+                        </button>
+                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
+                            This feature will be available in next update
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
             </div>
         </div>
     </div>
