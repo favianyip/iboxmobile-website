@@ -1193,7 +1193,22 @@ function renderPhones() {
         if (phone.display === undefined) {
             phone.display = true;
         }
-        
+
+        // Get price based on currentBuybackType toggle
+        let displayPrice;
+        let priceLabel;
+        if (currentBuybackType === 'new') {
+            displayPrice = phone.newPhonePrices
+                ? Math.max(...Object.values(phone.newPhonePrices))
+                : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : (phone.basePrice || 0) * 1.15);
+            priceLabel = 'New Sealed';
+        } else {
+            displayPrice = phone.storagePrices
+                ? Math.max(...Object.values(phone.storagePrices))
+                : (phone.basePrice || 0);
+            priceLabel = 'Used';
+        }
+
         return `
         <div class="phone-card-admin">
             <div class="phone-card-header">
@@ -1211,7 +1226,7 @@ function renderPhones() {
             <div class="phone-card-info">
                 <h4>${phone.model}</h4>
                 <p><strong>Storage:</strong> ${phone.storages.join(', ') || 'N/A'}</p>
-                <p><strong>Base Price:</strong> SGD $${phone.basePrice}</p>
+                <p><strong>${priceLabel} Price:</strong> Up to SGD $${Math.round(displayPrice).toLocaleString()}</p>
                 <p><strong>Colors:</strong> ${phone.colors.length > 0 ? phone.colors.join(', ') : 'N/A'}</p>
                 <div class="display-toggle" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
@@ -1627,15 +1642,17 @@ function renderPriceTable() {
             : (phone.storagePrices ? Object.keys(phone.storagePrices) : ['128GB', '256GB']);
         
         return storages.map(storage => {
-            // Get price based on currentPriceType (used vs new)
+            // Get price based on currentPriceType toggle
             let price;
             if (currentPriceType === 'new') {
-                // For new phones, use newPhonePrices
+                // Show NEW phone prices
                 price = phone.newPhonePrices && phone.newPhonePrices[storage]
                     ? phone.newPhonePrices[storage]
-                    : 0;
+                    : (phone.storagePrices && phone.storagePrices[storage]
+                        ? Math.round(phone.storagePrices[storage] * 1.15)
+                        : Math.round((phone.basePrice || 0) * 1.15));
             } else {
-                // For used phones, use storagePrices or basePrice
+                // Show USED phone prices (default)
                 price = phone.storagePrices && phone.storagePrices[storage]
                     ? phone.storagePrices[storage]
                     : (phone.basePrice || 0);
@@ -1653,14 +1670,15 @@ function renderPriceTable() {
                                value="${price}"
                                data-phone-id="${phone.id}"
                                data-storage="${storage}"
-                               onchange="updatePrice('${phone.id}', '${storage}', this.value)"
+                               data-price-type="${currentPriceType}"
+                               onchange="updateSinglePrice(this)"
                                min="0"
                                step="10"
                                style="width: 120px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
                     </td>
                     <td>
                         <button class="btn btn-primary btn-sm"
-                                onclick="savePrice('${phone.id}', '${storage}')"
+                                onclick="saveSinglePrice('${phone.id}', '${storage}', '${currentPriceType}')"
                                 style="pointer-events: auto;">
                             Save
                         </button>
@@ -1673,6 +1691,33 @@ function renderPriceTable() {
     console.log('Price table rendered successfully');
 }
 
+/**
+ * Update price in memory when input changes (supports both used and new prices)
+ */
+function updateSinglePrice(input) {
+    const phoneId = input.dataset.phoneId;
+    const storage = input.dataset.storage;
+    const priceType = input.dataset.priceType;
+    const newPrice = parseFloat(input.value) || 0;
+
+    const phone = adminManager.getPhone(phoneId);
+    if (!phone) return;
+
+    // Update the appropriate price field
+    if (priceType === 'new') {
+        if (!phone.newPhonePrices) phone.newPhonePrices = {};
+        phone.newPhonePrices[storage] = newPrice;
+    } else {
+        if (!phone.storagePrices) phone.storagePrices = {};
+        phone.storagePrices[storage] = newPrice;
+        // Also update basePrice if this is the lowest
+        if (!phone.basePrice || newPrice < phone.basePrice) {
+            phone.basePrice = newPrice;
+        }
+    }
+}
+
+// Keep old function for backward compatibility
 function updatePrice(phoneId, storage, newPrice) {
     // Check permission (only if auth is available)
     if (typeof auth !== 'undefined' && auth.hasPermission && !auth.hasPermission('canManagePrices')) {
@@ -1728,9 +1773,34 @@ function savePrice(phoneId, storage) {
         alert('Price input not found');
         return;
     }
-    
+
     updatePrice(phoneId, storage, input.value);
     alert('Price saved successfully!');
+}
+
+/**
+ * Save single price (supports both used and new prices)
+ */
+function saveSinglePrice(phoneId, storage, priceType) {
+    // Check permission (only if auth is available)
+    if (typeof auth !== 'undefined' && auth.hasPermission && !auth.hasPermission('canManagePrices')) {
+        alert('You do not have permission to update prices.');
+        return;
+    }
+
+    const phone = adminManager.getPhone(phoneId);
+    if (!phone) {
+        alert('Phone not found');
+        return;
+    }
+
+    // Save to localStorage
+    phone.updatedAt = new Date().toISOString();
+    adminManager.updatePhone(phoneId, phone);
+
+    // Show success message
+    const priceTypeLabel = priceType === 'new' ? 'New' : 'Used';
+    showNotification(`${priceTypeLabel} price updated for ${phone.model} ${storage}`, 'success');
 }
 
 /**
@@ -1981,14 +2051,17 @@ function closePhoneModal() {
 
 function updateStoragePrices() {
     const container = document.getElementById('storagePrices');
+    const newPriceContainer = document.getElementById('newPhonePrices');
     const checkedStorages = Array.from(document.querySelectorAll('.storage-checkboxes input:checked'))
         .map(cb => cb.value);
 
     if (checkedStorages.length === 0) {
         container.innerHTML = '<p style="color: var(--text-light); font-size: 0.875rem;">Select storage options above</p>';
+        if (newPriceContainer) newPriceContainer.innerHTML = '';
         return;
     }
 
+    // Used prices section (existing)
     container.innerHTML = checkedStorages.map(storage => `
         <div class="storage-price-item" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
             <label style="min-width: 80px; font-weight: 600; color: var(--text-dark);">${storage}:</label>
@@ -2006,6 +2079,36 @@ function updateStoragePrices() {
             </div>
         </div>
     `).join('');
+
+    // New phone prices section
+    if (newPriceContainer) {
+        newPriceContainer.innerHTML = checkedStorages.map(storage => {
+            const usedPrice = adminManager.currentEditingPhone
+                ? (adminManager.getPhone(adminManager.currentEditingPhone)?.storagePrices?.[storage] || 0)
+                : 0;
+            const newPrice = adminManager.currentEditingPhone
+                ? (adminManager.getPhone(adminManager.currentEditingPhone)?.newPhonePrices?.[storage] || Math.round(usedPrice * 1.15))
+                : 0;
+
+            return `
+                <div class="new-price-item" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                    <label style="min-width: 80px; font-weight: 600; color: var(--text-dark);">${storage}:</label>
+                    <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-light); font-size: 0.875rem;">SGD</span>
+                        <input type="number" class="form-control new-price-input"
+                               data-storage="${storage}"
+                               value="${newPrice}"
+                               min="0" step="10"
+                               placeholder="Auto: ${Math.round(usedPrice * 1.15)}"
+                               style="max-width: 200px;">
+                        <span style="color: var(--text-light); font-size: 0.75rem;">
+                            (Auto: $${Math.round(usedPrice * 1.15)})
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
     // Update buy prices section when storages change
     if (adminManager.currentEditingPhone) {
@@ -2133,6 +2236,18 @@ function savePhone() {
         }
     });
 
+    // Get NEW phone prices
+    const newPhonePrices = {};
+    checkedStorages.forEach(storage => {
+        const input = document.querySelector(`.new-price-input[data-storage="${storage}"]`);
+        if (input && input.value) {
+            newPhonePrices[storage] = parseFloat(input.value) || 0;
+        } else {
+            // Auto-calculate if not provided
+            newPhonePrices[storage] = Math.round((storagePrices[storage] || 0) * 1.15);
+        }
+    });
+
     // Validate required fields
     if (!brand || !model || checkedStorages.length === 0) {
         alert('Please fill in all required fields (Brand, Model, and at least one Storage option with price)');
@@ -2193,7 +2308,8 @@ function savePhone() {
         storages: checkedStorages,
         colors: colors, // Already an array from dropdown
         basePrice: basePrice, // Calculated from minimum storage price
-        storagePrices: storagePrices,
+        storagePrices: storagePrices, // USED prices
+        newPhonePrices: newPhonePrices, // NEW SEALED prices
         display: display, // For refurbishment/buy page visibility
         buyPrices: buyPrices, // For REFURBISHED PHONE SALES (not buyback)
         quantities: quantities, // Stock for REFURBISHED PHONE SALES (not buyback)
