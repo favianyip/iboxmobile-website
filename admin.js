@@ -2029,6 +2029,12 @@ function initializePhoneModal() {
     const imageFileInput = document.getElementById('phoneImageFile');
     const imagePreview = document.getElementById('imagePreview');
 
+    // Add null checks for critical elements
+    if (!form || !brandSelect || !imageFileInput) {
+        console.warn('Phone modal elements not found, skipping initialization');
+        return;
+    }
+
     // Storage checkboxes handler
     brandSelect.addEventListener('change', function() {
         updateStoragePrices();
@@ -4487,6 +4493,12 @@ function switchModalPriceType(type) {
     const newToggle = document.getElementById('modalNewToggle');
     const usedSection = document.querySelector('.modal-used-section');
     const newSection = document.querySelector('.modal-new-section');
+
+    // Add null checks
+    if (!usedToggle || !newToggle || !usedSection || !newSection) {
+        console.warn('Modal toggle elements not found');
+        return;
+    }
 
     if (type === 'used') {
         // Switch to Used prices
