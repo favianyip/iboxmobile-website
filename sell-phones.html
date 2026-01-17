@@ -463,6 +463,45 @@
     </div>
 
     <script>
+        // Pricing constants
+        const NEW_PHONE_PRICE_MULTIPLIER = 1.15; // Multiplier to calculate new sealed price from used price
+        
+        /**
+         * Calculate maximum price from storage prices object
+         * @param {Object} pricesObj - Object with storage prices
+         * @returns {number} Maximum price or 0 if empty
+         */
+        function getMaxPrice(pricesObj) {
+            if (!pricesObj) return 0;
+            const values = Object.values(pricesObj);
+            return values.length > 0 ? Math.max(...values) : 0;
+        }
+        
+        /**
+         * Calculate max new and used prices for a phone
+         * @param {Object} phone - Phone object with price data
+         * @returns {Object} Object with maxNewPrice and maxUsedPrice
+         */
+        function calculatePhonePrices(phone) {
+            const maxNewPriceFromNew = getMaxPrice(phone.newPhonePrices);
+            const maxUsedPrice = getMaxPrice(phone.storagePrices);
+            
+            // Calculate new price: use explicit new prices if available, else use used price * multiplier
+            let maxNewPrice;
+            if (maxNewPriceFromNew > 0) {
+                maxNewPrice = maxNewPriceFromNew;
+            } else if (maxUsedPrice > 0) {
+                maxNewPrice = maxUsedPrice * NEW_PHONE_PRICE_MULTIPLIER;
+            } else {
+                maxNewPrice = (phone.basePrice || 0) * NEW_PHONE_PRICE_MULTIPLIER;
+            }
+            
+            return {
+                maxNewPrice: maxNewPrice,
+                maxUsedPrice: maxUsedPrice || phone.basePrice || 0
+            };
+        }
+        
         // Helper function to get competitive price
         function getCompetitivePrice(modelName, storage, condition) {
             const brand = modelName.includes('iPhone') ? 'iphone' : 'samsung';
@@ -675,14 +714,8 @@
 
                     // Render Apple models
                     applePhones.forEach(phone => {
-                        const maxNewPrice = phone.newPhonePrices
-                            ? Math.max(...Object.values(phone.newPhonePrices))
-                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
-                        const maxUsedPrice = phone.storagePrices
-                            ? Math.max(...Object.values(phone.storagePrices))
-                            : phone.basePrice || 0;
-
-                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const prices = calculatePhonePrices(phone);
+                        const price = currentCondition === 'used' ? Math.round(prices.maxUsedPrice) : Math.round(prices.maxNewPrice);
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
@@ -693,14 +726,8 @@
 
                     // Render Samsung models
                     samsungPhones.forEach(phone => {
-                        const maxNewPrice = phone.newPhonePrices
-                            ? Math.max(...Object.values(phone.newPhonePrices))
-                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
-                        const maxUsedPrice = phone.storagePrices
-                            ? Math.max(...Object.values(phone.storagePrices))
-                            : phone.basePrice || 0;
-
-                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const prices = calculatePhonePrices(phone);
+                        const price = currentCondition === 'used' ? Math.round(prices.maxUsedPrice) : Math.round(prices.maxNewPrice);
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',

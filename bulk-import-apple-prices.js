@@ -3,6 +3,11 @@
  * Generated from RedWhite + WhyMobile competitor analysis
  * Date: January 2026
  *
+ * NOTE: iPhone 17 series prices are PROJECTED/ESTIMATED for unreleased products.
+ * iPhone 17 has not been officially released by Apple as of January 2026.
+ * These prices are based on market predictions and should be updated when
+ * official pricing becomes available.
+ *
  * Usage:
  * 1. Open admin panel in browser
  * 2. Open browser console (F12)

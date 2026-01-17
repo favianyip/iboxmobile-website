@@ -7,6 +7,10 @@
 // Prices are loaded dynamically from price_data.json
 // ============================================================
 
+// Pricing constants
+const NEW_PHONE_PRICE_MULTIPLIER = 1.15; // Multiplier to calculate new sealed price from used price
+const ACTIVATED_DEDUCTION = 150; // Deduction amount for activated devices
+
 // Dynamic price loading from price_data.json
 let dynamicPrices = null;
 let directPriceLookup = null; // DIRECT PRICES - no calculations!
@@ -1772,8 +1776,8 @@ function calculateQuote() {
             price = adminPhone.newPhonePrices[quoteState.storage];
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: price, type: 'base' });
         } else if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
-            // Fallback: Use used price * 1.15
-            price = Math.round(adminPhone.storagePrices[quoteState.storage] * 1.15);
+            // Fallback: Use used price * NEW_PHONE_PRICE_MULTIPLIER
+            price = Math.round(adminPhone.storagePrices[quoteState.storage] * NEW_PHONE_PRICE_MULTIPLIER);
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: price, type: 'base' });
         } else {
             // Final fallback: Use old base price + 200
@@ -1781,18 +1785,18 @@ function calculateQuote() {
             breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
         }
     } else if (quoteState.deviceType === 'new-activated') {
-        // Use NEW SEALED price - $150
+        // Use NEW SEALED price - ACTIVATED_DEDUCTION
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             const sealedPrice = adminPhone.newPhonePrices[quoteState.storage];
-            price = sealedPrice - 150;
+            price = sealedPrice - ACTIVATED_DEDUCTION;
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
-            breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
+            breakdown.push({ label: 'Activated Deduction', value: -ACTIVATED_DEDUCTION, type: 'deduction' });
         } else if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
-            // Fallback: Use used price * 1.15 - 150
-            const sealedPrice = Math.round(adminPhone.storagePrices[quoteState.storage] * 1.15);
-            price = sealedPrice - 150;
+            // Fallback: Use used price * NEW_PHONE_PRICE_MULTIPLIER - ACTIVATED_DEDUCTION
+            const sealedPrice = Math.round(adminPhone.storagePrices[quoteState.storage] * NEW_PHONE_PRICE_MULTIPLIER);
+            price = sealedPrice - ACTIVATED_DEDUCTION;
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
-            breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
+            breakdown.push({ label: 'Activated Deduction', value: -ACTIVATED_DEDUCTION, type: 'deduction' });
         } else {
             // Final fallback: Use old base price + 100
             price = (adminPhone?.basePrice || model.basePrice) + 100;
