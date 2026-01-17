@@ -20,10 +20,10 @@
                     <button class="btn btn-primary btn-sm" onclick="exportAllData()" title="Export all prices, models, and settings. Save this file after every price update!" style="margin: 0; white-space: nowrap;">
                         💾 Export (Save Prices)
                     </button>
-                    <button class="btn btn-success btn-sm" onclick="document.getElementById('importDataFile').click()" title="Import previously saved prices and settings" style="margin: 0; white-space: nowrap;">
-                        📥 Import (Restore)
+                    <button class="btn btn-success btn-sm" onclick="document.getElementById('importDataFile').click()" title="Import a previously exported backup file or apple-products-prices.csv" style="margin: 0; white-space: nowrap;">
+                        📥 Import Backup/CSV
                     </button>
-                    <input type="file" id="importDataFile" accept=".xlsx,.xls,.json" style="display: none;" onchange="importAllData(event)">
+                    <input type="file" id="importDataFile" accept=".xlsx,.xls,.csv,.json" style="display: none;" onchange="importAllData(event)">
                 </div>
                 <span class="admin-user" id="adminUserName">Admin</span>
                 <button class="btn btn-secondary btn-sm" onclick="auth.logout()">Logout</button>
