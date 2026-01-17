@@ -4,6 +4,11 @@
  */
 
 // ============================================================================
+// PRICING CONSTANTS
+// ============================================================================
+const NEW_PHONE_PRICE_MULTIPLIER = 1.15; // Multiplier to calculate new sealed price from used price
+
+// ============================================================================
 // ADMIN DATA STORAGE (In production, use backend API)
 // ============================================================================
 
@@ -1197,15 +1202,25 @@ function renderPhones() {
         // Get price based on currentBuybackType toggle
         let displayPrice;
         let priceLabel;
+        
+        const newPriceValues = phone.newPhonePrices ? Object.values(phone.newPhonePrices) : [];
+        const storagePriceValues = phone.storagePrices ? Object.values(phone.storagePrices) : [];
+        
         if (currentBuybackType === 'new') {
-            displayPrice = phone.newPhonePrices
-                ? Math.max(...Object.values(phone.newPhonePrices))
-                : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : (phone.basePrice || 0) * 1.15);
+            if (newPriceValues.length > 0) {
+                displayPrice = Math.max(...newPriceValues);
+            } else if (storagePriceValues.length > 0) {
+                displayPrice = Math.max(...storagePriceValues) * NEW_PHONE_PRICE_MULTIPLIER;
+            } else {
+                displayPrice = (phone.basePrice || 0) * NEW_PHONE_PRICE_MULTIPLIER;
+            }
             priceLabel = 'New Sealed';
         } else {
-            displayPrice = phone.storagePrices
-                ? Math.max(...Object.values(phone.storagePrices))
-                : (phone.basePrice || 0);
+            if (storagePriceValues.length > 0) {
+                displayPrice = Math.max(...storagePriceValues);
+            } else {
+                displayPrice = (phone.basePrice || 0);
+            }
             priceLabel = 'Used';
         }
 
@@ -1649,8 +1664,8 @@ function renderPriceTable() {
                 price = phone.newPhonePrices && phone.newPhonePrices[storage]
                     ? phone.newPhonePrices[storage]
                     : (phone.storagePrices && phone.storagePrices[storage]
-                        ? Math.round(phone.storagePrices[storage] * 1.15)
-                        : Math.round((phone.basePrice || 0) * 1.15));
+                        ? Math.round(phone.storagePrices[storage] * NEW_PHONE_PRICE_MULTIPLIER)
+                        : Math.round((phone.basePrice || 0) * NEW_PHONE_PRICE_MULTIPLIER));
             } else {
                 // Show USED phone prices (default)
                 price = phone.storagePrices && phone.storagePrices[storage]
@@ -1677,8 +1692,10 @@ function renderPriceTable() {
                                style="width: 120px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-sm"
-                                onclick="saveSinglePrice('${phone.id}', '${storage}', '${currentPriceType}')"
+                        <button class="btn btn-primary btn-sm save-price-btn"
+                                data-phone-id="${phone.id}"
+                                data-storage="${storage}"
+                                data-price-type="${currentPriceType}"
                                 style="pointer-events: auto;">
                             Save
                         </button>
@@ -1687,6 +1704,18 @@ function renderPriceTable() {
             `;
         });
     }).join('');
+    
+    // Add event listeners to save buttons to prevent XSS
+    setTimeout(() => {
+        document.querySelectorAll('.save-price-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const phoneId = this.dataset.phoneId;
+                const storage = this.dataset.storage;
+                const priceType = this.dataset.priceType;
+                saveSinglePrice(phoneId, storage, priceType);
+            });
+        });
+    }, 0);
     
     console.log('Price table rendered successfully');
 }
@@ -1710,9 +1739,10 @@ function updateSinglePrice(input) {
     } else {
         if (!phone.storagePrices) phone.storagePrices = {};
         phone.storagePrices[storage] = newPrice;
-        // Also update basePrice if this is the lowest
-        if (!phone.basePrice || newPrice < phone.basePrice) {
-            phone.basePrice = newPrice;
+        // Update basePrice to always be the minimum of all storage prices
+        const allStoragePrices = Object.values(phone.storagePrices);
+        if (allStoragePrices.length > 0) {
+            phone.basePrice = Math.min(...allStoragePrices);
         }
     }
 }
