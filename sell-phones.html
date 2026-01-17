@@ -667,17 +667,59 @@
                 appleGrid.innerHTML = '';
                 samsungGrid.innerHTML = '';
 
-                // Render Apple models
-                phoneModels.apple.forEach(model => {
-                    const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                    appleGrid.innerHTML += createModelCard(model, 'Apple', price);
-                });
+                // Try to get phones from adminManager (live data), fallback to hardcoded phoneModels
+                if (typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0) {
+                    // Use admin manager data (live prices)
+                    const applePhones = adminManager.phones.filter(p => p.brand === 'Apple' && p.display !== false);
+                    const samsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung' && p.display !== false);
 
-                // Render Samsung models
-                phoneModels.samsung.forEach(model => {
-                    const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                    samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
-                });
+                    // Render Apple models
+                    applePhones.forEach(phone => {
+                        const maxNewPrice = phone.newPhonePrices
+                            ? Math.max(...Object.values(phone.newPhonePrices))
+                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
+                        const maxUsedPrice = phone.storagePrices
+                            ? Math.max(...Object.values(phone.storagePrices))
+                            : phone.basePrice || 0;
+
+                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const model = {
+                            name: phone.model,
+                            img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
+                            storage: phone.storages || []
+                        };
+                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                    });
+
+                    // Render Samsung models
+                    samsungPhones.forEach(phone => {
+                        const maxNewPrice = phone.newPhonePrices
+                            ? Math.max(...Object.values(phone.newPhonePrices))
+                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
+                        const maxUsedPrice = phone.storagePrices
+                            ? Math.max(...Object.values(phone.storagePrices))
+                            : phone.basePrice || 0;
+
+                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const model = {
+                            name: phone.model,
+                            img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
+                            storage: phone.storages || []
+                        };
+                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                    });
+                } else {
+                    // Fallback to hardcoded phoneModels
+                    phoneModels.apple.forEach(model => {
+                        const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
+                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                    });
+
+                    phoneModels.samsung.forEach(model => {
+                        const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
+                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                    });
+                }
 
                 // Fade in with new content
                 appleGrid.style.opacity = '1';

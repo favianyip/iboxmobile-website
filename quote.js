@@ -1755,41 +1755,58 @@ function selectOption(key, value, adjustment, btn) {
 // Calculate Quote
 function calculateQuote() {
     let model = phoneDatabase[quoteState.brand][quoteState.model];
-    
-    // Check admin data for updated base price
+
+    // Get admin phone data for accurate pricing
+    let adminPhone = null;
     if (typeof adminManager !== 'undefined') {
-        const adminPhone = adminManager.phones.find(p => p.brand === quoteState.brand && p.model === quoteState.model);
-        if (adminPhone && adminPhone.basePrice !== undefined) {
-            model = { ...model, basePrice: adminPhone.basePrice };
-        }
+        adminPhone = adminManager.phones.find(p => p.brand === quoteState.brand && p.model === quoteState.model);
     }
-    
-    let price = model.basePrice;
+
+    let price = 0;
     const breakdown = [];
 
-    // Base price
-    breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
-
-    // Device type bonus (New Sealed / New Activated / Used)
+    // Calculate base price based on device type and storage
     if (quoteState.deviceType === 'new-sealed') {
-        price += 200;
-        breakdown.push({ label: 'New Sealed Device', value: 200, type: 'bonus' });
+        // Use NEW SEALED price from admin data
+        if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
+            price = adminPhone.newPhonePrices[quoteState.storage];
+            breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: price, type: 'base' });
+        } else if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
+            // Fallback: Use used price * 1.15
+            price = Math.round(adminPhone.storagePrices[quoteState.storage] * 1.15);
+            breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: price, type: 'base' });
+        } else {
+            // Final fallback: Use old base price + 200
+            price = (adminPhone?.basePrice || model.basePrice) + 200;
+            breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
+        }
     } else if (quoteState.deviceType === 'new-activated') {
-        price += 100;
-        breakdown.push({ label: 'New Activated Device', value: 100, type: 'bonus' });
-    } else if (quoteState.deviceType === 'used') {
-        breakdown.push({ label: 'Used Device', value: 0, type: 'info' });
-    }
-
-    // Storage adjustment
-    if (quoteState.storageAdjustment) {
-        price += quoteState.storageAdjustment;
-        if (quoteState.storageAdjustment !== 0) {
-            breakdown.push({ 
-                label: `Storage: ${quoteState.storage}`, 
-                value: quoteState.storageAdjustment, 
-                type: quoteState.storageAdjustment > 0 ? 'bonus' : 'deduction' 
-            });
+        // Use NEW SEALED price - $150
+        if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
+            const sealedPrice = adminPhone.newPhonePrices[quoteState.storage];
+            price = sealedPrice - 150;
+            breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
+            breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
+        } else if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
+            // Fallback: Use used price * 1.15 - 150
+            const sealedPrice = Math.round(adminPhone.storagePrices[quoteState.storage] * 1.15);
+            price = sealedPrice - 150;
+            breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
+            breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
+        } else {
+            // Final fallback: Use old base price + 100
+            price = (adminPhone?.basePrice || model.basePrice) + 100;
+            breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
+        }
+    } else {
+        // USED device - use storage-specific used price
+        if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
+            price = adminPhone.storagePrices[quoteState.storage];
+            breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (Used)`, value: price, type: 'base' });
+        } else {
+            // Fallback to old base price
+            price = adminPhone?.basePrice || model.basePrice;
+            breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
         }
     }
 
