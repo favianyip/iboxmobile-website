@@ -1938,111 +1938,81 @@ function updateLivePriceEstimate() {
     }
     
     let price = 0;
-    
-    // For USED devices, try DIRECT PRICE LOOKUP first (no calculations!)
-    if (quoteState.deviceType === 'used') {
-        const accessories = quoteState.accessories.map(a => a.value);
-        const issues = quoteState.issues.map(i => i.value);
-        const directPrice = getDirectPrice(
-            quoteState.model,
-            quoteState.storage,
-            quoteState.color || 'Black',
-            quoteState.country,
-            quoteState.bodyCondition,
-            quoteState.screenCondition,
-            quoteState.batteryHealth,
-            issues,
-            accessories
-        );
-        
-        if (directPrice !== null) {
-            price = directPrice;
-            
-            // Ensure minimum price
-            price = Math.max(50, price);
-            
-            // Animate price update
-            estimatePriceEl.textContent = '$' + price.toLocaleString();
-            estimatePriceEl.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                estimatePriceEl.style.transform = 'scale(1)';
-            }, 150);
-            return; // Exit early - used direct lookup!
-        }
-    }
-    
-    // FALLBACK: Calculate price if direct lookup not available
-    // Check admin data for updated base price
+    let adminPhone = null;
+
+    // Check admin data for phone details
     if (typeof adminManager !== 'undefined' && adminManager.phones) {
-        const adminPhone = adminManager.phones.find(p => p.brand === quoteState.brand && p.model === quoteState.model);
-        if (adminPhone && adminPhone.basePrice !== undefined) {
-            model = { ...model, basePrice: adminPhone.basePrice };
-        }
+        adminPhone = adminManager.phones.find(p => p.brand === quoteState.brand && p.model === quoteState.model);
     }
-    
-    price = model.basePrice;
-    
-    // Device type bonus for NEW phones
+
+    // Calculate price based on device type
     if (quoteState.deviceType === 'new-sealed') {
-        // Try direct lookup for new sealed
-        const modelLookup = directPriceLookup?.models?.[quoteState.model];
-        if (modelLookup?.storage?.[quoteState.storage]?.new_sealed) {
-            price = modelLookup.storage[quoteState.storage].new_sealed;
+        // Use EXACT NEW SEALED price from admin data
+        if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
+            price = adminPhone.newPhonePrices[quoteState.storage];
         } else {
-            price += 200;
-            if (quoteState.storage && model.storage[quoteState.storage]) {
-                price += model.storage[quoteState.storage];
-            }
+            // NEW price not available - show $0 or fallback message
+            price = 0;
+            console.warn(`NEW SEALED price not available for ${quoteState.model} ${quoteState.storage}`);
+        }
+
+        // Receipt bonus (for new phones)
+        if (quoteState.hasReceipt === 'yes') {
+            price += 30;
         }
     } else if (quoteState.deviceType === 'new-activated') {
-        // Try direct lookup for new activated
-        const modelLookup = directPriceLookup?.models?.[quoteState.model];
-        if (modelLookup?.storage?.[quoteState.storage]?.new_activated) {
-            price = modelLookup.storage[quoteState.storage].new_activated;
+        // Use NEW SEALED price - $150 deduction
+        if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
+            price = adminPhone.newPhonePrices[quoteState.storage] - 150;
         } else {
-            price += 100;
-            if (quoteState.storage && model.storage[quoteState.storage]) {
+            // NEW price not available - show $0
+            price = 0;
+            console.warn(`NEW ACTIVATED price not available for ${quoteState.model} ${quoteState.storage}`);
+        }
+
+        // Receipt bonus (for new phones)
+        if (quoteState.hasReceipt === 'yes') {
+            price += 30;
+        }
+    } else {
+        // USED device - use exact storage-specific USED price
+        if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
+            price = adminPhone.storagePrices[quoteState.storage];
+        } else {
+            // Fallback to phoneDatabase basePrice + storage modifier
+            price = model.basePrice;
+            if (quoteState.storage && model.storage[quoteState.storage] !== undefined) {
                 price += model.storage[quoteState.storage];
             }
         }
-    } else {
-        // Used device - fallback calculation
-        if (quoteState.storage && model.storage[quoteState.storage] !== undefined) {
-            price += model.storage[quoteState.storage];
-        }
-        
+
         // Country deduction
         if (quoteState.country === 'export') {
             price -= 50;
         }
-        
+
         // Body condition
         const bodyDeduction = getDeduction('body-options', quoteState.bodyCondition);
         price -= bodyDeduction;
-        
+
         // Screen condition
         const screenDeduction = getDeduction('screen-options', quoteState.screenCondition);
         price -= screenDeduction;
-        
+
         // Battery health
         const batteryDeduction = getDeduction('battery-options', quoteState.batteryHealth);
         price -= batteryDeduction;
-        
+
         // Issues
         quoteState.issues.forEach(issue => {
             price -= issue.deduction;
         });
+
+        // Accessories bonus (ONLY for USED devices)
+        quoteState.accessories.forEach(acc => {
+            price += acc.bonus;
+        });
     }
-    
-    // Receipt bonus (for new phones)
-    if (quoteState.hasReceipt === 'yes' && quoteState.deviceType !== 'used') {
-        price += 30;
-    }
-    
-    // Accessories bonus
-    quoteState.accessories.forEach(acc => {
-        price += acc.bonus;
-    });
     
     // Ensure minimum price
     price = Math.max(50, price);
