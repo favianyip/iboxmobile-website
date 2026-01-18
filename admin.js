@@ -244,8 +244,8 @@ class AdminDataManager {
                 storages: ['256GB', '512GB', '1TB'],
                 colors: ['Titanium Black', 'Titanium Gray', 'Titanium Violet', 'Titanium Yellow'],
                 basePrice: 580,
-                storagePrices: { '256GB': 580, '512GB': 650, '1TB': 700 }, // FIXED: Exact USED prices from Excel
-                newPhonePrices: {}, // FIXED: Leave empty - will be filled by import
+                storagePrices: { '256GB': 580, '512GB': 650, '1TB': 700 }, // Exact USED prices from Excel
+                newPhonePrices: { '256GB': 760, '512GB': 850, '1TB': 920 }, // NEW sealed phone prices
                 buyPrices: {
                     '256GB': { excellent: 580, good: 551, fair: 493 },
                     '512GB': { excellent: 650, good: 618, fair: 553 },
@@ -269,8 +269,8 @@ class AdminDataManager {
                 storages: ['256GB', '512GB'],
                 colors: ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
                 basePrice: 380,
-                storagePrices: { '256GB': 380, '512GB': 450 }, // FIXED: Exact USED prices from Excel
-                newPhonePrices: {}, // FIXED: Leave empty - will be filled by import
+                storagePrices: { '256GB': 380, '512GB': 450 }, // Exact USED prices from Excel
+                newPhonePrices: { '256GB': 500, '512GB': 600 }, // NEW sealed phone prices
                 buyPrices: {
                     '256GB': { excellent: 380, good: 361, fair: 323 },
                     '512GB': { excellent: 450, good: 428, fair: 383 }
@@ -307,15 +307,11 @@ class AdminDataManager {
         if (stored) {
             return JSON.parse(stored);
         }
-        
+
+        // FOCUS: Apple and Samsung only (as per business requirements)
         return {
             Apple: { image: 'images/phones/iphone-16-pro-max.jpg', color: '#333333' },
-            Samsung: { image: 'images/phones/galaxy-s23-ultra.jpg', color: '#1428A0' },
-            Google: { image: 'images/phones/pixel-8-pro.jpg', color: '#EA4335' },
-            OnePlus: { image: 'images/phones/oneplus-12.jpg', color: '#F5010C' },
-            Xiaomi: { image: 'images/phones/xiaomi-14.jpg', color: '#FF6900' },
-            OPPO: { image: 'images/phones/xiaomi-14.jpg', color: '#1E5128' },
-            Vivo: { image: 'images/phones/xiaomi-14.jpg', color: '#1E3A8A' }
+            Samsung: { image: 'images/phones/galaxy-s23-ultra.jpg', color: '#1428A0' }
         };
     }
 
@@ -482,14 +478,10 @@ class AdminDataManager {
      * Get default image for brand
      */
     getDefaultImage(brand) {
+        // FOCUS: Apple and Samsung only (as per business requirements)
         const brandImages = {
             Apple: 'images/phones/iphone-16-pro-max.jpg',
-            Samsung: 'images/phones/galaxy-s23-ultra.jpg',
-            Google: 'images/phones/pixel-8-pro.jpg',
-            OnePlus: 'images/phones/oneplus-12.jpg',
-            Xiaomi: 'images/phones/xiaomi-14.jpg',
-            OPPO: 'images/phones/xiaomi-14.jpg',
-            Vivo: 'images/phones/xiaomi-14.jpg'
+            Samsung: 'images/phones/galaxy-s23-ultra.jpg'
         };
         return brandImages[brand] || 'images/phones/iphone-16-pro-max.jpg';
     }
@@ -828,12 +820,8 @@ function initializeAdmin() {
         setTimeout(() => initializeMenuNavigation(), 100);
         setTimeout(() => initializeMenuNavigation(), 500);
         
-        // Initialize other sections
-        const phonesGrid = document.getElementById('phonesGrid');
-        if (phonesGrid) {
-            initializePhonesSection();
-        }
-        
+        // Initialize other sections - always run to attach event listeners
+        initializePhonesSection();
         initializePricesSection();
         initializeBrandsSection();
         initializeUsersSection();
@@ -1150,16 +1138,26 @@ function initializePhonesSection() {
     const modelFilter = document.getElementById('modelFilter');
     const searchInput = document.getElementById('searchPhones');
 
-    addPhoneBtn.addEventListener('click', () => openPhoneModal());
+    // Add Phone button with null check
+    if (addPhoneBtn) {
+        addPhoneBtn.addEventListener('click', () => openPhoneModal());
+        console.log('✅ Add Phone button initialized successfully');
+    } else {
+        console.error('❌ Add Phone button not found in DOM');
+    }
 
     // Brand filter change - update model dropdown and render phones
-    brandFilter.addEventListener('change', function() {
-        updateModelDropdown(this.value);
-        renderPhones();
-    });
+    if (brandFilter) {
+        brandFilter.addEventListener('change', function() {
+            updateModelDropdown(this.value);
+            renderPhones();
+        });
+    }
 
     // Model filter change - render phones
-    modelFilter.addEventListener('change', () => renderPhones());
+    if (modelFilter) {
+        modelFilter.addEventListener('change', () => renderPhones());
+    }
     
     // Search input change - render phones
     searchInput.addEventListener('input', () => renderPhones());
@@ -4036,40 +4034,149 @@ window.updateModelFilter = updateModelFilter;
 // ============================================
 
 /**
- * Export all admin data to a JSON file
+ * Export all admin data to an EXCEL file
  * This allows admins to save their changes and commit to git
  */
 function exportAllData() {
     try {
-        const exportData = {
-            version: '1.0',
-            exportDate: new Date().toISOString(),
-            data: {
-                phones: JSON.parse(localStorage.getItem('ktmobile_phones') || '[]'),
-                brands: JSON.parse(localStorage.getItem('ktmobile_brands') || '[]'),
-                conditionModifiers: JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}'),
-                heroImage: JSON.parse(localStorage.getItem('ktmobile_hero_image') || '{}'),
-                appointments: JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]'),
-                generalSettings: JSON.parse(localStorage.getItem('ibox_general_settings') || '{}')
+        console.log('📊 Starting Excel export...');
+
+        // Get all data from localStorage
+        const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+        const brands = JSON.parse(localStorage.getItem('ktmobile_brands') || '{}');
+        const conditionModifiers = JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}');
+        const appointments = JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]');
+        const generalSettings = JSON.parse(localStorage.getItem('ibox_general_settings') || '{}');
+
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+
+        // ========================================
+        // Sheet 1: Phone USED Prices
+        // ========================================
+        const usedPricesData = [];
+        usedPricesData.push(['USED PHONE PRICES - IBOX MOBILE SINGAPORE']);
+        usedPricesData.push(['Export Date:', new Date().toISOString()]);
+        usedPricesData.push([]);
+        usedPricesData.push(['Brand', 'Model', 'Storage', 'Used Price (SGD)', 'Display', 'Available', 'Colors']);
+
+        phones.forEach(phone => {
+            if (phone.storages && phone.storagePrices) {
+                phone.storages.forEach(storage => {
+                    usedPricesData.push([
+                        phone.brand,
+                        phone.model,
+                        storage,
+                        phone.storagePrices[storage] || 0,
+                        phone.display ? 'YES' : 'NO',
+                        phone.available ? 'YES' : 'NO',
+                        (phone.colors || []).join(', ')
+                    ]);
+                });
             }
-        };
+        });
 
-        // Create blob and download
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `admin-data-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const wsUsed = XLSX.utils.aoa_to_sheet(usedPricesData);
+        XLSX.utils.book_append_sheet(wb, wsUsed, 'USED Prices');
 
-        showNotification('✓ All prices and settings exported successfully!', 'success');
-        alert('✅ Data Backup Saved Successfully!\n\n📊 All Prices & Settings Exported:\n• Phone models and prices (Used & New)\n• Buyback base prices\n• Condition modifiers\n• All settings\n\n💾 File saved to your Downloads\n\n⚠️ IMPORTANT:\n1. Save this file to /data/ folder in your repository\n2. Commit to git: git add data/admin-data-*.json\n3. This ensures your prices persist after updates!\n\n💡 TIP: Export after every major price update!');
+        // ========================================
+        // Sheet 2: Phone NEW Prices
+        // ========================================
+        const newPricesData = [];
+        newPricesData.push(['NEW PHONE PRICES - IBOX MOBILE SINGAPORE']);
+        newPricesData.push(['Export Date:', new Date().toISOString()]);
+        newPricesData.push([]);
+        newPricesData.push(['Brand', 'Model', 'Storage', 'New Price (SGD)', 'Display', 'Available', 'Colors']);
+
+        phones.forEach(phone => {
+            if (phone.storages && phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
+                phone.storages.forEach(storage => {
+                    if (phone.newPhonePrices[storage]) {
+                        newPricesData.push([
+                            phone.brand,
+                            phone.model,
+                            storage,
+                            phone.newPhonePrices[storage] || 0,
+                            phone.display ? 'YES' : 'NO',
+                            phone.available ? 'YES' : 'NO',
+                            (phone.colors || []).join(', ')
+                        ]);
+                    }
+                });
+            }
+        });
+
+        const wsNew = XLSX.utils.aoa_to_sheet(newPricesData);
+        XLSX.utils.book_append_sheet(wb, wsNew, 'NEW Prices');
+
+        // ========================================
+        // Sheet 3: Complete Phone List with All Data
+        // ========================================
+        const completeData = [];
+        completeData.push(['COMPLETE PHONE DATABASE - IBOX MOBILE SINGAPORE']);
+        completeData.push(['Export Date:', new Date().toISOString()]);
+        completeData.push([]);
+        completeData.push(['Brand', 'Model', 'Storage', 'Used Price', 'New Price', 'Colors', 'Display', 'Available', 'Image Path']);
+
+        phones.forEach(phone => {
+            if (phone.storages) {
+                phone.storages.forEach(storage => {
+                    completeData.push([
+                        phone.brand,
+                        phone.model,
+                        storage,
+                        phone.storagePrices ? (phone.storagePrices[storage] || 0) : 0,
+                        phone.newPhonePrices ? (phone.newPhonePrices[storage] || 0) : 0,
+                        (phone.colors || []).join(', '),
+                        phone.display ? 'YES' : 'NO',
+                        phone.available ? 'YES' : 'NO',
+                        phone.image || ''
+                    ]);
+                });
+            }
+        });
+
+        const wsComplete = XLSX.utils.aoa_to_sheet(completeData);
+        XLSX.utils.book_append_sheet(wb, wsComplete, 'Complete Database');
+
+        // ========================================
+        // Sheet 4: Summary & Statistics
+        // ========================================
+        const summaryData = [];
+        summaryData.push(['IBOX MOBILE SINGAPORE - DATA SUMMARY']);
+        summaryData.push(['Export Date:', new Date().toISOString()]);
+        summaryData.push([]);
+        summaryData.push(['Category', 'Count/Value']);
+        summaryData.push(['Total Phone Models', phones.length]);
+        summaryData.push(['Apple Models', phones.filter(p => p.brand === 'Apple').length]);
+        summaryData.push(['Samsung Models', phones.filter(p => p.brand === 'Samsung').length]);
+        summaryData.push(['Models with NEW Prices', phones.filter(p => p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0).length]);
+        summaryData.push(['Models with USED Prices', phones.filter(p => p.storagePrices && Object.keys(p.storagePrices).length > 0).length]);
+        summaryData.push(['Visible Models (Display=YES)', phones.filter(p => p.display === true).length]);
+        summaryData.push(['Total Appointments', appointments.length]);
+        summaryData.push([]);
+        summaryData.push(['GENERAL SETTINGS']);
+        summaryData.push(['Setting', 'Value']);
+        Object.entries(generalSettings).forEach(([key, value]) => {
+            summaryData.push([key, value]);
+        });
+
+        const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+        // Generate Excel file
+        const fileName = `IBOX-Mobile-Buyback-Data-${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+
+        console.log('✅ Excel export complete!');
+        alert(`✅ Excel Backup Saved Successfully!\n\n📊 All Prices & Settings Exported to Excel:\n• USED Prices (${phones.length} models)\n• NEW Prices (${phones.filter(p => p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0).length} models)\n• Complete Database\n• Summary & Statistics\n\n💾 File: ${fileName}\n📁 Location: Your Downloads folder\n\n⚠️ IMPORTANT:\n1. Save this Excel file in a safe location\n2. Use it for price reviews and updates\n3. Export after every major price change!\n\n💡 TIP: Open in Excel/Google Sheets to view all data!`);
+
+        if (typeof showNotification === 'function') {
+            showNotification('✓ All prices and settings exported to Excel!', 'success');
+        }
     } catch (error) {
         console.error('Export error:', error);
-        alert('❌ Error exporting data: ' + error.message);
+        alert('❌ Error exporting data: ' + error.message + '\n\nPlease check the console for details.');
     }
 }
 

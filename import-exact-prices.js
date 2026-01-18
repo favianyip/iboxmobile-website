@@ -103,6 +103,12 @@ const samsungNewPrices = {
     "Galaxy Z Fold 7 5G": { "256GB": 1630, "512GB": 1780, "1TB": 1860 },
     "Galaxy A36 5G": { "8/256GB": 330 },
     "Galaxy A56 5G": { "8/256GB": 380, "12/256GB": 420 },
+    // S24 Series NEW prices (calculated at ~30-35% above USED prices)
+    "Galaxy S24 5G": { "256GB": 500, "512GB": 600 },
+    "Galaxy S24 Plus 5G": { "256GB": 630, "512GB": 700 },
+    "Galaxy S24 Ultra 5G": { "256GB": 760, "512GB": 850, "1TB": 920 },
+    "Galaxy S24 FE 5G": { "256GB": 390, "512GB": 470 },
+    // S25 Series NEW prices
     "Galaxy S25 5G": { "256GB": 760, "512GB": 850 },
     "Galaxy S25 FE 5G": { "128GB": 480, "256GB": 580, "512GB": 660 },
     "Galaxy S25+ 5G": { "256GB": 880, "512GB": 1000 },
