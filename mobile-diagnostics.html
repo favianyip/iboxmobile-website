@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Mobile Diagnostics - IBOX MOBILE</title>
+    <script src="quote.js"></script>
+    <script src="script.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #C9A84C;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        h2 {
+            color: #333;
+            margin: 20px 0 10px 0;
+            font-size: 18px;
+            border-bottom: 2px solid #C9A84C;
+            padding-bottom: 5px;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .status.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #C9A84C;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .code-block {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .test-fail {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Mobile Diagnostics Tool</h1>
+        <p>This page helps diagnose issues with mobile browsers.</p>
+
+        <h2>1. Device Information</h2>
+        <div id="device-info"></div>
+
+        <h2>2. Browser Cache Status</h2>
+        <div id="cache-info"></div>
+
+        <h2>3. LocalStorage Data</h2>
+        <div id="localStorage-info"></div>
+        <button onclick="showLocalStorageDetails()">Show Full LocalStorage Data</button>
+        <button onclick="clearAllData()">⚠️ Clear All Data</button>
+
+        <h2>4. Phone Database Status</h2>
+        <div id="database-info"></div>
+
+        <h2>5. Search Tests</h2>
+        <div id="search-tests"></div>
+        <button onclick="runSearchTests()">Run Search Tests</button>
+
+        <h2>6. Price Sync Test</h2>
+        <div id="price-sync"></div>
+        <button onclick="testPriceSync()">Test Price Synchronization</button>
+
+        <h2>7. Actions</h2>
+        <button onclick="forceReloadPrices()">Force Reload Prices</button>
+        <button onclick="testMenuFunctionality()">Test Mobile Menu</button>
+        <button onclick="window.location.href='admin.html'">Go to Admin Panel</button>
+        <button onclick="window.location.href='sell-phones.html'">Go to Sell Phones</button>
+    </div>
+
+    <script>
+        // Run diagnostics on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            runDiagnostics();
+        });
+
+        function runDiagnostics() {
+            displayDeviceInfo();
+            displayCacheInfo();
+            displayLocalStorageInfo();
+            displayDatabaseInfo();
+        }
+
+        function displayDeviceInfo() {
+            const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const html = `
+                <div class="status info">
+                    <strong>Device Type:</strong> ${isMobile ? 'MOBILE' : 'DESKTOP'}<br>
+                    <strong>Screen Width:</strong> ${window.innerWidth}px<br>
+                    <strong>Screen Height:</strong> ${window.innerHeight}px<br>
+                    <strong>User Agent:</strong><br>
+                    <div class="code-block">${navigator.userAgent}</div>
+                    <strong>Browser:</strong> ${getBrowserName()}<br>
+                    <strong>Platform:</strong> ${navigator.platform}<br>
+                    <strong>Language:</strong> ${navigator.language}
+                </div>
+            `;
+            document.getElementById('device-info').innerHTML = html;
+        }
+
+        function getBrowserName() {
+            const ua = navigator.userAgent;
+            if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edg') === -1) return 'Chrome';
+            if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) return 'Safari';
+            if (ua.indexOf('Firefox') > -1) return 'Firefox';
+            if (ua.indexOf('Edg') > -1) return 'Edge';
+            if (ua.indexOf('MSIE') > -1 || ua.indexOf('Trident') > -1) return 'Internet Explorer';
+            return 'Unknown';
+        }
+
+        function displayCacheInfo() {
+            const version = localStorage.getItem('quote_js_version') || 'Not set';
+            const lastUpdate = localStorage.getItem('ktmobile_last_update') || 'Not set';
+
+            const html = `
+                <div class="status ${version === 'Not set' ? 'error' : 'success'}">
+                    <strong>JavaScript Version:</strong> ${version}<br>
+                    <strong>Expected Version:</strong> ${typeof QUOTE_JS_VERSION !== 'undefined' ? QUOTE_JS_VERSION : 'Unknown'}<br>
+                    <strong>Last Update:</strong> ${lastUpdate}<br>
+                    ${version !== 'Not set' && typeof QUOTE_JS_VERSION !== 'undefined' && version !== QUOTE_JS_VERSION ?
+                        '<br><span style="color: red; font-weight: bold;">⚠️ VERSION MISMATCH! Hard refresh needed.</span>' : ''}
+                </div>
+            `;
+            document.getElementById('cache-info').innerHTML = html;
+        }
+
+        function displayLocalStorageInfo() {
+            const phones = localStorage.getItem('ktmobile_phones');
+            const modifiers = localStorage.getItem('ktmobile_condition_modifiers');
+            const lastUpdate = localStorage.getItem('ktmobile_last_update');
+
+            let html = '';
+
+            if (!phones) {
+                html += '<div class="status error"><strong>❌ NO PHONE DATA!</strong><br>LocalStorage is empty. Please go to admin panel and click "Import Exact Prices".</div>';
+            } else {
+                try {
+                    const phoneData = JSON.parse(phones);
+                    const updateDate = lastUpdate ? new Date(lastUpdate) : null;
+                    const hoursAgo = updateDate ? Math.floor((new Date() - updateDate) / (1000 * 60 * 60)) : null;
+
+                    html += `<div class="status success">
+                        <strong>✅ Phone Data Found</strong><br>
+                        <strong>Total Models:</strong> ${phoneData.length}<br>
+                        <strong>Last Update:</strong> ${lastUpdate || 'Unknown'}<br>
+                        ${hoursAgo !== null ? `<strong>Age:</strong> ${hoursAgo} hours ago<br>` : ''}
+                        <strong>Data Size:</strong> ${(phones.length / 1024).toFixed(2)} KB
+                    </div>`;
+
+                    if (hoursAgo && hoursAgo > 24) {
+                        html += '<div class="status warning">⚠️ Data is more than 24 hours old. Consider refreshing from admin panel.</div>';
+                    }
+                } catch (e) {
+                    html += `<div class="status error">❌ Error parsing phone data: ${e.message}</div>`;
+                }
+            }
+
+            if (!modifiers) {
+                html += '<div class="status warning">⚠️ No condition modifiers found.</div>';
+            } else {
+                html += '<div class="status success">✅ Condition modifiers found</div>';
+            }
+
+            document.getElementById('localStorage-info').innerHTML = html;
+        }
+
+        function displayDatabaseInfo() {
+            let html = '';
+
+            if (typeof phoneDatabase === 'undefined') {
+                html += '<div class="status error">❌ phoneDatabase is not defined! quote.js may not have loaded.</div>';
+            } else {
+                const appleCount = phoneDatabase.Apple ? Object.keys(phoneDatabase.Apple).length : 0;
+                const samsungCount = phoneDatabase.Samsung ? Object.keys(phoneDatabase.Samsung).length : 0;
+
+                html += `<div class="status success">
+                    <strong>✅ phoneDatabase loaded</strong><br>
+                    <strong>Apple Models:</strong> ${appleCount}<br>
+                    <strong>Samsung Models:</strong> ${samsungCount}<br>
+                    <strong>Total Models:</strong> ${appleCount + samsungCount}
+                </div>`;
+
+                // Test specific models
+                const testModels = ['iPhone 17 Pro Max', 'iPhone 17', 'Galaxy S25 Ultra 5G'];
+                testModels.forEach(model => {
+                    const brand = model.includes('iPhone') ? 'Apple' : 'Samsung';
+                    const exists = phoneDatabase[brand] && phoneDatabase[brand][model];
+                    const icon = exists ? '✅' : '❌';
+                    html += `<div class="test-result ${exists ? 'test-pass' : 'test-fail'}">${icon} ${model}: ${exists ? 'Found' : 'NOT FOUND'}</div>`;
+                });
+            }
+
+            document.getElementById('database-info').innerHTML = html;
+        }
+
+        function showLocalStorageDetails() {
+            const phones = localStorage.getItem('ktmobile_phones');
+            if (!phones) {
+                alert('No phone data in localStorage');
+                return;
+            }
+
+            try {
+                const phoneData = JSON.parse(phones);
+                let details = 'Phone Models in LocalStorage:\n\n';
+                phoneData.forEach((phone, index) => {
+                    details += `${index + 1}. ${phone.brand} ${phone.model}\n`;
+                    details += `   Base Price: $${phone.basePrice}\n`;
+                    details += `   Storages: ${phone.storages ? phone.storages.join(', ') : 'None'}\n\n`;
+                });
+
+                const blob = new Blob([details], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'localStorage-data.txt';
+                a.click();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('This will clear ALL localStorage data. You will need to re-import prices from admin panel. Continue?')) {
+                localStorage.clear();
+                alert('All data cleared! Please go to admin panel and import prices again.');
+                location.reload();
+            }
+        }
+
+        function runSearchTests() {
+            const testQueries = [
+                'iPhone 17',
+                'iPhone 17 Pro Max',
+                'Galaxy S25',
+                'S25 Ultra',
+                'iPhone 15',
+                'Galaxy A55'
+            ];
+
+            let html = '<h3>Search Test Results:</h3>';
+
+            if (typeof phoneDatabase === 'undefined') {
+                html += '<div class="status error">Cannot run tests: phoneDatabase not loaded</div>';
+            } else {
+                testQueries.forEach(query => {
+                    const result = testSearch(query);
+                    html += `<div class="test-result ${result.found ? 'test-pass' : 'test-fail'}">
+                        ${result.found ? '✅' : '❌'} "${query}" → ${result.message}
+                    </div>`;
+                });
+            }
+
+            document.getElementById('search-tests').innerHTML = html;
+        }
+
+        function testSearch(query) {
+            const normalizedQuery = query.toLowerCase();
+
+            // Test in Apple
+            if (phoneDatabase.Apple) {
+                for (const [modelName, modelData] of Object.entries(phoneDatabase.Apple)) {
+                    if (modelName.toLowerCase() === normalizedQuery ||
+                        modelName.toLowerCase().includes(normalizedQuery) ||
+                        normalizedQuery.includes(modelName.toLowerCase())) {
+                        return { found: true, message: `Found: ${modelName}` };
+                    }
+                }
+            }
+
+            // Test in Samsung
+            if (phoneDatabase.Samsung) {
+                for (const [modelName, modelData] of Object.entries(phoneDatabase.Samsung)) {
+                    if (modelName.toLowerCase() === normalizedQuery ||
+                        modelName.toLowerCase().includes(normalizedQuery) ||
+                        normalizedQuery.includes(modelName.toLowerCase())) {
+                        return { found: true, message: `Found: ${modelName}` };
+                    }
+                }
+            }
+
+            return { found: false, message: 'Not found in database' };
+        }
+
+        function testPriceSync() {
+            let html = '<h3>Price Sync Test Results:</h3>';
+
+            const localStorage Data = localStorage.getItem('ktmobile_phones');
+            const hasLocalStorage = !!localStorageData;
+            const hasDatabaseData = typeof phoneDatabase !== 'undefined';
+
+            html += `<div class="test-result ${hasLocalStorage ? 'test-pass' : 'test-fail'}">
+                ${hasLocalStorage ? '✅' : '❌'} LocalStorage has phone data
+            </div>`;
+
+            html += `<div class="test-result ${hasDatabaseData ? 'test-pass' : 'test-fail'}">
+                ${hasDatabaseData ? '✅' : '❌'} phoneDatabase is loaded
+            </div>`;
+
+            if (hasLocalStorage && hasDatabaseData) {
+                // Compare sample prices
+                try {
+                    const stored = JSON.parse(localStorageData);
+                    const iPhone17 = stored.find(p => p.model === 'iPhone 17 Pro Max');
+
+                    if (iPhone17 && phoneDatabase.Apple && phoneDatabase.Apple['iPhone 17 Pro Max']) {
+                        const dbData = phoneDatabase.Apple['iPhone 17 Pro Max'];
+                        const match = iPhone17.basePrice === dbData.basePrice;
+
+                        html += `<div class="test-result ${match ? 'test-pass' : 'test-fail'}">
+                            ${match ? '✅' : '❌'} iPhone 17 Pro Max prices match<br>
+                            LocalStorage: $${iPhone17.basePrice}<br>
+                            phoneDatabase: $${dbData.basePrice}
+                        </div>`;
+                    }
+                } catch (e) {
+                    html += `<div class="test-result test-fail">❌ Error comparing prices: ${e.message}</div>`;
+                }
+            }
+
+            document.getElementById('price-sync').innerHTML = html;
+        }
+
+        function forceReloadPrices() {
+            if (typeof loadAdminDataForCustomerPages === 'function') {
+                console.log('Force reloading prices...');
+                loadAdminDataForCustomerPages();
+                alert('Prices reloaded! Check console for details.');
+                location.reload();
+            } else {
+                alert('ERROR: loadAdminDataForCustomerPages function not found!');
+            }
+        }
+
+        function testMenuFunctionality() {
+            const hamburger = document.getElementById('hamburgerMenu');
+            if (hamburger) {
+                alert('Hamburger menu element found! This page doesn\'t have the menu, but the element exists in other pages.');
+            } else {
+                alert('This diagnostic page doesn\'t have a hamburger menu. Test on actual pages like sell-phones.html');
+            }
+
+            // Check if script.js loaded
+            if (typeof initializeSearchAutocomplete !== 'undefined') {
+                alert('✅ script.js is loaded and functional');
+            } else {
+                alert('❌ script.js may not be loaded correctly');
+            }
+        }
+    </script>
+</body>
+</html>
