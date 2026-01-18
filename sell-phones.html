@@ -676,50 +676,8 @@
                 appleGrid.innerHTML = '';
                 samsungGrid.innerHTML = '';
 
-                // Priority 1: Try adminManager (localStorage from admin panel)
-                if (typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0) {
-                    console.log('✅ Using adminManager data (localStorage)');
-                    const applePhones = adminManager.phones.filter(p => p.brand === 'Apple' && p.display !== false);
-                    const samsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung' && p.display !== false);
-
-                    // Render Apple models
-                    applePhones.forEach(phone => {
-                        const maxNewPrice = phone.newPhonePrices
-                            ? Math.max(...Object.values(phone.newPhonePrices))
-                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
-                        const maxUsedPrice = phone.storagePrices
-                            ? Math.max(...Object.values(phone.storagePrices))
-                            : phone.basePrice || 0;
-
-                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
-                        const model = {
-                            name: phone.model,
-                            img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
-                            storage: phone.storages || []
-                        };
-                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
-                    });
-
-                    // Render Samsung models
-                    samsungPhones.forEach(phone => {
-                        const maxNewPrice = phone.newPhonePrices
-                            ? Math.max(...Object.values(phone.newPhonePrices))
-                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
-                        const maxUsedPrice = phone.storagePrices
-                            ? Math.max(...Object.values(phone.storagePrices))
-                            : phone.basePrice || 0;
-
-                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
-                        const model = {
-                            name: phone.model,
-                            img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
-                            storage: phone.storages || []
-                        };
-                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
-                    });
-                }
-                // Priority 2: Try phoneDatabase from quote.js (our fixed data with 40 models)
-                else if (typeof phoneDatabase !== 'undefined') {
+                // Priority 1: Try phoneDatabase from quote.js FIRST (has all 40 models with correct data)
+                if (typeof phoneDatabase !== 'undefined') {
                     console.log('✅ Using phoneDatabase from quote.js (40 models)');
 
                     // Render Apple models from phoneDatabase
@@ -777,6 +735,48 @@
                             samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
                         });
                     }
+                }
+                // Priority 2: Try adminManager (localStorage from admin panel)
+                else if (typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0) {
+                    console.log('✅ Using adminManager data (localStorage)');
+                    const applePhones = adminManager.phones.filter(p => p.brand === 'Apple' && p.display !== false);
+                    const samsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung' && p.display !== false);
+
+                    // Render Apple models
+                    applePhones.forEach(phone => {
+                        const maxNewPrice = phone.newPhonePrices
+                            ? Math.max(...Object.values(phone.newPhonePrices))
+                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
+                        const maxUsedPrice = phone.storagePrices
+                            ? Math.max(...Object.values(phone.storagePrices))
+                            : phone.basePrice || 0;
+
+                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const model = {
+                            name: phone.model,
+                            img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
+                            storage: phone.storages || []
+                        };
+                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                    });
+
+                    // Render Samsung models
+                    samsungPhones.forEach(phone => {
+                        const maxNewPrice = phone.newPhonePrices
+                            ? Math.max(...Object.values(phone.newPhonePrices))
+                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
+                        const maxUsedPrice = phone.storagePrices
+                            ? Math.max(...Object.values(phone.storagePrices))
+                            : phone.basePrice || 0;
+
+                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const model = {
+                            name: phone.model,
+                            img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
+                            storage: phone.storages || []
+                        };
+                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                    });
                 }
                 // Priority 3: Fallback to hardcoded phoneModels (last resort)
                 else {
@@ -849,24 +849,12 @@
                 return;
             }
 
-            // Get all phone models - Priority 1: localStorage, Priority 2: phoneDatabase, Priority 3: hardcoded
+            // Get all phone models - Priority 1: phoneDatabase FIRST, Priority 2: localStorage, Priority 3: hardcoded
             let allModels = [];
 
             try {
-                // Priority 1: Try to get models from localStorage (admin panel managed data)
-                const storedPhones = localStorage.getItem('ktmobile_phones');
-                if (storedPhones) {
-                    const phonesData = JSON.parse(storedPhones);
-                    // Convert admin data format to search format
-                    allModels = phonesData.map(phone => ({
-                        name: phone.model,
-                        brand: phone.brand,
-                        storage: phone.storages || [],
-                        img: phone.img || 'default.jpg'
-                    }));
-                }
-                // Priority 2: Use phoneDatabase from quote.js (40 models we just fixed)
-                else if (typeof phoneDatabase !== 'undefined') {
+                // Priority 1: Use phoneDatabase from quote.js FIRST (40 models with correct data)
+                if (typeof phoneDatabase !== 'undefined') {
                     console.log('Search using phoneDatabase (40 models)');
                     // Convert phoneDatabase to search format
                     if (phoneDatabase.Apple) {
@@ -890,10 +878,24 @@
                         });
                     }
                 }
-                // Priority 3: Fallback to hardcoded phoneModels
+                // Priority 2: Try to get models from localStorage (admin panel managed data)
                 else {
-                    console.warn('Search using hardcoded phoneModels fallback');
-                    allModels = [...phoneModels.apple, ...phoneModels.samsung];
+                    const storedPhones = localStorage.getItem('ktmobile_phones');
+                    if (storedPhones) {
+                        const phonesData = JSON.parse(storedPhones);
+                        // Convert admin data format to search format
+                        allModels = phonesData.map(phone => ({
+                            name: phone.model,
+                            brand: phone.brand,
+                            storage: phone.storages || [],
+                            img: phone.img || 'default.jpg'
+                        }));
+                    }
+                    // Priority 3: Fallback to hardcoded phoneModels
+                    else {
+                        console.warn('Search using hardcoded phoneModels fallback');
+                        allModels = [...phoneModels.apple, ...phoneModels.samsung];
+                    }
                 }
             } catch (e) {
                 console.error('Error loading phone data:', e);
