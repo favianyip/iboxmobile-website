@@ -46,6 +46,66 @@
         <div class="mobile-overlay" id="mobileOverlay"></div>
     </header>
 
+    <!-- CRITICAL FIX: Initialize mobile menu INLINE (don't wait for script.js) -->
+    <script>
+    (function() {
+        console.log('🚀 INLINE MOBILE MENU INIT - INDEX.HTML');
+
+        function initMobileMenuNow() {
+            const hamburger = document.getElementById('hamburgerMenu');
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('mobileOverlay');
+
+            if (!hamburger || !navLinks || !overlay) {
+                console.error('❌ Mobile menu elements not found');
+                return;
+            }
+
+            console.log('✅ Mobile menu elements found, attaching listeners');
+
+            // Remove any existing listeners to prevent duplicates
+            const newHamburger = hamburger.cloneNode(true);
+            hamburger.parentNode.replaceChild(newHamburger, hamburger);
+
+            const hamburgerFinal = document.getElementById('hamburgerMenu');
+
+            hamburgerFinal.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('📱 HAMBURGER CLICKED - INDEX PAGE');
+
+                const nav = document.getElementById('navLinks');
+                const over = document.getElementById('mobileOverlay');
+                const ham = document.getElementById('hamburgerMenu');
+
+                ham.classList.toggle('active');
+                nav.classList.toggle('active');
+                over.classList.toggle('active');
+
+                document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+                console.log('📱 Menu is now:', nav.classList.contains('active') ? 'OPEN' : 'CLOSED');
+            });
+
+            overlay.addEventListener('click', function() {
+                console.log('📱 OVERLAY CLICKED - CLOSING');
+                document.getElementById('hamburgerMenu').classList.remove('active');
+                document.getElementById('navLinks').classList.remove('active');
+                document.getElementById('mobileOverlay').classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
+            console.log('✅ Mobile menu initialized successfully on INDEX page!');
+        }
+
+        // Try to initialize immediately if DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMobileMenuNow);
+        } else {
+            initMobileMenuNow();
+        }
+    })();
+    </script>
+
     <main>
         <section class="hero">
             <div class="container">
