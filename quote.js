@@ -181,9 +181,10 @@ function loadAdminDataForCustomerPages() {
             // Update with admin data
             const dbModel = phoneDatabase[brand][model];
 
-            // Update image
+            // Update image - ALWAYS use admin image if available
             if (phone.image) {
                 dbModel.image = phone.image;
+                console.log(`   📷 Updated image for ${brand} ${model}: ${phone.image}`);
             }
 
             // Update basePrice
@@ -231,10 +232,21 @@ function loadAdminDataForCustomerPages() {
             }
         });
 
+        // Check when data was last updated in admin panel
+        const lastUpdate = localStorage.getItem('ktmobile_last_update');
+
         console.log('');
         console.log('✅ SYNC COMPLETE:');
         console.log(`   Updated: ${updatedCount} models`);
         console.log(`   Created: ${createdCount} new models`);
+        if (lastUpdate) {
+            console.log(`   Last admin update: ${lastUpdate}`);
+        }
+        console.log('');
+        console.log('💡 TIP: If images don\'t update after admin changes:');
+        console.log('   1. Hard refresh this page (Ctrl+Shift+R or Cmd+Shift+R)');
+        console.log('   2. Clear browser cache');
+        console.log('   3. Check admin panel saved the correct image path');
         console.log('='.repeat(80));
 
     } catch (error) {

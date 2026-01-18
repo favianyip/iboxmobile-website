@@ -716,9 +716,13 @@
                             const maxNewPrice = maxUsedPrice * 1.15;
                             const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
 
+                            // Get image - phoneDatabase already synced with adminManager by quote.js loadAdminDataForCustomerPages()
+                            // Just use the image directly from phoneDatabase (it's already updated with admin changes)
+                            const imageUrl = modelData.image || 'iphone-16-pro-max.jpg';
+
                             const model = {
                                 name: modelName,
-                                img: modelData.image ? modelData.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
+                                img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
                                 storage: storageOptions
                             };
                             appleGrid.innerHTML += createModelCard(model, 'Apple', price);
@@ -744,9 +748,13 @@
                             const maxNewPrice = maxUsedPrice * 1.15;
                             const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
 
+                            // Get image - phoneDatabase already synced with adminManager by quote.js loadAdminDataForCustomerPages()
+                            // Just use the image directly from phoneDatabase (it's already updated with admin changes)
+                            const imageUrl = modelData.image || 'galaxy-s24-ultra.jpg';
+
                             const model = {
                                 name: modelName,
-                                img: modelData.image ? modelData.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
+                                img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
                                 storage: storageOptions
                             };
                             samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
