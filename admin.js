@@ -44,6 +44,9 @@ class AdminDataManager {
                 return this.initializePhones();
             }
 
+            // CRITICAL FIX: Ensure all phones have proper storagePrices from phoneDatabase
+            this.ensureStoragePrices(phones, db);
+
             // Run migration to add missing fields
             this.migratePhoneData(phones);
             return phones;
@@ -52,6 +55,56 @@ class AdminDataManager {
         // Initialize from existing quote.js data structure
         console.log('📦 No localStorage data, initializing from phoneDatabase...');
         return this.initializePhones();
+    }
+
+    /**
+     * Ensure all phones have proper storagePrices populated from phoneDatabase
+     * CRITICAL: Fixes issue where edit modal shows 0 prices
+     */
+    ensureStoragePrices(phones, db) {
+        if (!db) return;
+
+        let fixed = 0;
+        phones.forEach(phone => {
+            // Check if this phone exists in phoneDatabase
+            const brandData = db[phone.brand];
+            if (!brandData) return;
+
+            const modelData = brandData[phone.model];
+            if (!modelData) return;
+
+            // Check if storagePrices is missing or incomplete
+            let needsFix = false;
+            if (!phone.storagePrices || Object.keys(phone.storagePrices).length === 0) {
+                needsFix = true;
+            } else {
+                // Check if any storage is missing from storagePrices
+                phone.storages.forEach(storage => {
+                    if (!phone.storagePrices[storage] || phone.storagePrices[storage] === 0) {
+                        needsFix = true;
+                    }
+                });
+            }
+
+            if (needsFix) {
+                console.log(`🔧 Fixing storagePrices for ${phone.brand} ${phone.model}...`);
+
+                // Rebuild storagePrices from phoneDatabase
+                const storagePrices = {};
+                Object.entries(modelData.storage || {}).forEach(([storage, modifier]) => {
+                    storagePrices[storage] = (modelData.basePrice || 0) + (modifier || 0);
+                });
+
+                phone.storagePrices = storagePrices;
+                phone.basePrice = modelData.basePrice || 0;
+                fixed++;
+            }
+        });
+
+        if (fixed > 0) {
+            console.log(`✅ Fixed storagePrices for ${fixed} phones`);
+            localStorage.setItem('ktmobile_phones', JSON.stringify(phones));
+        }
     }
 
     /**
@@ -2299,8 +2352,29 @@ function updateStoragePrices() {
         return;
     }
 
-    // Used prices section (existing)
-    container.innerHTML = checkedStorages.map(storage => `
+    // Get current phone with fallback logic
+    let currentPhone = null;
+    if (adminManager.currentEditingPhone) {
+        currentPhone = adminManager.getPhone(adminManager.currentEditingPhone);
+    }
+
+    // Used prices section with intelligent fallback
+    container.innerHTML = checkedStorages.map(storage => {
+        let usedPrice = 0;
+
+        if (currentPhone) {
+            // Try storagePrices first
+            if (currentPhone.storagePrices && currentPhone.storagePrices[storage]) {
+                usedPrice = currentPhone.storagePrices[storage];
+            }
+            // Fallback to basePrice if storagePrices is missing
+            else if (currentPhone.basePrice) {
+                usedPrice = currentPhone.basePrice;
+                console.warn(`⚠️  ${currentPhone.model} missing storagePrices[${storage}], using basePrice: $${usedPrice}`);
+            }
+        }
+
+        return `
         <div class="storage-price-item" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
             <label style="min-width: 80px; font-weight: 600; color: var(--text-dark);">${storage}:</label>
             <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem;">
@@ -2308,22 +2382,28 @@ function updateStoragePrices() {
                 <input type="number" class="form-control storage-price-input"
                        data-storage="${storage}"
                        placeholder="Enter base price"
-                       value="${adminManager.currentEditingPhone ?
-                           (adminManager.getPhone(adminManager.currentEditingPhone)?.storagePrices?.[storage] || 0) : 0}"
+                       value="${usedPrice}"
                        min="0"
                        step="10"
                        required
                        style="max-width: 200px;">
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
-    // New phone prices section - FIXED: No auto-calculation!
+    // New phone prices section - with intelligent fallback
     if (newPriceContainer) {
         newPriceContainer.innerHTML = checkedStorages.map(storage => {
-            const newPrice = adminManager.currentEditingPhone
-                ? (adminManager.getPhone(adminManager.currentEditingPhone)?.newPhonePrices?.[storage] || 0)
-                : 0;
+            let newPrice = 0;
+
+            if (currentPhone) {
+                // Use exact NEW price if available
+                if (currentPhone.newPhonePrices && currentPhone.newPhonePrices[storage]) {
+                    newPrice = currentPhone.newPhonePrices[storage];
+                }
+                // NO AUTO-CALCULATION - Leave as 0 if no exact NEW price exists
+            }
 
             return `
                 <div class="new-price-item" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
@@ -2518,7 +2598,10 @@ function savePhone() {
             storagePrices = {};
         }
 
-        basePrice = Math.min(...Object.values(storagePrices));
+        // Calculate basePrice safely, handling empty storagePrices
+        basePrice = Object.values(storagePrices).length > 0
+            ? Math.min(...Object.values(storagePrices))
+            : (Object.values(newPhonePrices).length > 0 ? Math.min(...Object.values(newPhonePrices)) : 0);
     }
 
     // Validate required fields
