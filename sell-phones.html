@@ -417,14 +417,67 @@
         <div class="mobile-overlay" id="mobileOverlay"></div>
     </header>
 
-    <!-- CRITICAL: Mobile localStorage Warning Banner -->
-    <div id="mobile-warning-banner" style="display: none; background: #dc3545; color: white; padding: 15px 20px; text-align: center; font-weight: 500; position: relative;">
-        <div style="max-width: 800px; margin: 0 auto;">
-            ⚠️ <strong>MOBILE USER ALERT:</strong> Prices not loaded on this device!
-            <br><small>You need to import prices from the admin panel on THIS mobile browser.</small>
-            <br><button onclick="window.location.href='admin.html'" style="margin-top: 10px; background: white; color: #dc3545; padding: 8px 16px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Go to Admin Panel</button>
-        </div>
-    </div>
+    <!-- CRITICAL FIX: Initialize mobile menu INLINE (don't wait for script.js) -->
+    <script>
+    (function() {
+        console.log('🚀 INLINE MOBILE MENU INIT');
+
+        function initMobileMenuNow() {
+            const hamburger = document.getElementById('hamburgerMenu');
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('mobileOverlay');
+
+            if (!hamburger || !navLinks || !overlay) {
+                console.error('❌ Mobile menu elements not found');
+                return;
+            }
+
+            console.log('✅ Mobile menu elements found, attaching listeners');
+
+            // Remove any existing listeners to prevent duplicates
+            const newHamburger = hamburger.cloneNode(true);
+            hamburger.parentNode.replaceChild(newHamburger, hamburger);
+
+            const hamburgerFinal = document.getElementById('hamburgerMenu');
+
+            hamburgerFinal.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('📱 HAMBURGER CLICKED');
+
+                const nav = document.getElementById('navLinks');
+                const over = document.getElementById('mobileOverlay');
+                const ham = document.getElementById('hamburgerMenu');
+
+                ham.classList.toggle('active');
+                nav.classList.toggle('active');
+                over.classList.toggle('active');
+
+                document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+                console.log('📱 Menu is now:', nav.classList.contains('active') ? 'OPEN' : 'CLOSED');
+            });
+
+            overlay.addEventListener('click', function() {
+                console.log('📱 OVERLAY CLICKED - CLOSING');
+                document.getElementById('hamburgerMenu').classList.remove('active');
+                document.getElementById('navLinks').classList.remove('active');
+                document.getElementById('mobileOverlay').classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
+            console.log('✅ Mobile menu initialized successfully!');
+        }
+
+        // Try to initialize immediately if DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMobileMenuNow);
+        } else {
+            initMobileMenuNow();
+        }
+    })();
+    </script>
+
+    <!-- localStorage warning removed - now using ONLY phoneDatabase (backend prices) -->
 
     <div class="sell-page-header">
         <h1 id="page-title">Sell Your Phones</h1>
@@ -595,47 +648,21 @@
         // Initialize page
         function initPage() {
             console.log('='.repeat(80));
-            console.log('📱 SELL-PHONES.HTML INITIALIZATION');
+            console.log('📱 SIMPLIFIED SELL-PHONES INITIALIZATION');
+            console.log('💡 NOW USING ONLY phoneDatabase (backend prices)');
+            console.log('💡 NO localStorage dependency - works on all devices!');
             console.log('='.repeat(80));
 
-            // CRITICAL: Check device type and localStorage status
             const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const hasLocalStorageData = !!localStorage.getItem('ktmobile_phones');
-            const hasDatabaseData = typeof phoneDatabase !== 'undefined';
-
-            console.log('📱 Device Type:', isMobile ? 'MOBILE' : 'DESKTOP');
-            console.log('📱 Screen Width:', window.innerWidth + 'px');
-            console.log('📦 localStorage has data:', hasLocalStorageData);
-            console.log('📦 phoneDatabase available:', hasDatabaseData);
-
-            // CRITICAL: Show warning banner if on mobile without data
-            if (isMobile && !hasLocalStorageData) {
-                console.error('='.repeat(80));
-                console.error('❌ CRITICAL ERROR: MOBILE DEVICE WITHOUT LOCALSTORAGE DATA!');
-                console.error('='.repeat(80));
-                console.error('🔥 localStorage is BROWSER-SPECIFIC!');
-                console.error('🔥 If you imported prices on desktop Chrome, mobile Safari won\'t have them!');
-                console.error('🔥 You must import prices FROM this mobile browser!');
-                console.error('');
-                console.error('📋 SOLUTION:');
-                console.error('   1. On THIS mobile device, open: admin.html');
-                console.error('   2. Log in to admin panel');
-                console.error('   3. Click "Import Exact Prices"');
-                console.error('   4. Come back to this page');
-                console.error('='.repeat(80));
-
-                // Show warning banner
-                const banner = document.getElementById('mobile-warning-banner');
-                if (banner) {
-                    banner.style.display = 'block';
-                }
-            }
+            console.log('📱 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
+            console.log('📱 Screen:', window.innerWidth + 'px');
 
             if (typeof phoneDatabase !== 'undefined') {
+                console.log('✅ phoneDatabase loaded');
                 console.log('📱 Apple models:', Object.keys(phoneDatabase.Apple || {}).length);
                 console.log('📱 Samsung models:', Object.keys(phoneDatabase.Samsung || {}).length);
             } else {
-                console.error('❌ phoneDatabase is undefined! quote.js may not have loaded.');
+                console.error('❌ phoneDatabase not loaded! quote.js may have failed.');
             }
 
             // Check URL parameters
@@ -869,70 +896,13 @@
                         });
                     }
                 }
-                // Priority 2: Try adminManager (localStorage from admin panel)
-                else if (typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0) {
-                    console.log('✅ Using adminManager data (localStorage)');
-                    const applePhones = adminManager.phones.filter(p => p.brand === 'Apple' && p.display !== false);
-                    const samsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung' && p.display !== false);
-
-                    // Render Apple models
-                    applePhones.forEach(phone => {
-                        const maxNewPrice = phone.newPhonePrices
-                            ? Math.max(...Object.values(phone.newPhonePrices))
-                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
-                        const maxUsedPrice = phone.storagePrices
-                            ? Math.max(...Object.values(phone.storagePrices))
-                            : phone.basePrice || 0;
-
-                        const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
-                        const model = {
-                            name: phone.model,
-                            img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
-                            storage: sortStorageOptions(phone.storages || []) // Sort storage in ascending order
-                        };
-                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
-                    });
-
-                    // Render Samsung models
-                    samsungPhones.forEach(phone => {
-                        const maxNewPrice = phone.newPhonePrices
-                            ? Math.max(...Object.values(phone.newPhonePrices))
-                            : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : phone.basePrice * 1.15);
-                        const maxUsedPrice = phone.storagePrices
-                            ? Math.max(...Object.values(phone.storagePrices))
-                            : phone.basePrice || 0;
-
-                        const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
-                        const model = {
-                            name: phone.model,
-                            img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
-                            storage: sortStorageOptions(phone.storages || []) // Sort storage in ascending order
-                        };
-                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
-                    });
-                }
-                // Priority 3: Fallback to hardcoded phoneModels (last resort)
+                // SIMPLIFIED: NO Priority 2 or 3 - ONLY phoneDatabase
+                // NO localStorage, NO hardcoded fallback, NO complexity
                 else {
-                    console.warn('⚠️ Using hardcoded phoneModels fallback');
-                    console.log(`📦 Hardcoded models: ${phoneModels.apple.length} Apple + ${phoneModels.samsung.length} Samsung`);
-
-                    phoneModels.apple.forEach(model => {
-                        const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                        const sortedModel = {
-                            ...model,
-                            storage: sortStorageOptions(model.storage || []) // Sort storage in ascending order
-                        };
-                        appleGrid.innerHTML += createModelCard(sortedModel, 'Apple', price);
-                    });
-
-                    phoneModels.samsung.forEach(model => {
-                        const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                        const sortedModel = {
-                            ...model,
-                            storage: sortStorageOptions(model.storage || []) // Sort storage in ascending order
-                        };
-                        samsungGrid.innerHTML += createModelCard(sortedModel, 'Samsung', price);
-                    });
+                    console.error('❌ phoneDatabase not available!');
+                    console.error('💡 quote.js must be loaded with phoneDatabase');
+                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">Error: Phone database not loaded. Please refresh the page.</p>';
+                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">Error: Phone database not loaded. Please refresh the page.</p>';
                 }
 
                 // Fade in with new content

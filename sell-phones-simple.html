@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Sell Phones - IBOX MOBILE SINGAPORE</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="quote.js"></script>
+    <script>
+        // SIMPLIFIED SYSTEM - ONLY uses phoneDatabase from quote.js
+        // NO localStorage, NO adminManager, NO complexity
+        // Everyone sees same prices from backend (phoneDatabase)
+
+        let currentCondition = 'used';
+
+        // Initialize after DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('='.repeat(80));
+            console.log('🚀 SIMPLIFIED SELL-PHONES INITIALIZATION');
+            console.log('='.repeat(80));
+
+            // Initialize mobile menu FIRST
+            initMobileMenu();
+
+            // Initialize page
+            initPage();
+        });
+
+        // MOBILE MENU - Inline implementation (don't rely on external script)
+        function initMobileMenu() {
+            console.log('📱 Initializing mobile menu...');
+
+            const hamburger = document.getElementById('hamburgerMenu');
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('mobileOverlay');
+
+            if (!hamburger || !navLinks || !overlay) {
+                console.error('❌ Mobile menu elements not found!');
+                return;
+            }
+
+            console.log('✅ Mobile menu elements found');
+
+            // Hamburger click
+            hamburger.addEventListener('click', function() {
+                console.log('📱 Hamburger clicked');
+                hamburger.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+            });
+
+            // Overlay click
+            overlay.addEventListener('click', function() {
+                console.log('📱 Overlay clicked - closing menu');
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
+            console.log('✅ Mobile menu initialized successfully');
+        }
+
+        function initPage() {
+            console.log('📱 Device:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'MOBILE' : 'DESKTOP');
+            console.log('📱 Screen:', window.innerWidth + 'px');
+
+            // Check URL for type parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            currentCondition = typeParam === 'new' ? 'new' : 'used';
+
+            updateToggleButtons();
+            renderModels();
+        }
+
+        function switchCondition(condition) {
+            console.log('🔄 Switching to:', condition);
+            currentCondition = condition;
+            updateToggleButtons();
+            renderModels();
+
+            // Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('type', condition);
+            window.history.pushState({}, '', url);
+        }
+
+        function updateToggleButtons() {
+            const usedBtn = document.getElementById('used-toggle');
+            const newBtn = document.getElementById('new-toggle');
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+
+            if (currentCondition === 'used') {
+                usedBtn.classList.add('active');
+                newBtn.classList.remove('active');
+                pageTitle.textContent = 'Sell Used Phones';
+                pageSubtitle.textContent = 'Get cash for your pre-owned devices';
+            } else {
+                newBtn.classList.add('active');
+                usedBtn.classList.remove('active');
+                pageTitle.textContent = 'Sell New Phones';
+                pageSubtitle.textContent = 'Get the best prices for sealed devices';
+            }
+        }
+
+        function renderModels() {
+            console.log('='.repeat(80));
+            console.log('🔄 RENDERING MODELS');
+            console.log('='.repeat(80));
+            console.log('Condition:', currentCondition);
+
+            const appleGrid = document.getElementById('apple-grid');
+            const samsungGrid = document.getElementById('samsung-grid');
+
+            if (!appleGrid || !samsungGrid) {
+                console.error('❌ Grid elements not found');
+                return;
+            }
+
+            // Fade out
+            appleGrid.style.opacity = '0';
+            samsungGrid.style.opacity = '0';
+
+            setTimeout(() => {
+                appleGrid.innerHTML = '';
+                samsungGrid.innerHTML = '';
+
+                // Check phoneDatabase
+                if (typeof phoneDatabase === 'undefined') {
+                    console.error('❌ phoneDatabase not loaded!');
+                    appleGrid.innerHTML = '<p style="text-align:center;padding:40px;">Loading...</p>';
+                    samsungGrid.innerHTML = '<p style="text-align:center;padding:40px;">Loading...</p>';
+                    return;
+                }
+
+                console.log('✅ Using phoneDatabase');
+                console.log('Apple models:', Object.keys(phoneDatabase.Apple || {}).length);
+                console.log('Samsung models:', Object.keys(phoneDatabase.Samsung || {}).length);
+
+                // Render Apple
+                if (phoneDatabase.Apple) {
+                    Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
+                        const card = createModelCard(modelName, modelData, 'Apple');
+                        appleGrid.innerHTML += card;
+                    });
+                }
+
+                // Render Samsung
+                if (phoneDatabase.Samsung) {
+                    Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
+                        const card = createModelCard(modelName, modelData, 'Samsung');
+                        samsungGrid.innerHTML += card;
+                    });
+                }
+
+                // Fade in
+                appleGrid.style.opacity = '1';
+                samsungGrid.style.opacity = '1';
+
+                console.log('✅ Rendering complete');
+                console.log('='.repeat(80));
+            }, 200);
+        }
+
+        function createModelCard(modelName, modelData, brand) {
+            // Calculate price
+            const basePrice = modelData.basePrice || 0;
+            let maxPrice = basePrice;
+
+            // Find highest storage price
+            if (modelData.storage) {
+                const prices = Object.values(modelData.storage).map(modifier => basePrice + modifier);
+                maxPrice = Math.max(...prices);
+            }
+
+            // Used = actual price, New = 15% higher
+            const price = currentCondition === 'used'
+                ? Math.round(maxPrice / 10) * 10
+                : Math.round((maxPrice * 1.15) / 10) * 10;
+
+            // Get image
+            const img = modelData.image || (brand === 'Apple' ? 'images/phones/iphone-16-pro-max.jpg' : 'images/phones/galaxy-s24-ultra.jpg');
+
+            // Sort storage
+            const storageOptions = Object.keys(modelData.storage || {}).sort((a, b) => {
+                const parseStorage = (str) => {
+                    const match = str.match(/^(\d+)(GB|TB)$/i);
+                    if (!match) return 0;
+                    const num = parseInt(match[1]);
+                    return match[2].toUpperCase() === 'TB' ? num * 1024 : num;
+                };
+                return parseStorage(a) - parseStorage(b);
+            });
+
+            return `
+                <div class="model-card" onclick="navigateTo('${brand}', '${modelName.replace(/'/g, "\\'")}')">
+                    <img src="${img}" alt="${modelName}" onerror="this.src='${brand === 'Apple' ? 'images/phones/iphone-16-pro-max.jpg' : 'images/phones/galaxy-s24-ultra.jpg'}'" style="width:100%;height:200px;object-fit:contain;background:#f5f5f5">
+                    <h3 style="margin:15px 0 10px 0;font-size:1.1rem">${modelName}</h3>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:15px">
+                        ${storageOptions.map(s => `<span style="background:#f0f0f0;padding:4px 8px;border-radius:4px;font-size:0.85rem">${s}</span>`).join('')}
+                    </div>
+                    <div style="margin-top:auto">
+                        <div style="font-size:0.9rem;color:#666">Get up to</div>
+                        <div style="font-size:1.8rem;font-weight:bold;color:#C9A84C">$${price}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function navigateTo(brand, model) {
+            window.location.href = `quote.html?brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(model)}&type=${currentCondition}&direct=true`;
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+
+        .page-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            padding: 8rem 0 4rem 0;
+            text-align: center;
+            color: white;
+        }
+
+        .page-header h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .page-header p { font-size: 1.1rem; opacity: 0.9; }
+
+        .condition-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem 1rem;
+            background: #f5f5f5;
+        }
+
+        .condition-toggle-btn {
+            padding: 15px 40px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .condition-toggle-btn:hover {
+            border-color: #C9A84C;
+            transform: translateY(-2px);
+        }
+
+        .condition-toggle-btn.active {
+            background: #C9A84C;
+            color: white;
+            border-color: #C9A84C;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        .brand-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .brand-tab {
+            padding: 12px 30px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .brand-tab.active {
+            background: #C9A84C;
+            color: white;
+            border-color: #C9A84C;
+        }
+
+        .brand-content {
+            display: none;
+        }
+
+        .brand-content.active {
+            display: block;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            transition: opacity 0.3s;
+        }
+
+        .model-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .model-card:hover {
+            border-color: #C9A84C;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+        }
+
+        @media (max-width: 768px) {
+            .page-header { padding: 4rem 1rem 2rem 1rem; }
+            .page-header h1 { font-size: 1.8rem; }
+            .model-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+            .condition-toggle-btn { padding: 12px 25px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="index.html" class="logo">
+                <span class="logo-text">IBox Mobile Singapore</span>
+            </a>
+            <div class="hamburger-menu" id="hamburgerMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">Sell Phones <span>▼</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="sell-phones-simple.html?type=used">Trade In Used Phone</a></li>
+                        <li><a href="sell-phones-simple.html?type=new">Trade In New Phone</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#wholesale">Wholesale</a></li>
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+    </header>
+
+    <div class="page-header">
+        <h1 id="page-title">Sell Your Phones</h1>
+        <p id="page-subtitle">Get the best prices for your devices</p>
+    </div>
+
+    <div class="condition-toggle">
+        <button class="condition-toggle-btn active" id="used-toggle" onclick="switchCondition('used')">
+            👤 Used
+        </button>
+        <button class="condition-toggle-btn" id="new-toggle" onclick="switchCondition('new')">
+            📦 New
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="brand-tabs">
+            <button class="brand-tab active" onclick="showBrand('apple')">Apple</button>
+            <button class="brand-tab" onclick="showBrand('samsung')">Samsung</button>
+        </div>
+
+        <div id="apple-models" class="brand-content active">
+            <h2>Select iPhone Model</h2>
+            <div class="model-grid" id="apple-grid">
+                <p style="text-align:center;padding:40px;">Loading models...</p>
+            </div>
+        </div>
+
+        <div id="samsung-models" class="brand-content">
+            <h2>Select Samsung Model</h2>
+            <div class="model-grid" id="samsung-grid">
+                <p style="text-align:center;padding:40px;">Loading models...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showBrand(brand) {
+            document.querySelectorAll('.brand-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.brand-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(brand + '-models').classList.add('active');
+        }
+    </script>
+</body>
+</html>
