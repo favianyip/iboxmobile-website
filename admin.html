@@ -1274,15 +1274,20 @@
                 <div class="import-options">
                     <h3>Choose Import Method:</h3>
 
-                    <!-- Option 1: Benchmark Import -->
-                    <div class="import-option" style="margin-bottom: 2rem; padding: 1.5rem; border: 2px solid var(--gold); border-radius: 8px;">
-                        <h4 style="color: var(--gold);">🎯 Benchmark Price Import (Recommended)</h4>
-                        <p>Import exact benchmark prices from iPhone_Benchmark_Price_List.xlsx</p>
-                        <button class="btn btn-primary" onclick="runBenchmarkImport()" style="width: 100%;">
-                            📊 Import Benchmark Prices
+                    <!-- Option 1: Exact Price Import (NO AUTO-CALCULATIONS) -->
+                    <div class="import-option" style="margin-bottom: 2rem; padding: 1.5rem; border: 2px solid var(--gold); border-radius: 8px; background: linear-gradient(135deg, rgba(201, 168, 76, 0.05) 0%, rgba(184, 151, 59, 0.05) 100%);">
+                        <h4 style="color: var(--gold);">✨ Import Exact Prices (Recommended)</h4>
+                        <p style="margin: 0.5rem 0; font-weight: 600; color: var(--text-dark);">Apple & Samsung - EXACT prices from Excel</p>
+                        <p style="margin: 0.5rem 0; font-size: 0.875rem; color: var(--text-dark);">
+                            ✓ Apple: 22 models with USED & NEW prices<br>
+                            ✓ Samsung: 17 models with USED & NEW prices<br>
+                            ✓ NO auto-calculations - exact Excel data only
+                        </p>
+                        <button class="btn btn-primary" onclick="runExactPriceImport()" style="width: 100%; margin-top: 1rem; font-weight: 600;">
+                            🎯 Import Exact Prices Now
                         </button>
-                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
-                            Source: Excel file with 7 models, separate USED & NEW prices
+                        <p style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.5rem; font-style: italic;">
+                            Source: Apple_USED_NEW_FULL_REVIEW.xlsx & Samsung_USED_NEW_FULL_REVIEW.xlsx
                         </p>
                     </div>
 
