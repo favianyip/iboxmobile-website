@@ -117,6 +117,170 @@ function updatePhoneDatabaseWithDynamicPrices() {
     console.log('Phone database updated with dynamic prices');
 }
 
+// ============================================================================
+// LOAD ADMIN DATA FROM LOCALSTORAGE FOR CUSTOMER PAGES
+// ============================================================================
+// This creates a simulated adminManager from localStorage data
+// So customer pages can access the same data as admin panel
+// ============================================================================
+
+function loadAdminDataForCustomerPages() {
+    console.log('🔄 Loading admin data from localStorage for customer pages...');
+
+    try {
+        // Load phones from localStorage (same as admin panel)
+        const storedPhones = localStorage.getItem('ktmobile_phones');
+
+        if (!storedPhones) {
+            console.warn('⚠️ No admin phone data found in localStorage');
+            return;
+        }
+
+        const adminPhones = JSON.parse(storedPhones);
+        console.log(`✅ Loaded ${adminPhones.length} phones from admin panel`);
+
+        // Create simulated adminManager object for compatibility
+        if (typeof adminManager === 'undefined') {
+            window.adminManager = {
+                phones: adminPhones
+            };
+            console.log('✅ Created adminManager from localStorage data');
+        }
+
+        // Update phoneDatabase with admin data
+        adminPhones.forEach(phone => {
+            const brand = phone.brand;
+            const model = phone.model;
+
+            // Skip if brand/model doesn't exist in phoneDatabase
+            if (!phoneDatabase[brand]) {
+                console.log(`⚠️ Brand ${brand} not in phoneDatabase, skipping`);
+                return;
+            }
+
+            // Create model entry if it doesn't exist
+            if (!phoneDatabase[brand][model]) {
+                phoneDatabase[brand][model] = {
+                    basePrice: 0,
+                    image: '',
+                    storage: {},
+                    colors: []
+                };
+                console.log(`➕ Created new entry for ${brand} ${model}`);
+            }
+
+            // Update with admin data
+            const dbModel = phoneDatabase[brand][model];
+
+            // Update image
+            if (phone.image) {
+                dbModel.image = phone.image;
+            }
+
+            // Update basePrice
+            if (phone.basePrice !== undefined) {
+                dbModel.basePrice = phone.basePrice;
+            }
+
+            // Update storage options - Convert absolute prices to modifiers
+            if (phone.storages && phone.storages.length > 0) {
+                const newStorage = {};
+                const basePrice = phone.basePrice || 0;
+
+                phone.storages.forEach(storage => {
+                    if (phone.storagePrices && phone.storagePrices[storage] !== undefined) {
+                        // Calculate modifier from absolute USED price
+                        newStorage[storage] = phone.storagePrices[storage] - basePrice;
+                    } else {
+                        newStorage[storage] = 0;
+                    }
+                });
+
+                dbModel.storage = newStorage;
+                console.log(`   Storage options: ${phone.storages.join(', ')}`);
+            }
+
+            // Update colors - Convert strings to objects with hex
+            if (phone.colors && phone.colors.length > 0) {
+                dbModel.colors = phone.colors.map(colorName => {
+                    // Try to find hex from existing database
+                    const existingColor = dbModel.colors.find(c =>
+                        (typeof c === 'string' ? c : c.name) === colorName
+                    );
+
+                    if (existingColor && typeof existingColor === 'object') {
+                        return existingColor; // Keep existing hex
+                    }
+
+                    // Generate default color object
+                    return {
+                        name: colorName,
+                        hex: getColorHex(colorName) || '#CCCCCC'
+                    };
+                });
+                console.log(`   Colors: ${phone.colors.join(', ')}`);
+            }
+        });
+
+        console.log('✅ phoneDatabase updated with admin data');
+        console.log('📊 Available models:', Object.entries(phoneDatabase).map(([brand, models]) =>
+            `${brand}: ${Object.keys(models).length} models`
+        ).join(', '));
+
+    } catch (error) {
+        console.error('❌ Error loading admin data:', error);
+    }
+}
+
+// Helper function to get color hex values
+function getColorHex(colorName) {
+    const colorMap = {
+        // Titanium colors
+        'Desert Titanium': '#8B7355',
+        'Natural Titanium': '#A8A8A0',
+        'White Titanium': '#F5F5F0',
+        'Black Titanium': '#2C2C2C',
+        'Blue Titanium': '#5B7C99',
+
+        // Basic colors
+        'Orange': '#FF8C00',
+        'Cosmic Orange': '#FF6B35',
+        'Blue': '#007AFF',
+        'Deep Blue': '#003D82',
+        'Silver': '#C0C0C0',
+        'Gold': '#FFD700',
+        'Black': '#000000',
+        'White': '#FFFFFF',
+        'Pink': '#FFB6C1',
+        'Green': '#4CD964',
+        'Yellow': '#FFD60A',
+        'Purple': '#BF5AF2',
+        'Red': '#FF3B30',
+        '(PRODUCT)RED': '#E10A0A',
+
+        // Samsung colors
+        'Titanium Black': '#1C1C1C',
+        'Titanium Gray': '#8E8E93',
+        'Titanium Violet': '#C9B3D8',
+        'Titanium Yellow': '#FFD60A',
+        'Titanium Green': '#30D158',
+        'Titanium Orange': '#FF9500',
+        'Titanium Blue': '#0A84FF',
+        'Onyx Black': '#000000',
+        'Marble Gray': '#B4B4B8',
+        'Cobalt Violet': '#8E7CC3',
+        'Amber Yellow': '#FFD60A',
+        'Jade Green': '#32D74B',
+        'Sapphire Blue': '#0A84FF',
+        'Sandstone Orange': '#FF9F0A'
+    };
+
+    return colorMap[colorName];
+}
+
+// Load admin data on page load - BEFORE phoneDatabase is used
+loadAdminDataForCustomerPages();
+
 // Load prices on page load
 document.addEventListener('DOMContentLoaded', loadDynamicPrices);
 
