@@ -1268,10 +1268,22 @@ function renderPhones() {
     // Filter by search query
     if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase();
-        phones = phones.filter(p => 
+        phones = phones.filter(p =>
             p.model.toLowerCase().includes(lowerQuery) ||
             p.brand.toLowerCase().includes(lowerQuery)
         );
+    }
+
+    // FILTER: If viewing NEW phone prices, hide phones that don't have NEW prices
+    if (currentBuybackType === 'new') {
+        phones = phones.filter(p => {
+            // Check if phone has at least one NEW price greater than 0
+            if (p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0) {
+                const hasNonZeroPrice = Object.values(p.newPhonePrices).some(price => price > 0);
+                return hasNonZeroPrice;
+            }
+            return false; // No NEW prices, hide this phone
+        });
     }
 
     if (phones.length === 0) {
@@ -1754,6 +1766,11 @@ function renderPriceTable() {
                 price = phone.storagePrices && phone.storagePrices[storage]
                     ? phone.storagePrices[storage]
                     : (phone.basePrice || 0);
+            }
+
+            // FILTER: Skip this row if viewing NEW prices and price is 0 (model doesn't have NEW pricing)
+            if (currentPriceType === 'new' && price === 0) {
+                return ''; // Return empty string to skip this row
             }
 
             return `
@@ -4944,3 +4961,80 @@ window.clearAndReimport = clearAndReimport;
 window.currentPriceType = currentPriceType;
 window.switchModalPriceType = switchModalPriceType;
 // REMOVED: recalculateModalNewPrices - Auto-calculation disabled to preserve exact Excel prices
+
+// ============================================
+// CONDITION MODIFIER TOGGLE (USED vs NEW)
+// ============================================
+
+let currentModifierType = 'used'; // Default to used phone modifiers
+
+function switchConditionModifierType(type) {
+    currentModifierType = type;
+
+    const usedBtn = document.getElementById('usedModifierToggle');
+    const newBtn = document.getElementById('newModifierToggle');
+    const usedSection = document.getElementById('usedConditionModifiers');
+    const newSection = document.getElementById('newConditionModifiers');
+
+    if (!usedBtn || !newBtn || !usedSection || !newSection) {
+        console.warn('Condition modifier toggle elements not found');
+        return;
+    }
+
+    usedBtn.style.transition = 'all 0.3s ease';
+    newBtn.style.transition = 'all 0.3s ease';
+
+    if (type === 'used') {
+        usedBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+        usedBtn.style.color = 'white';
+        usedBtn.style.boxShadow = '0 4px 12px rgba(201, 168, 76, 0.4)';
+        usedBtn.style.transform = 'scale(1.05)';
+        usedBtn.classList.add('active');
+
+        newBtn.style.background = '#e9ecef';
+        newBtn.style.color = '#666';
+        newBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+        newBtn.style.transform = 'scale(1)';
+        newBtn.classList.remove('active');
+
+        usedSection.style.transition = 'opacity 0.3s ease';
+        newSection.style.transition = 'opacity 0.3s ease';
+
+        newSection.style.opacity = '0';
+        setTimeout(() => {
+            newSection.style.display = 'none';
+            usedSection.style.display = 'block';
+            setTimeout(() => {
+                usedSection.style.opacity = '1';
+            }, 50);
+        }, 300);
+    } else {
+        newBtn.style.background = 'linear-gradient(135deg, #C9A84C 0%, #B8973B 100%)';
+        newBtn.style.color = 'white';
+        newBtn.style.boxShadow = '0 4px 12px rgba(201, 168, 76, 0.4)';
+        newBtn.style.transform = 'scale(1.05)';
+        newBtn.classList.add('active');
+
+        usedBtn.style.background = '#e9ecef';
+        usedBtn.style.color = '#666';
+        usedBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+        usedBtn.style.transform = 'scale(1)';
+        usedBtn.classList.remove('active');
+
+        usedSection.style.transition = 'opacity 0.3s ease';
+        newSection.style.transition = 'opacity 0.3s ease';
+
+        usedSection.style.opacity = '0';
+        setTimeout(() => {
+            usedSection.style.display = 'none';
+            newSection.style.display = 'block';
+            setTimeout(() => {
+                newSection.style.opacity = '1';
+            }, 50);
+        }, 300);
+    }
+
+    showNotification(`Switched to ${type === 'used' ? 'Used' : 'New'} Phone Condition Modifiers`, 'success');
+}
+
+window.switchConditionModifierType = switchConditionModifierType;
