@@ -239,17 +239,17 @@ class AdminDataManager {
             {
                 id: 'samsung-galaxy-s24-ultra-4',
                 brand: 'Samsung',
-                model: 'Galaxy S24 Ultra',
+                model: 'Galaxy S24 Ultra 5G', // FIXED: Added "5G" to match import
                 image: 'images/phones/galaxy-s24-ultra.jpg',
                 storages: ['256GB', '512GB', '1TB'],
                 colors: ['Titanium Gray', 'Titanium Black', 'Titanium Violet', 'Titanium Yellow'],
-                basePrice: 1200,
-                storagePrices: { '256GB': 1200, '512GB': 1300, '1TB': 1400 },
-                newPhonePrices: { '256GB': 1380, '512GB': 1495, '1TB': 1610 },
+                basePrice: 580,
+                storagePrices: { '256GB': 580, '512GB': 650, '1TB': 700 }, // FIXED: Exact USED prices from Excel
+                newPhonePrices: {}, // FIXED: Leave empty - will be filled by import
                 buyPrices: {
-                    '256GB': { excellent: 1200, good: 1140, fair: 1020 },
-                    '512GB': { excellent: 1300, good: 1235, fair: 1105 },
-                    '1TB': { excellent: 1400, good: 1330, fair: 1190 }
+                    '256GB': { excellent: 580, good: 551, fair: 493 },
+                    '512GB': { excellent: 650, good: 618, fair: 553 },
+                    '1TB': { excellent: 700, good: 665, fair: 595 }
                 },
                 quantities: {
                     '256GB': { excellent: 0, good: 0, fair: 0 },
@@ -264,20 +264,20 @@ class AdminDataManager {
             {
                 id: 'samsung-galaxy-s24-5',
                 brand: 'Samsung',
-                model: 'Galaxy S24',
+                model: 'Galaxy S24 5G', // FIXED: Added "5G" to match import
                 image: 'images/phones/galaxy-s24.jpg',
-                storages: ['128GB', '256GB'],
+                storages: ['256GB', '512GB'],
                 colors: ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow'],
-                basePrice: 800,
-                storagePrices: { '128GB': 800, '256GB': 850 },
-                newPhonePrices: { '128GB': 920, '256GB': 978 },
+                basePrice: 380,
+                storagePrices: { '256GB': 380, '512GB': 450 }, // FIXED: Exact USED prices from Excel
+                newPhonePrices: {}, // FIXED: Leave empty - will be filled by import
                 buyPrices: {
-                    '128GB': { excellent: 800, good: 760, fair: 680 },
-                    '256GB': { excellent: 850, good: 808, fair: 723 }
+                    '256GB': { excellent: 380, good: 361, fair: 323 },
+                    '512GB': { excellent: 450, good: 428, fair: 383 }
                 },
                 quantities: {
-                    '128GB': { excellent: 0, good: 0, fair: 0 },
-                    '256GB': { excellent: 0, good: 0, fair: 0 }
+                    '256GB': { excellent: 0, good: 0, fair: 0 },
+                    '512GB': { excellent: 0, good: 0, fair: 0 }
                 },
                 available: true,
                 display: true,
@@ -4394,20 +4394,16 @@ function performBulkUpdate() {
                     });
                 }
             } else {
-                // For new phones - update a separate property or use a multiplier
-                // If you have a newPhonePrices field, update that
-                if (phone.newPhonePrices) {
+                // For new phones - ONLY update if newPhonePrices already exists
+                // CRITICAL: Never create newPhonePrices from storagePrices!
+                if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
                     Object.keys(phone.newPhonePrices).forEach(storage => {
                         phone.newPhonePrices[storage] = Math.max(0, phone.newPhonePrices[storage] + priceChange);
                     });
                 } else {
-                    // Create newPhonePrices based on current prices + change
-                    phone.newPhonePrices = {};
-                    if (phone.storagePrices) {
-                        Object.keys(phone.storagePrices).forEach(storage => {
-                            phone.newPhonePrices[storage] = Math.max(0, phone.storagePrices[storage] + priceChange);
-                        });
-                    }
+                    // Skip phones without NEW prices - they should be added via import
+                    console.warn(`Skipping ${phone.brand} ${phone.model} - no NEW prices to update. Use import instead.`);
+                    return; // Skip this phone
                 }
             }
 
@@ -4625,6 +4621,90 @@ async function runExactPriceImport() {
     }
 }
 
+async function clearAndReimport() {
+    const confirmed = confirm(
+        '🧹 CLEAR ALL PHONE DATA & FRESH IMPORT\n\n' +
+        '⚠️ WARNING: This will:\n' +
+        '1. Delete ALL phones from database\n' +
+        '2. Clear all localStorage data\n' +
+        '3. Import fresh data from Excel files\n\n' +
+        '✅ Use this if:\n' +
+        '- Samsung prices are still showing calculated values\n' +
+        '- You see duplicate phone entries\n' +
+        '- Prices don\'t match Excel files\n\n' +
+        'Continue with complete reset?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+        console.log('🧹 Starting complete database reset...');
+
+        // Clear ALL localStorage data
+        localStorage.removeItem('ktmobile_phones');
+        localStorage.removeItem('ktmobile_phones_backup');
+        console.log('✅ Cleared localStorage');
+
+        // Reset admin manager
+        adminManager.phones = [];
+        console.log('✅ Reset admin manager');
+
+        // Now run fresh import
+        console.log('📥 Running fresh import...');
+
+        const importButton = event.target;
+        const originalText = importButton.innerHTML;
+        importButton.innerHTML = '⏳ Clearing & Importing...';
+        importButton.disabled = true;
+
+        // Load the exact price import script
+        const response = await fetch('import-exact-prices.js');
+        if (!response.ok) {
+            throw new Error(`Failed to load import script: ${response.status}`);
+        }
+
+        const scriptText = await response.text();
+        eval(scriptText);
+
+        if (typeof importExactPrices === 'function') {
+            const result = importExactPrices();
+
+            // Reload from localStorage
+            adminManager.phones = adminManager.loadPhones();
+
+            // Refresh UI
+            renderPhones();
+            renderPriceTable();
+
+            closeImportModal();
+
+            alert(`✅ COMPLETE RESET & IMPORT SUCCESSFUL!\n\n` +
+                  `🗑️  Cleared all old data\n` +
+                  `➕ Added: ${result.added} phones\n` +
+                  `📦 Total: ${result.total} phones\n\n` +
+                  `✨ All prices are fresh from Excel files.\n` +
+                  `✨ NO calculated prices remaining.`);
+
+            console.log('✅ Complete reset and import successful');
+        } else {
+            throw new Error('importExactPrices function not found');
+        }
+
+        importButton.innerHTML = originalText;
+        importButton.disabled = false;
+
+    } catch (error) {
+        console.error('❌ Clear and reimport failed:', error);
+        alert('Clear and reimport failed: ' + error.message);
+
+        const importButton = event.target;
+        if (importButton) {
+            importButton.innerHTML = '🧹 Clear All & Fresh Import';
+            importButton.disabled = false;
+        }
+    }
+}
+
 // ============================================
 // MODAL PRICE TYPE TOGGLE (USED vs NEW)
 // ============================================
@@ -4704,6 +4784,7 @@ window.closeImportModal = closeImportModal;
 window.runBulkImport = runBulkImport;
 window.runBenchmarkImport = runBenchmarkImport;
 window.runExactPriceImport = runExactPriceImport;
+window.clearAndReimport = clearAndReimport;
 window.currentPriceType = currentPriceType;
 window.switchModalPriceType = switchModalPriceType;
 // REMOVED: recalculateModalNewPrices - Auto-calculation disabled to preserve exact Excel prices

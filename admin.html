@@ -1280,8 +1280,14 @@
                             ✓ Samsung: 17 models with USED & NEW prices<br>
                             ✓ NO auto-calculations - exact Excel data only
                         </p>
-                        <button class="btn btn-primary" onclick="runExactPriceImport()" style="width: 100%; margin-top: 1rem; font-weight: 600;">
-                            🎯 Import Exact Prices Now
+                        <button class="btn btn-warning" onclick="clearAndReimport()" style="width: 100%; margin-top: 1rem; font-weight: 600; background: #ff9800; border: none;">
+                            🧹 Clear All & Fresh Import
+                        </button>
+                        <p style="font-size: 0.75rem; color: #ff6b00; margin-top: 0.25rem; font-weight: 600;">
+                            ⚠️ Use this if prices are still incorrect - clears everything and imports fresh
+                        </p>
+                        <button class="btn btn-primary" onclick="runExactPriceImport()" style="width: 100%; margin-top: 0.75rem; font-weight: 600;">
+                            🎯 Import/Update Prices
                         </button>
                         <p style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.5rem; font-style: italic;">
                             Source: Apple_USED_NEW_FULL_REVIEW.xlsx & Samsung_USED_NEW_FULL_REVIEW.xlsx
