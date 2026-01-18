@@ -329,14 +329,14 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
     const officialColors = getOfficialColors(brand, model);
 
     if (existingIndex >= 0) {
-        // Update existing
+        // Update existing - FORCE UPDATE COLORS with official colors
         const existing = phones[existingIndex];
         phones[existingIndex] = {
             ...existing,
             ...phoneData,
             id: existing.id,
             image: existing.image || getImagePath(brand, model),
-            colors: existing.colors && existing.colors.length > 0 ? existing.colors : officialColors,
+            colors: officialColors.length > 0 ? officialColors : existing.colors || [], // Use official colors if available
             buyPrices: existing.buyPrices || calculateBuyPrices(usedPrices),
             quantities: existing.quantities || initializeQuantities(storages),
             createdAt: existing.createdAt || new Date().toISOString()
@@ -359,11 +359,86 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
     }
 }
 
-// Export function
+// ============================================================================
+// UPDATE COLORS ONLY - Standalone function to update all phone colors
+// ============================================================================
+
+function updateAllPhoneColors() {
+    console.log('🎨 Starting Official Colors Update for ALL phones...');
+    console.log('='*80);
+
+    const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+    let updated = 0;
+    let skipped = 0;
+
+    // Collect all official colors for global color list
+    const allOfficialColors = new Set();
+
+    phones.forEach(phone => {
+        const officialColors = getOfficialColors(phone.brand, phone.model);
+
+        if (officialColors.length > 0) {
+            phone.colors = officialColors;
+            phone.updatedAt = new Date().toISOString();
+            updated++;
+            console.log(`✅ Updated colors for ${phone.brand} ${phone.model}: ${officialColors.join(', ')}`);
+
+            // Add to global color list
+            officialColors.forEach(color => allOfficialColors.add(color));
+        } else {
+            skipped++;
+            console.log(`⚠️  No official colors found for ${phone.brand} ${phone.model} - keeping existing: ${(phone.colors || []).join(', ')}`);
+
+            // Add existing colors to global list
+            if (phone.colors && phone.colors.length > 0) {
+                phone.colors.forEach(color => allOfficialColors.add(color));
+            }
+        }
+    });
+
+    // Save phones to localStorage
+    localStorage.setItem('ktmobile_phones', JSON.stringify(phones));
+
+    // Update global color list with all official colors
+    const sortedColors = Array.from(allOfficialColors).sort();
+    localStorage.setItem('ktmobile_available_colors', JSON.stringify(sortedColors));
+    console.log(`\n🎨 Updated global color list with ${sortedColors.length} unique colors`);
+
+    console.log('\n' + '='*80);
+    console.log('✅ OFFICIAL COLORS UPDATE COMPLETE!');
+    console.log(`🎨 Updated: ${updated} phones`);
+    console.log(`⏭️  Skipped: ${skipped} phones (no official colors in database)`);
+    console.log(`📦 Total: ${phones.length} phones in database`);
+    console.log(`🎨 Global color list: ${sortedColors.length} unique colors`);
+    console.log('='*80);
+
+    alert(`✅ Official Colors Update Successful!\\n\\n` +
+          `🎨 Updated: ${updated} phones\\n` +
+          `⏭️  Skipped: ${skipped} phones\\n` +
+          `📦 Total: ${phones.length} phones\\n` +
+          `🎨 Global colors: ${sortedColors.length} unique colors\\n\\n` +
+          `All phones now have official factory colors from manufacturers.`);
+
+    // Refresh admin panel
+    if (typeof renderPhones === 'function') renderPhones();
+    if (typeof renderPriceTable === 'function') renderPriceTable();
+    if (typeof loadAvailableColors === 'function') {
+        if (typeof availableColors !== 'undefined') {
+            availableColors = loadAvailableColors();
+        }
+    }
+    if (typeof populateColorDropdown === 'function') populateColorDropdown();
+
+    return { updated, skipped, total: phones.length, totalColors: sortedColors.length };
+}
+
+// Export functions
 if (typeof window !== 'undefined') {
     window.importExactPrices = importExactPrices;
+    window.updateAllPhoneColors = updateAllPhoneColors;
 }
 
 console.log('✅ Clean Price Import Utility loaded');
 console.log('📝 Run importExactPrices() to import EXACT prices from Excel');
+console.log('🎨 Run updateAllPhoneColors() to update ALL phone colors to official factory colors');
 console.log('⚠️  NO AUTO-CALCULATIONS - All prices are exact from source files');
