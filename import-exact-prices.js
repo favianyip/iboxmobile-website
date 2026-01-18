@@ -120,6 +120,9 @@ const samsungNewPrices = {
 // ============================================================================
 
 function getOfficialColors(brand, model) {
+    // ============================================================================
+    // EXACT MODEL MATCHES - Official Factory Colors
+    // ============================================================================
     const colorMap = {
         // Apple iPhones - Based on official factory colors from Apple.com
         'iPhone 17 Pro Max': ['Cosmic Orange', 'Deep Blue', 'Silver'],
@@ -154,12 +157,20 @@ function getOfficialColors(brand, model) {
         'iPhone XS': ['Gold', 'Silver', 'Space Gray'],
         'iPhone XR': ['Black', 'White', 'Blue', 'Yellow', 'Coral', '(PRODUCT)RED'],
         'iPhone SE (2022)': ['Midnight', 'Starlight', '(PRODUCT)RED'],
+        'iPhone SE (2020)': ['Black', 'White', '(PRODUCT)RED'],
+        'iPhone X': ['Silver', 'Space Gray'],
+        'iPhone 8 Plus': ['Silver', 'Space Gray', 'Gold'],
+        'iPhone 8': ['Silver', 'Space Gray', 'Gold'],
+        'iPhone 7 Plus': ['Rose Gold', 'Gold', 'Silver', 'Black', 'Jet Black'],
+        'iPhone 7': ['Rose Gold', 'Gold', 'Silver', 'Black', 'Jet Black'],
 
-        // Samsung - Based on official factory colors from Samsung.com
+        // Samsung Galaxy S Series
         'Galaxy S25 Ultra 5G': ['Titanium Silverblue', 'Titanium Black', 'Titanium Gray', 'Titanium Whitesilver', 'Titanium Jade Green', 'Titanium Pink Gold', 'Titanium Jet Black'],
         'Galaxy S25+ 5G': ['Icy Blue', 'Mint', 'Navy', 'Silver Shadow', 'Coral Red', 'Blue Black', 'Pink Gold'],
         'Galaxy S25 5G': ['Icy Blue', 'Mint', 'Navy', 'Silver Shadow', 'Coral Red', 'Blue Black', 'Pink Gold'],
+        'Galaxy S25 FE 5G': ['Icy Blue', 'Mint', 'Navy', 'Silver Shadow'],
         'Galaxy S24 Ultra 5G': ['Titanium Black', 'Titanium Gray', 'Titanium Violet', 'Titanium Yellow', 'Titanium Green', 'Titanium Orange', 'Titanium Blue'],
+        'Galaxy S24+ 5G': ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
         'Galaxy S24 Plus 5G': ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
         'Galaxy S24 5G': ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
         'Galaxy S24 FE 5G': ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green'],
@@ -168,18 +179,130 @@ function getOfficialColors(brand, model) {
         'Galaxy S23 5G': ['Green', 'Phantom Black', 'Cream', 'Lavender', 'Lime', 'Graphite'],
         'Galaxy S23 FE': ['Green', 'Phantom Black', 'Cream', 'Lavender'],
         'Galaxy S22 Ultra 5G': ['Phantom Black', 'Phantom White', 'Burgundy', 'Green'],
+        'Galaxy S22+ 5G': ['Phantom Black', 'Phantom White', 'Green', 'Pink Gold'],
+        'Galaxy S22 5G': ['Phantom Black', 'Phantom White', 'Green', 'Pink Gold'],
+        'Galaxy S21 Ultra 5G': ['Phantom Black', 'Phantom Silver', 'Phantom Brown', 'Phantom Navy'],
+        'Galaxy S21+ 5G': ['Phantom Black', 'Phantom Silver', 'Phantom Violet', 'Phantom Pink', 'Phantom Gold'],
+        'Galaxy S21 5G': ['Phantom Gray', 'Phantom White', 'Phantom Violet', 'Phantom Pink'],
+        'Galaxy S21 FE 5G': ['Graphite', 'White', 'Lavender', 'Olive'],
+        'Galaxy S20 Ultra 5G': ['Cosmic Black', 'Cosmic Gray'],
+        'Galaxy S20+ 5G': ['Cosmic Black', 'Cosmic Gray', 'Cloud Blue'],
+        'Galaxy S20 5G': ['Cosmic Gray', 'Cloud Blue', 'Cloud Pink'],
+        'Galaxy S20 FE 5G': ['Cloud Navy', 'Cloud Lavender', 'Cloud Mint', 'Cloud Red', 'Cloud White'],
+
+        // Samsung Galaxy Z Fold/Flip
         'Galaxy Z Fold 7 5G': ['Jet Black', 'Blue Shadow', 'Silver Shadow', 'Mint'],
         'Galaxy Z Flip 7 5G': ['Jet Black', 'Blue Shadow', 'Coral Red', 'Mint'],
         'Galaxy Z Flip 7 FE 5G': ['Jet Black', 'Blue Shadow', 'Coral Red', 'Mint'],
+        'Galaxy Z Fold 6 5G': ['Phantom Black', 'Silver Shadow', 'Pink'],
+        'Galaxy Z Flip 6 5G': ['Mint', 'Silver Shadow', 'Yellow', 'Blue', 'Peach'],
+        'Galaxy Z Fold 5 5G': ['Phantom Black', 'Cream', 'Icy Blue'],
+        'Galaxy Z Flip 5 5G': ['Mint', 'Graphite', 'Cream', 'Lavender'],
+
+        // Samsung Galaxy A Series
         'Galaxy A56 5G': ['Navy', 'Ice Blue', 'Lilac'],
         'Galaxy A55 5G': ['Navy', 'Ice Blue', 'Lilac'],
+        'Galaxy A54 5G': ['Awesome Violet', 'Awesome Graphite', 'Awesome Lime', 'Awesome White'],
         'Galaxy A36 5G': ['Navy', 'Black', 'Silver'],
+        'Galaxy A35 5G': ['Awesome Navy', 'Awesome Lilac', 'Awesome Lemon'],
         'Galaxy A26 5G': ['Navy', 'Black', 'Silver'],
+        'Galaxy A25 5G': ['Blue Black', 'Blue', 'Yellow'],
         'Galaxy A17 5G': ['Navy', 'Black', 'Silver'],
-        'Galaxy A17 4G': ['Navy', 'Black', 'Silver']
+        'Galaxy A17 4G': ['Navy', 'Black', 'Silver'],
+        'Galaxy A15 5G': ['Blue Black', 'Blue', 'Yellow'],
+        'Galaxy A14 5G': ['Black', 'Dark Red', 'Silver', 'Light Green'],
+
+        // Samsung Accessories
+        'Galaxy Tab A11+ 128 5G': ['Silver', 'Dark Gray'],
+        'Galaxy Tab A11+ 128 WiFi': ['Silver', 'Dark Gray'],
+        'Galaxy Watch 8 40mm Bluetooth': ['Silver', 'Pink Gold', 'Graphite'],
+        'Galaxy Watch 8 44mm Bluetooth': ['Silver', 'Black', 'Green'],
+        'Galaxy Watch 8 Classic 46mm Bluetooth': ['Black', 'Silver'],
+        'Galaxy Watch Ultra 47mm (2025)': ['Titanium Gray', 'Titanium White', 'Titanium Black'],
+        'Galaxy Buds 3': ['Silver', 'White'],
+        'Galaxy Buds 3 Pro': ['Silver', 'White']
     };
 
-    return colorMap[model] || [];
+    // Exact match found
+    if (colorMap[model]) {
+        return colorMap[model];
+    }
+
+    // ============================================================================
+    // SMART FALLBACK SYSTEM - Pattern Matching
+    // ============================================================================
+
+    // Pattern matching for series
+    if (brand === 'Apple') {
+        // iPhone Pro models (any year) - Titanium/Premium colors
+        if (model.includes('Pro Max') || model.includes('Pro')) {
+            return ['Black Titanium', 'Natural Titanium', 'White Titanium', 'Gold'];
+        }
+        // iPhone Plus models
+        if (model.includes('Plus')) {
+            return ['Black', 'White', 'Blue', 'Pink', 'Yellow'];
+        }
+        // iPhone SE models
+        if (model.includes('SE')) {
+            return ['Midnight', 'Starlight', '(PRODUCT)RED'];
+        }
+        // Standard iPhone models
+        if (model.startsWith('iPhone')) {
+            return ['Black', 'White', 'Blue', 'Pink', 'Yellow', '(PRODUCT)RED'];
+        }
+    }
+
+    if (brand === 'Samsung') {
+        // Galaxy S Ultra models - Titanium finish
+        if (model.includes('Ultra')) {
+            return ['Titanium Black', 'Titanium Gray', 'Titanium Violet', 'Titanium Yellow'];
+        }
+        // Galaxy S Plus models
+        if (model.includes('+') || model.includes('Plus')) {
+            return ['Phantom Black', 'Phantom White', 'Green', 'Pink Gold'];
+        }
+        // Galaxy Z Fold models
+        if (model.includes('Z Fold')) {
+            return ['Phantom Black', 'Silver Shadow', 'Cream'];
+        }
+        // Galaxy Z Flip models
+        if (model.includes('Z Flip')) {
+            return ['Mint', 'Graphite', 'Cream', 'Lavender'];
+        }
+        // Galaxy A Series
+        if (model.includes('Galaxy A')) {
+            return ['Awesome Black', 'Awesome Blue', 'Awesome Violet', 'Awesome White'];
+        }
+        // Galaxy S standard models
+        if (model.includes('Galaxy S')) {
+            return ['Phantom Black', 'Phantom White', 'Green', 'Lavender'];
+        }
+        // Galaxy Tab models
+        if (model.includes('Tab')) {
+            return ['Silver', 'Dark Gray', 'Graphite'];
+        }
+        // Galaxy Watch models
+        if (model.includes('Watch')) {
+            return ['Silver', 'Black', 'Graphite', 'Pink Gold'];
+        }
+        // Galaxy Buds models
+        if (model.includes('Buds')) {
+            return ['White', 'Graphite', 'Silver'];
+        }
+    }
+
+    // ============================================================================
+    // FINAL FALLBACK - Generic Brand Colors
+    // ============================================================================
+    if (brand === 'Apple') {
+        return ['Space Gray', 'Silver', 'Gold'];
+    }
+    if (brand === 'Samsung') {
+        return ['Phantom Black', 'Phantom White', 'Blue'];
+    }
+
+    // Ultimate fallback
+    return ['Black', 'White', 'Gray'];
 }
 
 // ============================================================================
