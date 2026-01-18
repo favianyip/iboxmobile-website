@@ -590,9 +590,10 @@
                 console.log('phoneDatabase.Samsung models:', Object.keys(phoneDatabase.Samsung || {}).length);
             }
 
-            // Check URL parameter
+            // Check URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const typeParam = urlParams.get('type');
+            const searchParam = urlParams.get('search');
 
             if (typeParam === 'new') {
                 currentCondition = 'new';
@@ -603,6 +604,17 @@
             // Update UI
             updateToggleButtons();
             renderModels();
+
+            // Auto-populate search if search parameter exists
+            if (searchParam) {
+                const searchInput = document.getElementById('device-search');
+                if (searchInput) {
+                    searchInput.value = searchParam;
+                    // Trigger search to show results
+                    handleSearch(searchParam);
+                    console.log('🔍 Auto-populated search with:', searchParam);
+                }
+            }
         }
 
         // Switch between Used/New

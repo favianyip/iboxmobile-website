@@ -606,7 +606,38 @@ function searchDevice(event) {
     });
 
     if (!found) {
-        window.location.href = `quote.html?search=${encodeURIComponent(searchTerm)}`;
+        // Try to find matching model in phoneDatabase and redirect to new quote flow
+        if (typeof phoneDatabase !== 'undefined') {
+            console.log('🔍 Searching for model in phoneDatabase:', searchTerm);
+
+            // Search in Apple models
+            if (phoneDatabase.Apple) {
+                for (const [modelName, modelData] of Object.entries(phoneDatabase.Apple)) {
+                    if (modelName.toLowerCase().includes(searchTerm)) {
+                        console.log('✅ Found Apple model:', modelName);
+                        window.location.href = `quote.html?brand=Apple&model=${encodeURIComponent(modelName)}&type=used&direct=true`;
+                        return;
+                    }
+                }
+            }
+
+            // Search in Samsung models
+            if (phoneDatabase.Samsung) {
+                for (const [modelName, modelData] of Object.entries(phoneDatabase.Samsung)) {
+                    if (modelName.toLowerCase().includes(searchTerm)) {
+                        console.log('✅ Found Samsung model:', modelName);
+                        window.location.href = `quote.html?brand=Samsung&model=${encodeURIComponent(modelName)}&type=used&direct=true`;
+                        return;
+                    }
+                }
+            }
+
+            console.log('⚠️ No exact match found, redirecting to sell-phones with search');
+        }
+
+        // If not found in phoneDatabase or phoneDatabase not available, redirect to sell-phones.html
+        // The sell-phones.html search will show all matching models
+        window.location.href = `sell-phones.html?search=${encodeURIComponent(searchTerm)}`;
     }
 }
 
