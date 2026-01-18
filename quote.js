@@ -295,57 +295,55 @@ document.addEventListener('DOMContentLoaded', loadDynamicPrices);
 const phoneDatabase = {
     Apple: {
         'iPhone 17 Pro Max': {
-            basePrice: 1230, // SellUp market rate
+            basePrice: 1520, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/iphone-16-pro-max.jpg',
-            storage: { '256GB': 0, '512GB': 100, '1TB': 200 },
+            storage: { '256GB': 0, '512GB': 230, '1TB': 400, '2TB': 550 },
             colors: [
-                { name: 'Desert Titanium', hex: '#8B7355' },
-                { name: 'Natural Titanium', hex: '#A8A8A0' },
-                { name: 'White Titanium', hex: '#F5F5F0' },
-                { name: 'Black Titanium', hex: '#2C2C2C' }
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D82' },
+                { name: 'Silver', hex: '#C0C0C0' }
             ]
         },
         'iPhone 17 Pro': {
-            basePrice: 1125, // SellUp market rate
+            basePrice: 1350, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/iphone-16-pro.jpg',
-            storage: { '256GB': 0, '512GB': 100, '1TB': 200 },
+            storage: { '256GB': 0, '512GB': 200, '1TB': 400 },
             colors: [
-                { name: 'Desert Titanium', hex: '#8B7355' },
-                { name: 'Natural Titanium', hex: '#A8A8A0' },
-                { name: 'White Titanium', hex: '#F5F5F0' },
-                { name: 'Black Titanium', hex: '#2C2C2C' }
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D82' },
+                { name: 'Silver', hex: '#C0C0C0' }
             ]
         },
         'iPhone 17': {
-            basePrice: 910, // SellUp market rate
+            basePrice: 900, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/iphone-16.jpg',
-            storage: { '256GB': 0, '512GB': 100 },
+            storage: { '256GB': 0, '512GB': 250 },
             colors: [
-                { name: 'Black', hex: '#1C1C1E' },
-                { name: 'White', hex: '#FFFFFF' },
-                { name: 'Pink', hex: '#FFB6C1' },
-                { name: 'Blue', hex: '#4169E1' },
-                { name: 'Green', hex: '#2E7D32' }
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D82' },
+                { name: 'Silver', hex: '#C0C0C0' }
             ]
         },
         'iPhone Air': {
-            basePrice: 1330, // SellUp: $1,330
+            basePrice: 850, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/iphone-16.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '256GB': 0, '512GB': 150, '1TB': 250 },
             colors: [
-                { name: 'Starlight', hex: '#F5F5DC' },
-                { name: 'Midnight', hex: '#1C1C1E' },
-                { name: 'Blue', hex: '#4169E1' }
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D82' },
+                { name: 'Silver', hex: '#C0C0C0' }
             ]
         },
-        'iPhone 16e': {
-            basePrice: 730, // SellUp: $730
+        'iPhone 16E': {
+            basePrice: 520, // Excel USED price for 128GB (updated 2026-01-18)
             image: 'images/phones/iphone-se-3rd-gen.jpg',
             storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
             colors: [
                 { name: 'Black', hex: '#000000' },
                 { name: 'White', hex: '#FFFFFF' },
-                { name: 'Blue', hex: '#4169E1' }
+                { name: 'Pink', hex: '#FFB6C1' },
+                { name: 'Teal', hex: '#008080' },
+                { name: 'Ultramarine', hex: '#4169E1' }
             ]
         },
         'iPhone 16 Pro Max': {
@@ -371,27 +369,27 @@ const phoneDatabase = {
             ]
         },
         'iPhone 16 Plus': {
-            basePrice: 1040, // SellUp: $1,040
+            basePrice: 750, // Excel USED price for 128GB (updated 2026-01-18)
             image: 'images/phones/iphone-16-plus.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
-                { name: 'Ultramarine', hex: '#4169E1' },
-                { name: 'Teal', hex: '#008080' },
-                { name: 'Pink', hex: '#FFB6C1' },
+                { name: 'Black', hex: '#000000' },
                 { name: 'White', hex: '#FFFFFF' },
-                { name: 'Black', hex: '#000000' }
+                { name: 'Pink', hex: '#FFB6C1' },
+                { name: 'Teal', hex: '#008080' },
+                { name: 'Ultramarine', hex: '#4169E1' }
             ]
         },
         'iPhone 16': {
-            basePrice: 960, // SellUp: $960
+            basePrice: 670, // Excel USED price for 128GB (updated 2026-01-18)
             image: 'images/phones/iphone-16.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
-                { name: 'Ultramarine', hex: '#4169E1' },
-                { name: 'Teal', hex: '#008080' },
-                { name: 'Pink', hex: '#FFB6C1' },
+                { name: 'Black', hex: '#000000' },
                 { name: 'White', hex: '#FFFFFF' },
-                { name: 'Black', hex: '#000000' }
+                { name: 'Pink', hex: '#FFB6C1' },
+                { name: 'Teal', hex: '#008080' },
+                { name: 'Ultramarine', hex: '#4169E1' }
             ]
         },
         'iPhone 15 Pro Max': {
@@ -733,70 +731,216 @@ const phoneDatabase = {
         }
     },
     Samsung: {
-        'Galaxy S24 Ultra': {
-            basePrice: 870, // SellUp: $870
+        'Galaxy S24 Ultra 5G': {
+            basePrice: 580, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/galaxy-s24-ultra.jpg',
-            storage: { '256GB': 0, '512GB': 100, '1TB': 200 },
+            storage: { '256GB': 0, '512GB': 70, '1TB': 120 },
             colors: [
+                { name: 'Titanium Black', hex: '#1C1C1C' },
                 { name: 'Titanium Gray', hex: '#8E8E93' },
-                { name: 'Titanium Black', hex: '#1C1C1E' },
-                { name: 'Titanium Violet', hex: '#967BB6' },
-                { name: 'Titanium Yellow', hex: '#F4D03F' }
+                { name: 'Titanium Violet', hex: '#C9B3D8' },
+                { name: 'Titanium Yellow', hex: '#FFD60A' },
+                { name: 'Titanium Green', hex: '#30D158' },
+                { name: 'Titanium Orange', hex: '#FF9500' },
+                { name: 'Titanium Blue', hex: '#0A84FF' }
             ]
         },
-        'Galaxy S24+': {
-            basePrice: 700, // SellUp: $700
+        'Galaxy S24 Plus 5G': {
+            basePrice: 480, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/galaxy-s24-plus.jpg',
-            storage: { '256GB': 0, '512GB': 100 },
+            storage: { '256GB': 0, '512GB': 50 },
             colors: [
-                { name: 'Onyx Black', hex: '#1C1C1E' },
-                { name: 'Marble Gray', hex: '#8E8E93' },
-                { name: 'Cobalt Violet', hex: '#967BB6' },
-                { name: 'Amber Yellow', hex: '#F4D03F' }
+                { name: 'Onyx Black', hex: '#000000' },
+                { name: 'Marble Gray', hex: '#B4B4B8' },
+                { name: 'Cobalt Violet', hex: '#8E7CC3' },
+                { name: 'Amber Yellow', hex: '#FFD60A' },
+                { name: 'Jade Green', hex: '#32D74B' },
+                { name: 'Sapphire Blue', hex: '#0A84FF' },
+                { name: 'Sandstone Orange', hex: '#FF9F0A' }
             ]
         },
-        'Galaxy S24': {
-            basePrice: 600, // SellUp: $600
+        'Galaxy S24 5G': {
+            basePrice: 380, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/galaxy-s24.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '256GB': 0, '512GB': 70 },
             colors: [
-                { name: 'Onyx Black', hex: '#1C1C1E' },
-                { name: 'Marble Gray', hex: '#8E8E93' },
-                { name: 'Cobalt Violet', hex: '#967BB6' },
-                { name: 'Amber Yellow', hex: '#F4D03F' }
+                { name: 'Onyx Black', hex: '#000000' },
+                { name: 'Marble Gray', hex: '#B4B4B8' },
+                { name: 'Cobalt Violet', hex: '#8E7CC3' },
+                { name: 'Amber Yellow', hex: '#FFD60A' },
+                { name: 'Jade Green', hex: '#32D74B' },
+                { name: 'Sapphire Blue', hex: '#0A84FF' },
+                { name: 'Sandstone Orange', hex: '#FF9F0A' }
             ]
         },
-        'Galaxy S23 Ultra': {
-            basePrice: 670, // SellUp: $670
+        'Galaxy S23 Ultra 5G': {
+            basePrice: 400, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/galaxy-s23-ultra.jpg',
-            storage: { '256GB': 0, '512GB': 75, '1TB': 150 },
+            storage: { '256GB': 0, '512GB': 50 },
             colors: [
+                { name: 'Green', hex: '#2E8B57' },
                 { name: 'Phantom Black', hex: '#1C1C1E' },
                 { name: 'Cream', hex: '#F5F5DC' },
+                { name: 'Lavender', hex: '#967BB6' },
+                { name: 'Lime', hex: '#32CD32' },
+                { name: 'Sky Blue', hex: '#87CEEB' },
+                { name: 'Graphite', hex: '#54524F' },
+                { name: 'Red', hex: '#FF0000' }
+            ]
+        },
+        'Galaxy S23+ 5G': {
+            basePrice: 330, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s23-plus.jpg',
+            storage: { '256GB': 0, '512GB': 40 },
+            colors: [
                 { name: 'Green', hex: '#2E8B57' },
+                { name: 'Phantom Black', hex: '#1C1C1E' },
+                { name: 'Cream', hex: '#F5F5DC' },
+                { name: 'Lavender', hex: '#967BB6' },
+                { name: 'Lime', hex: '#32CD32' },
+                { name: 'Graphite', hex: '#54524F' }
+            ]
+        },
+        'Galaxy S23 5G': {
+            basePrice: 250, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s23.jpg',
+            storage: { '256GB': 0 },
+            colors: [
+                { name: 'Green', hex: '#2E8B57' },
+                { name: 'Phantom Black', hex: '#1C1C1E' },
+                { name: 'Cream', hex: '#F5F5DC' },
+                { name: 'Lavender', hex: '#967BB6' },
+                { name: 'Lime', hex: '#32CD32' },
+                { name: 'Graphite', hex: '#54524F' }
+            ]
+        },
+        'Galaxy S23 FE': {
+            basePrice: 200, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s23.jpg',
+            storage: { '256GB': 0 },
+            colors: [
+                { name: 'Green', hex: '#2E8B57' },
+                { name: 'Phantom Black', hex: '#1C1C1E' },
+                { name: 'Cream', hex: '#F5F5DC' },
                 { name: 'Lavender', hex: '#967BB6' }
             ]
         },
-        'Galaxy S23+': {
-            basePrice: 445, // SellUp: $445
-            image: 'images/phones/galaxy-s23-plus.jpg',
+        'Galaxy S24 FE 5G': {
+            basePrice: 300, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '256GB': 0, '512GB': 60 },
+            colors: [
+                { name: 'Onyx Black', hex: '#000000' },
+                { name: 'Marble Gray', hex: '#B4B4B8' },
+                { name: 'Cobalt Violet', hex: '#8E7CC3' },
+                { name: 'Amber Yellow', hex: '#FFD60A' },
+                { name: 'Jade Green', hex: '#32D74B' }
+            ]
+        },
+        'Galaxy S22 Ultra 5G': {
+            basePrice: 270, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s23-ultra.jpg',
             storage: { '256GB': 0, '512GB': 50 },
             colors: [
                 { name: 'Phantom Black', hex: '#1C1C1E' },
-                { name: 'Cream', hex: '#F5F5DC' },
-                { name: 'Green', hex: '#2E8B57' },
-                { name: 'Lavender', hex: '#967BB6' }
+                { name: 'Phantom White', hex: '#F5F5F0' },
+                { name: 'Burgundy', hex: '#800020' },
+                { name: 'Green', hex: '#2E8B57' }
             ]
         },
-        'Galaxy S23': {
-            basePrice: 400, // SellUp: $400
-            image: 'images/phones/galaxy-s23.jpg',
-            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
+        'Galaxy S25 Ultra 5G': {
+            basePrice: 800, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s24-ultra.jpg',
+            storage: { '256GB': 0, '512GB': 120, '1TB': 220 },
             colors: [
-                { name: 'Phantom Black', hex: '#1C1C1E' },
-                { name: 'Cream', hex: '#F5F5DC' },
-                { name: 'Green', hex: '#2E8B57' },
-                { name: 'Lavender', hex: '#967BB6' }
+                { name: 'Titanium Silverblue', hex: '#8B9DC3' },
+                { name: 'Titanium Black', hex: '#1C1C1C' },
+                { name: 'Titanium Gray', hex: '#8E8E93' },
+                { name: 'Titanium Whitesilver', hex: '#E8E8E8' },
+                { name: 'Titanium Jade Green', hex: '#00A878' },
+                { name: 'Titanium Pink Gold', hex: '#E6C2B8' },
+                { name: 'Titanium Jet Black', hex: '#000000' }
+            ]
+        },
+        'Galaxy S25+ 5G': {
+            basePrice: 680, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s24-plus.jpg',
+            storage: { '256GB': 0, '512GB': 80 },
+            colors: [
+                { name: 'Icy Blue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Silver Shadow', hex: '#C0C0C0' },
+                { name: 'Coral Red', hex: '#FF6F61' },
+                { name: 'Blue Black', hex: '#1C2841' },
+                { name: 'Pink Gold', hex: '#E6C2B8' }
+            ]
+        },
+        'Galaxy S25 5G': {
+            basePrice: 560, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '256GB': 0, '512GB': 90 },
+            colors: [
+                { name: 'Icy Blue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Silver Shadow', hex: '#C0C0C0' },
+                { name: 'Coral Red', hex: '#FF6F61' },
+                { name: 'Blue Black', hex: '#1C2841' },
+                { name: 'Pink Gold', hex: '#E6C2B8' }
+            ]
+        },
+        'Galaxy Z Fold 7 5G': {
+            basePrice: 1220, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-z-fold5.jpg',
+            storage: { '256GB': 0, '512GB': 130, '1TB': 230 },
+            colors: [
+                { name: 'Jet Black', hex: '#000000' },
+                { name: 'Blue Shadow', hex: '#4A5568' },
+                { name: 'Silver Shadow', hex: '#C0C0C0' },
+                { name: 'Mint', hex: '#98FB98' }
+            ]
+        },
+        'Galaxy Z Flip 7 5G': {
+            basePrice: 550, // Excel USED price for 256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-z-flip5.jpg',
+            storage: { '256GB': 0, '512GB': 100 },
+            colors: [
+                { name: 'Jet Black', hex: '#000000' },
+                { name: 'Blue Shadow', hex: '#4A5568' },
+                { name: 'Coral Red', hex: '#FF6F61' },
+                { name: 'Mint', hex: '#98FB98' }
+            ]
+        },
+        'Galaxy Z Flip 7 FE 5G': {
+            basePrice: 300, // Excel USED price for 128GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-z-flip5.jpg',
+            storage: { '128GB': 0, '256GB': 150 },
+            colors: [
+                { name: 'Jet Black', hex: '#000000' },
+                { name: 'Blue Shadow', hex: '#4A5568' },
+                { name: 'Coral Red', hex: '#FF6F61' },
+                { name: 'Mint', hex: '#98FB98' }
+            ]
+        },
+        'Galaxy A56 5G': {
+            basePrice: 250, // Excel USED price for 12/256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '8/256GB': -70, '12/256GB': 0 },
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Ice Blue', hex: '#B0E0E6' },
+                { name: 'Lilac', hex: '#C8A2C8' }
+            ]
+        },
+        'Galaxy A55 5G': {
+            basePrice: 180, // Excel USED price for 8/256GB (updated 2026-01-18)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '8/256GB': 0 },
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Ice Blue', hex: '#B0E0E6' },
+                { name: 'Lilac', hex: '#C8A2C8' }
             ]
         },
         'Galaxy Z Fold 5': {
