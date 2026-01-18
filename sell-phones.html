@@ -417,6 +417,15 @@
         <div class="mobile-overlay" id="mobileOverlay"></div>
     </header>
 
+    <!-- CRITICAL: Mobile localStorage Warning Banner -->
+    <div id="mobile-warning-banner" style="display: none; background: #dc3545; color: white; padding: 15px 20px; text-align: center; font-weight: 500; position: relative;">
+        <div style="max-width: 800px; margin: 0 auto;">
+            ⚠️ <strong>MOBILE USER ALERT:</strong> Prices not loaded on this device!
+            <br><small>You need to import prices from the admin panel on THIS mobile browser.</small>
+            <br><button onclick="window.location.href='admin.html'" style="margin-top: 10px; background: white; color: #dc3545; padding: 8px 16px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Go to Admin Panel</button>
+        </div>
+    </div>
+
     <div class="sell-page-header">
         <h1 id="page-title">Sell Your Phones</h1>
         <p id="page-subtitle">Get the best prices for your devices</p>
@@ -585,12 +594,48 @@
 
         // Initialize page
         function initPage() {
-            console.log('=== SELL-PHONES.HTML INITIALIZATION ===');
-            console.log('phoneDatabase available:', typeof phoneDatabase !== 'undefined');
-            console.log('adminManager available:', typeof adminManager !== 'undefined');
+            console.log('='.repeat(80));
+            console.log('📱 SELL-PHONES.HTML INITIALIZATION');
+            console.log('='.repeat(80));
+
+            // CRITICAL: Check device type and localStorage status
+            const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const hasLocalStorageData = !!localStorage.getItem('ktmobile_phones');
+            const hasDatabaseData = typeof phoneDatabase !== 'undefined';
+
+            console.log('📱 Device Type:', isMobile ? 'MOBILE' : 'DESKTOP');
+            console.log('📱 Screen Width:', window.innerWidth + 'px');
+            console.log('📦 localStorage has data:', hasLocalStorageData);
+            console.log('📦 phoneDatabase available:', hasDatabaseData);
+
+            // CRITICAL: Show warning banner if on mobile without data
+            if (isMobile && !hasLocalStorageData) {
+                console.error('='.repeat(80));
+                console.error('❌ CRITICAL ERROR: MOBILE DEVICE WITHOUT LOCALSTORAGE DATA!');
+                console.error('='.repeat(80));
+                console.error('🔥 localStorage is BROWSER-SPECIFIC!');
+                console.error('🔥 If you imported prices on desktop Chrome, mobile Safari won\'t have them!');
+                console.error('🔥 You must import prices FROM this mobile browser!');
+                console.error('');
+                console.error('📋 SOLUTION:');
+                console.error('   1. On THIS mobile device, open: admin.html');
+                console.error('   2. Log in to admin panel');
+                console.error('   3. Click "Import Exact Prices"');
+                console.error('   4. Come back to this page');
+                console.error('='.repeat(80));
+
+                // Show warning banner
+                const banner = document.getElementById('mobile-warning-banner');
+                if (banner) {
+                    banner.style.display = 'block';
+                }
+            }
+
             if (typeof phoneDatabase !== 'undefined') {
-                console.log('phoneDatabase.Apple models:', Object.keys(phoneDatabase.Apple || {}).length);
-                console.log('phoneDatabase.Samsung models:', Object.keys(phoneDatabase.Samsung || {}).length);
+                console.log('📱 Apple models:', Object.keys(phoneDatabase.Apple || {}).length);
+                console.log('📱 Samsung models:', Object.keys(phoneDatabase.Samsung || {}).length);
+            } else {
+                console.error('❌ phoneDatabase is undefined! quote.js may not have loaded.');
             }
 
             // Check URL parameters
@@ -704,6 +749,13 @@
 
         // Render models
         function renderModels() {
+            console.log('='.repeat(80));
+            console.log('🔄 RENDERING MODELS FOR SELL-PHONES.HTML');
+            console.log('='.repeat(80));
+            console.log('📱 Current Condition:', currentCondition);
+            console.log('📱 Device Type:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'MOBILE' : 'DESKTOP');
+            console.log('📱 Screen Width:', window.innerWidth + 'px');
+
             const appleGrid = document.getElementById('apple-grid');
             const samsungGrid = document.getElementById('samsung-grid');
 
@@ -715,9 +767,41 @@
                 appleGrid.innerHTML = '';
                 samsungGrid.innerHTML = '';
 
+                // CRITICAL: Check phoneDatabase availability and sync status
+                console.log('📦 phoneDatabase available:', typeof phoneDatabase !== 'undefined');
+                console.log('📦 adminManager available:', typeof adminManager !== 'undefined');
+
+                if (typeof phoneDatabase === 'undefined') {
+                    console.error('❌ CRITICAL: phoneDatabase is not defined!');
+                    console.error('💡 This means quote.js did not load or execute properly');
+                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">Error: Phone database not loaded. Please refresh the page.</p>';
+                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">Error: Phone database not loaded. Please refresh the page.</p>';
+                    return;
+                }
+
                 // Priority 1: Try phoneDatabase from quote.js FIRST (has all 40 models with correct data)
-                if (typeof phoneDatabase !== 'undefined') {
-                    console.log('✅ Using phoneDatabase from quote.js (40 models)');
+                console.log('✅ Using phoneDatabase from quote.js');
+
+                // Log sample data for verification
+                if (phoneDatabase.Apple) {
+                    const appleModels = Object.keys(phoneDatabase.Apple);
+                    console.log(`📱 Apple models available: ${appleModels.length}`);
+                    console.log('   Sample models:', appleModels.slice(0, 5).join(', '));
+
+                    // Check for iPhone 17 specifically (user reported issue)
+                    if (phoneDatabase.Apple['iPhone 17']) {
+                        console.log('✅ iPhone 17 found in database');
+                        console.log('   Base Price: $' + phoneDatabase.Apple['iPhone 17'].basePrice);
+                    } else {
+                        console.error('❌ iPhone 17 NOT found in database!');
+                    }
+                }
+
+                if (phoneDatabase.Samsung) {
+                    const samsungModels = Object.keys(phoneDatabase.Samsung);
+                    console.log(`📱 Samsung models available: ${samsungModels.length}`);
+                    console.log('   Sample models:', samsungModels.slice(0, 5).join(', '));
+                }
 
                     // Render Apple models from phoneDatabase
                     if (phoneDatabase.Apple) {
@@ -927,14 +1011,31 @@
 
         // Autocomplete search handler
         function handleSearch(searchTerm) {
+            console.log('='.repeat(80));
+            console.log('🔍 SEARCH TRIGGERED');
+            console.log('='.repeat(80));
+            console.log('Search Term:', searchTerm);
+
             const suggestionsContainer = document.getElementById('autocomplete-suggestions');
             const term = searchTerm.toLowerCase().trim();
+
+            console.log('Normalized Term:', term);
+            console.log('Term Length:', term.length);
 
             // If empty, hide suggestions
             if (term.length === 0) {
                 suggestionsContainer.classList.remove('active');
                 suggestionsContainer.innerHTML = '';
                 filterDevices('');
+                console.log('✅ Search cleared');
+                return;
+            }
+
+            // CRITICAL: Verify phoneDatabase is available
+            if (typeof phoneDatabase === 'undefined') {
+                console.error('❌ CRITICAL: phoneDatabase is not available!');
+                suggestionsContainer.innerHTML = '<div class="autocomplete-item" style="cursor: default; color: red;"><div class="model-name">Error: Phone database not loaded</div></div>';
+                suggestionsContainer.classList.add('active');
                 return;
             }
 
@@ -944,9 +1045,13 @@
             try {
                 // Priority 1: Use phoneDatabase from quote.js FIRST (40 models with correct data)
                 if (typeof phoneDatabase !== 'undefined') {
-                    console.log('Search using phoneDatabase (40 models)');
+                    console.log('✅ Search using phoneDatabase');
+
                     // Convert phoneDatabase to search format
                     if (phoneDatabase.Apple) {
+                        const appleModels = Object.keys(phoneDatabase.Apple);
+                        console.log(`📱 Processing ${appleModels.length} Apple models`);
+
                         Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
                             allModels.push({
                                 name: modelName,
@@ -955,8 +1060,19 @@
                                 img: modelData.image || 'iphone-16-pro-max.jpg'
                             });
                         });
+
+                        // Check if iPhone 17 specifically is in the list
+                        if (term.includes('iphone 17') || term === 'iphone 17') {
+                            const iphone17Models = allModels.filter(m => m.name.toLowerCase().includes('iphone 17'));
+                            console.log(`🔍 iPhone 17 variants found: ${iphone17Models.length}`);
+                            iphone17Models.forEach(m => console.log(`   - ${m.name}`));
+                        }
                     }
+
                     if (phoneDatabase.Samsung) {
+                        const samsungModels = Object.keys(phoneDatabase.Samsung);
+                        console.log(`📱 Processing ${samsungModels.length} Samsung models`);
+
                         Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
                             allModels.push({
                                 name: modelName,
@@ -966,6 +1082,8 @@
                             });
                         });
                     }
+
+                    console.log(`📦 Total models for search: ${allModels.length}`);
                 }
                 // Priority 2: Try to get models from localStorage (admin panel managed data)
                 else {
@@ -993,15 +1111,25 @@
             }
 
             // Filter models based on search term - match model name, brand, or storage
+            console.log(`🔍 Searching "${term}" in ${allModels.length} models...`);
+
             const matches = allModels.filter(model => {
                 const modelName = model.name.toLowerCase();
                 const brandName = (model.brand || '').toLowerCase();
                 const storageStr = (model.storage || []).join(' ').toLowerCase();
 
-                return modelName.includes(term) ||
-                       brandName.includes(term) ||
-                       storageStr.includes(term);
+                const nameMatch = modelName.includes(term);
+                const brandMatch = brandName.includes(term);
+                const storageMatch = storageStr.includes(term);
+
+                if (nameMatch || brandMatch || storageMatch) {
+                    console.log(`   ✅ Match: ${model.name} (name:${nameMatch}, brand:${brandMatch}, storage:${storageMatch})`);
+                }
+
+                return nameMatch || brandMatch || storageMatch;
             });
+
+            console.log(`📊 Total matches found: ${matches.length}`);
 
             // CRITICAL FIX: Sort matches alphabetically in ASCENDING order
             matches.sort((a, b) => {
@@ -1010,7 +1138,7 @@
                 return nameA.localeCompare(nameB);
             });
 
-            console.log(`🔍 Search "${term}": Found ${matches.length} matches (sorted alphabetically)`);
+            console.log(`🔤 Matches sorted alphabetically`);
 
             // Show suggestions
             if (matches.length > 0) {
