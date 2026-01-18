@@ -7,6 +7,21 @@
 // Prices are loaded dynamically from price_data.json
 // ============================================================
 
+// CRITICAL: Version control for cache busting
+const QUOTE_JS_VERSION = '2.1.0'; // Increment this when making price-related changes
+console.log(`📌 quote.js Version: ${QUOTE_JS_VERSION}`);
+
+// Manual cache clear function - users can call this from browser console
+window.clearPriceCache = function() {
+    console.log('🗑️  Clearing price cache and localStorage...');
+    localStorage.removeItem('ktmobile_phones');
+    localStorage.removeItem('ktmobile_condition_modifiers');
+    localStorage.removeItem('ktmobile_last_update');
+    localStorage.removeItem('quote_js_version');
+    console.log('✅ Cache cleared! Please refresh the page and re-import prices in admin panel.');
+    alert('Price cache cleared! Please:\n1. Go to admin panel\n2. Click "Import Exact Prices"\n3. Refresh this page');
+};
+
 // Dynamic price loading from price_data.json
 let dynamicPrices = null;
 let directPriceLookup = null; // DIRECT PRICES - no calculations!
@@ -129,6 +144,25 @@ function loadAdminDataForCustomerPages() {
     console.log('🔄 LOADING ADMIN DATA FROM LOCALSTORAGE');
     console.log('='.repeat(80));
 
+    // CRITICAL: Detect device type for debugging mobile vs desktop price issues
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const screenWidth = window.innerWidth;
+    console.log(`📱 Device Type: ${isMobile ? 'MOBILE' : 'DESKTOP'}`);
+    console.log(`📏 Screen Width: ${screenWidth}px`);
+    console.log(`🌐 User Agent: ${navigator.userAgent}`);
+    console.log(`🔗 Page URL: ${window.location.href}`);
+
+    // CRITICAL: Version check to detect outdated cached JavaScript
+    const cachedVersion = localStorage.getItem('quote_js_version');
+    if (cachedVersion && cachedVersion !== QUOTE_JS_VERSION) {
+        console.warn(`⚠️  WARNING: Version mismatch!`);
+        console.warn(`   Cached: ${cachedVersion}`);
+        console.warn(`   Current: ${QUOTE_JS_VERSION}`);
+        console.warn(`   Recommendation: Hard refresh (Ctrl+Shift+R) to clear cache`);
+    }
+    localStorage.setItem('quote_js_version', QUOTE_JS_VERSION);
+    console.log(`✅ Version verified: ${QUOTE_JS_VERSION}`);
+
     try {
         // Load phones from localStorage (same as admin panel)
         const storedPhones = localStorage.getItem('ktmobile_phones');
@@ -141,6 +175,33 @@ function loadAdminDataForCustomerPages() {
 
         const adminPhones = JSON.parse(storedPhones);
         console.log(`✅ Found ${adminPhones.length} phones in localStorage`);
+
+        // CRITICAL: Check data freshness for mobile vs desktop debugging
+        const lastUpdate = localStorage.getItem('ktmobile_last_update');
+        if (lastUpdate) {
+            const updateDate = new Date(lastUpdate);
+            const now = new Date();
+            const hoursSinceUpdate = Math.floor((now - updateDate) / (1000 * 60 * 60));
+            console.log(`⏰ Last Update: ${lastUpdate} (${hoursSinceUpdate} hours ago)`);
+
+            if (hoursSinceUpdate > 24) {
+                console.warn(`⚠️  WARNING: Data is ${hoursSinceUpdate} hours old! Consider updating in admin panel.`);
+            }
+        } else {
+            console.warn('⚠️  WARNING: No last update timestamp found!');
+        }
+
+        // Log sample phone data for verification
+        if (adminPhones.length > 0) {
+            const samplePhone = adminPhones[0];
+            console.log('📦 Sample phone data:', {
+                model: samplePhone.model,
+                brand: samplePhone.brand,
+                basePrice: samplePhone.basePrice,
+                storages: samplePhone.storages,
+                hasPrices: !!samplePhone.storagePrices
+            });
+        }
 
         // Create simulated adminManager object for compatibility
         if (typeof adminManager === 'undefined') {
@@ -232,9 +293,6 @@ function loadAdminDataForCustomerPages() {
             }
         });
 
-        // Check when data was last updated in admin panel
-        const lastUpdate = localStorage.getItem('ktmobile_last_update');
-
         console.log('');
         console.log('✅ SYNC COMPLETE:');
         console.log(`   Updated: ${updatedCount} models`);
@@ -242,6 +300,24 @@ function loadAdminDataForCustomerPages() {
         if (lastUpdate) {
             console.log(`   Last admin update: ${lastUpdate}`);
         }
+
+        // CRITICAL: Verify prices were actually loaded for debugging
+        console.log('');
+        console.log('🔍 VERIFICATION - Sample prices after sync:');
+        if (phoneDatabase.Apple && phoneDatabase.Apple['iPhone 17 Pro Max']) {
+            const iphone17 = phoneDatabase.Apple['iPhone 17 Pro Max'];
+            console.log('   iPhone 17 Pro Max:');
+            console.log(`     Base Price: $${iphone17.basePrice}`);
+            console.log(`     Storage Options:`, Object.keys(iphone17.storage).join(', '));
+            console.log(`     Image:`, iphone17.image ? '✅ Set' : '❌ Missing');
+        }
+        if (phoneDatabase.Samsung && phoneDatabase.Samsung['Galaxy S25 Ultra 5G']) {
+            const galaxyS25 = phoneDatabase.Samsung['Galaxy S25 Ultra 5G'];
+            console.log('   Galaxy S25 Ultra 5G:');
+            console.log(`     Base Price: $${galaxyS25.basePrice}`);
+            console.log(`     Storage Options:`, Object.keys(galaxyS25.storage).join(', '));
+        }
+
         console.log('');
         console.log('💡 TIP: If images don\'t update after admin changes:');
         console.log('   1. Hard refresh this page (Ctrl+Shift+R or Cmd+Shift+R)');
@@ -1772,10 +1848,34 @@ function populateStep2() {
     }
     
     deviceNameEl.textContent = quoteState.model;
-    deviceImageEl.src = model.image;
+
+    // CRITICAL FIX: Handle image path - detect if it's base64 data or a file path
+    let imageSrc = '';
+    if (model.image) {
+        if (model.image.startsWith('data:image')) {
+            // Base64 data - use directly
+            imageSrc = model.image;
+            console.log(`📷 Using base64 image for ${quoteState.model} (${Math.round(model.image.length / 1024)} KB)`);
+        } else if (model.image.startsWith('images/phones/')) {
+            // Full path already included
+            imageSrc = model.image;
+        } else {
+            // Relative path - prepend directory
+            imageSrc = `images/phones/${model.image}`;
+        }
+    } else {
+        // Default fallback image
+        imageSrc = 'images/phones/iphone-16-pro-max.jpg';
+    }
+
+    deviceImageEl.src = imageSrc;
     deviceImageEl.onerror = function() {
+        console.error(`❌ Image failed to load for ${quoteState.model}`);
         this.onerror = null;
         this.src = 'images/phones/iphone-16-pro-max.jpg';
+    };
+    deviceImageEl.onload = function() {
+        console.log(`✅ Image loaded successfully for ${quoteState.model}`);
     };
 
     // Storage options - Sort in ascending order

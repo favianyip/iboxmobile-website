@@ -144,49 +144,75 @@ class PhoneBuybackAPI {
 
     /**
      * Get phone image URL - prioritizes local images and phoneDatabase
+     * CRITICAL FIX: Properly handles base64 images from admin panel
      */
     getPhoneImage(phoneModel) {
         // Check cache
         if (this.imageCache.has(phoneModel)) {
             return this.imageCache.get(phoneModel);
         }
-        
+
         // First, try to get from phoneDatabase if available
         if (typeof phoneDatabase !== 'undefined') {
             for (const [brand, models] of Object.entries(phoneDatabase)) {
                 // Try exact match
                 if (models[phoneModel] && models[phoneModel].image) {
-                    this.imageCache.set(phoneModel, models[phoneModel].image);
-                    return models[phoneModel].image;
+                    const image = models[phoneModel].image;
+
+                    // CRITICAL FIX: Detect if image is base64 or file path
+                    if (image.startsWith('data:image')) {
+                        // Base64 data - use directly
+                        console.log(`📷 Using base64 image for ${phoneModel} (${Math.round(image.length / 1024)} KB)`);
+                        this.imageCache.set(phoneModel, image);
+                        return image;
+                    } else if (image.startsWith('images/phones/')) {
+                        // Full path already included
+                        this.imageCache.set(phoneModel, image);
+                        return image;
+                    } else {
+                        // Relative path - prepend directory
+                        const fullPath = `images/phones/${image}`;
+                        this.imageCache.set(phoneModel, fullPath);
+                        return fullPath;
+                    }
                 }
                 // Try partial match (e.g., "Google Pixel 8 Pro" -> "Pixel 8 Pro")
                 for (const [modelName, modelData] of Object.entries(models)) {
                     const normalizedPhoneModel = phoneModel.replace('Google ', '').trim();
                     const normalizedModelName = modelName.replace('Google ', '').trim();
-                    
+
                     // Multiple matching strategies for better accuracy
                     if (phoneModel === modelName ||
                         normalizedPhoneModel === normalizedModelName ||
-                        phoneModel.includes(modelName) || 
+                        phoneModel.includes(modelName) ||
                         modelName.includes(normalizedPhoneModel) ||
                         normalizedPhoneModel.includes(normalizedModelName) ||
                         normalizedModelName.includes(normalizedPhoneModel)) {
                         if (modelData.image) {
-                            console.log(`Found match in phoneDatabase: ${phoneModel} -> ${modelName}: ${modelData.image}`);
-                            this.imageCache.set(phoneModel, modelData.image);
-                            return modelData.image;
+                            const image = modelData.image;
+
+                            // CRITICAL FIX: Detect if image is base64 or file path
+                            if (image.startsWith('data:image')) {
+                                console.log(`📷 Match found - Using base64 image for ${phoneModel} -> ${modelName}`);
+                                this.imageCache.set(phoneModel, image);
+                                return image;
+                            } else {
+                                console.log(`Found match in phoneDatabase: ${phoneModel} -> ${modelName}: ${image}`);
+                                this.imageCache.set(phoneModel, image);
+                                return image;
+                            }
                         }
                     }
                 }
             }
         }
-        
+
         // Check local mapping
         if (phoneImages[phoneModel]) {
             this.imageCache.set(phoneModel, phoneImages[phoneModel]);
             return phoneImages[phoneModel];
         }
-        
+
         // Try to find partial match in phoneImages
         for (const [key, value] of Object.entries(phoneImages)) {
             // Normalize both for comparison
@@ -197,7 +223,7 @@ class PhoneBuybackAPI {
                 return value;
             }
         }
-        
+
         // Generate placeholder for unknown models
         const placeholder = generatePlaceholder(phoneModel);
         this.imageCache.set(phoneModel, placeholder);

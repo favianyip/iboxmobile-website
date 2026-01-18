@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Sell Phones - IBOX MOBILE SINGAPORE</title>
     <link rel="stylesheet" href="styles.css">
     <style>
@@ -861,9 +864,35 @@
                 ? sortStorageOptions(model.storage)
                 : [];
 
+            // CRITICAL FIX: Handle image path - detect if it's base64 data or a file path
+            let imageSrc = '';
+            if (model.img) {
+                if (model.img.startsWith('data:image')) {
+                    // Base64 data - use directly
+                    imageSrc = model.img;
+                    console.log(`📷 Using base64 image for ${model.name} (${Math.round(model.img.length / 1024)} KB)`);
+                } else if (model.img.startsWith('images/phones/')) {
+                    // Full path already included
+                    imageSrc = model.img;
+                } else {
+                    // Relative path - prepend directory
+                    imageSrc = `images/phones/${model.img}`;
+                }
+            } else {
+                // Default fallback image based on brand
+                imageSrc = brand === 'Apple' ? 'images/phones/iphone-16-pro-max.jpg' : 'images/phones/galaxy-s24-ultra.jpg';
+            }
+
+            // Default fallback image for onerror
+            const fallbackImage = brand === 'Apple' ? 'images/phones/iphone-16-pro-max.jpg' : 'images/phones/galaxy-s24-ultra.jpg';
+
             return `
                 <div class="model-card" onclick="navigateToEvaluation('${brand}', '${model.name}')" data-model="${searchKey}">
-                    <img src="images/phones/${model.img}" alt="${model.name}" onerror="this.style.display='none'">
+                    <img src="${imageSrc}"
+                         alt="${model.name}"
+                         onerror="console.error('❌ Image failed for ${model.name}'); this.src='${fallbackImage}'; this.onerror=null;"
+                         onload="console.log('✅ Image loaded: ${model.name}')"
+                         style="background: #f5f5f5; min-height: 200px; object-fit: contain;">
                     <h3>${model.name}</h3>
                     <div class="storage-badges">
                         ${sortedStorage.map(s => `<span class="storage-badge">${s}</span>`).join('')}
