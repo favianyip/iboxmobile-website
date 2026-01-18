@@ -213,14 +213,14 @@ function importBenchmarkPrices() {
         const officialColors = getOfficialColors(brand, model);
 
         if (existingIndex >= 0) {
-            // Update existing phone
+            // Update existing phone - FORCE UPDATE COLORS with official colors
             const existing = phones[existingIndex];
             phones[existingIndex] = {
                 ...existing,
                 ...phoneData,
                 id: existing.id, // Preserve ID
                 image: existing.image || getImagePath(brand, model),
-                colors: existing.colors && existing.colors.length > 0 ? existing.colors : officialColors,
+                colors: officialColors.length > 0 ? officialColors : existing.colors || [], // Use official colors if available
                 buyPrices: existing.buyPrices || calculateBuyPrices(usedPrices),
                 quantities: existing.quantities || initializeQuantities(storages),
                 createdAt: existing.createdAt || new Date().toISOString()
