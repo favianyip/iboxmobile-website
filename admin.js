@@ -330,9 +330,23 @@ class AdminDataManager {
         if (stored) {
             return JSON.parse(stored);
         }
-        
-        // Default modifiers
+
+        // Default modifiers (including NEW phone modifiers)
         return {
+            // NEW Phone Modifiers
+            receipt: {
+                'yes': 30,
+                'no': 0
+            },
+            country: {
+                'local': 0,
+                'export': -50
+            },
+            deviceType: {
+                'new-sealed': 0,
+                'new-activated': -150
+            },
+            // USED Phone Modifiers
             body: {
                 'A': 0,
                 'B': -30,
@@ -369,14 +383,24 @@ class AdminDataManager {
      * Save condition modifier
      */
     saveConditionModifier(conditionType, grade, value) {
+        console.log(`💾 Saving condition modifier: ${conditionType}.${grade} = ${value}`);
+
         const modifiers = this.loadConditionModifiers();
-        
+        console.log('📦 Current modifiers before save:', modifiers);
+
         if (!modifiers[conditionType]) {
             modifiers[conditionType] = {};
         }
-        
+
         modifiers[conditionType][grade] = value;
+        console.log('✅ Updated modifiers:', modifiers);
+
         localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(modifiers));
+        console.log('💾 Saved to localStorage successfully');
+
+        // Verify the save
+        const verification = localStorage.getItem('ktmobile_condition_modifiers');
+        console.log('🔍 Verification - localStorage contains:', verification);
     }
 
     /**
@@ -1690,6 +1714,34 @@ function updateModifierInputStyle(input) {
 }
 
 /**
+ * Load condition modifiers from localStorage into input fields
+ */
+function loadConditionModifierInputs() {
+    console.log('📥 Loading condition modifiers into admin panel inputs...');
+
+    const modifiers = adminManager.loadConditionModifiers();
+    console.log('📦 Loaded modifiers:', modifiers);
+
+    // Get all modifier inputs
+    const inputs = document.querySelectorAll('input.modifier-input[data-condition][data-grade]');
+    console.log(`🔍 Found ${inputs.length} modifier input fields`);
+
+    inputs.forEach(input => {
+        const conditionType = input.getAttribute('data-condition');
+        const grade = input.getAttribute('data-grade');
+
+        if (modifiers[conditionType] && modifiers[conditionType][grade] !== undefined) {
+            const value = modifiers[conditionType][grade];
+            input.value = value;
+            updateModifierInputStyle(input);
+            console.log(`✅ Loaded ${conditionType}.${grade} = ${value}`);
+        }
+    });
+
+    console.log('✅ All condition modifier inputs loaded from localStorage');
+}
+
+/**
  * Save condition modifier
  */
 function saveConditionModifier(conditionType, grade) {
@@ -1702,14 +1754,14 @@ function saveConditionModifier(conditionType, grade) {
     const input = document.querySelector(
         `input[data-condition="${conditionType}"][data-grade="${grade}"]`
     );
-    
+
     if (!input) return;
 
     const modifierValue = parseFloat(input.value) || 0;
-    
+
     adminManager.saveConditionModifier(conditionType, grade, modifierValue);
     updateModifierInputStyle(input);
-    
+
     alert('Condition modifier saved successfully!');
 }
 
@@ -3972,6 +4024,8 @@ function saveGeneralSettings() {
 // Load settings when settings section is shown
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(loadGeneralSettings, 500);
+    // Load condition modifiers from localStorage into input fields
+    setTimeout(loadConditionModifierInputs, 600);
 });
 
 window.loadGeneralSettings = loadGeneralSettings;
