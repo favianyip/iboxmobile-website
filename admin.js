@@ -33,47 +33,24 @@ class AdminDataManager {
     /**
      * Migrate phone data to add missing newPhonePrices field
      * Runs automatically on load to ensure all phones have required fields
+     * CRITICAL: NEVER recalculate existing prices - only add missing fields as empty
      */
     migratePhoneData(phones) {
         console.log('🔄 Running phone data migration...');
         let migrated = 0;
-        let recalculated = 0;
-        let backupCreated = false;
 
         phones.forEach(phone => {
             let needsUpdate = false;
 
-            // Add newPhonePrices if missing
+            // Add newPhonePrices if missing - LEAVE EMPTY, don't calculate!
             if (!phone.newPhonePrices) {
                 phone.newPhonePrices = {};
                 needsUpdate = true;
+                migrated++;
+                console.log(`📦 Added empty newPhonePrices field to ${phone.brand} ${phone.model}`);
             }
 
-            // Check each storage option and recalculate if incorrect
-            if (phone.storagePrices && phone.storages) {
-                phone.storages.forEach(storage => {
-                    const usedPrice = phone.storagePrices[storage] || phone.basePrice || 0;
-                    const expectedNewPrice = Math.round(usedPrice * 1.15);
-                    const currentNewPrice = phone.newPhonePrices[storage];
-
-                    // Recalculate if missing OR incorrect
-                    if (!currentNewPrice || currentNewPrice !== expectedNewPrice) {
-                        // Create backup before first modification
-                        if (!backupCreated) {
-                            const backup = localStorage.getItem('ktmobile_phones');
-                            localStorage.setItem('ktmobile_phones_backup', backup);
-                            backupCreated = true;
-                            console.log('📦 Backup created: ktmobile_phones_backup');
-                        }
-
-                        phone.newPhonePrices[storage] = expectedNewPrice;
-                        needsUpdate = true;
-                        recalculated++;
-
-                        console.log(`🔧 Fixed ${phone.brand} ${phone.model} ${storage}: Used=$${usedPrice} → New=$${expectedNewPrice} (was: $${currentNewPrice || 'missing'})`);
-                    }
-                });
-            }
+            // NO RECALCULATION! Exact prices come from import only.
 
             if (needsUpdate) {
                 phone.updatedAt = new Date().toISOString();
@@ -83,7 +60,7 @@ class AdminDataManager {
 
         if (migrated > 0) {
             localStorage.setItem('ktmobile_phones', JSON.stringify(phones));
-            console.log(`✅ Migration complete: ${migrated} phones updated, ${recalculated} prices recalculated`);
+            console.log(`✅ Migration complete: ${migrated} phones updated (NO auto-calculations)`);
             console.log(`💡 To rollback: localStorage.setItem('ktmobile_phones', localStorage.getItem('ktmobile_phones_backup'))`);
         } else {
             console.log('✅ No migration needed - all prices correct');
@@ -1717,15 +1694,13 @@ function renderPriceTable() {
             : (phone.storagePrices ? Object.keys(phone.storagePrices) : ['128GB', '256GB']);
         
         return storages.map(storage => {
-            // Get price based on currentPriceType toggle
+            // Get price based on currentPriceType toggle - NO CALCULATIONS!
             let price;
             if (currentPriceType === 'new') {
-                // Show NEW phone prices
+                // Show NEW phone prices - EXACT from database only
                 price = phone.newPhonePrices && phone.newPhonePrices[storage]
                     ? phone.newPhonePrices[storage]
-                    : (phone.storagePrices && phone.storagePrices[storage]
-                        ? Math.round(phone.storagePrices[storage] * 1.15)
-                        : Math.round((phone.basePrice || 0) * 1.15));
+                    : 0; // Show 0 if no exact NEW price exists
             } else {
                 // Show USED phone prices (default)
                 price = phone.storagePrices && phone.storagePrices[storage]
@@ -4731,4 +4706,4 @@ window.runBenchmarkImport = runBenchmarkImport;
 window.runExactPriceImport = runExactPriceImport;
 window.currentPriceType = currentPriceType;
 window.switchModalPriceType = switchModalPriceType;
-window.recalculateModalNewPrices = recalculateModalNewPrices;
+// REMOVED: recalculateModalNewPrices - Auto-calculation disabled to preserve exact Excel prices
