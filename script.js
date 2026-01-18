@@ -1002,7 +1002,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================================================
     // GOOGLE REVIEWS LOADER
     // ============================================================================
-    loadGoogleReviews();
+    console.log('🔄 Initializing Google Reviews...');
+    try {
+        loadGoogleReviews();
+        console.log('✅ Google Reviews initialization complete');
+    } catch (error) {
+        console.error('❌ Error loading Google Reviews:', error);
+    }
 });
 
 /**
@@ -1011,9 +1017,17 @@ document.addEventListener('DOMContentLoaded', function() {
  * Place ID extracted from: https://g.page/r/CW-gP-cre887EAI/review
  */
 function loadGoogleReviews() {
+    console.log('📝 loadGoogleReviews() called');
+
     const widgetContainer = document.getElementById('google-reviews-widget');
 
-    if (!widgetContainer) return;
+    if (!widgetContainer) {
+        console.error('❌ Google reviews widget container not found!');
+        console.log('💡 Looking for element with id="google-reviews-widget"');
+        return;
+    }
+
+    console.log('✅ Found reviews widget container');
 
     // Google Place ID for IBOX MOBILE SINGAPORE
     const placeId = 'ChIJO_sqry8Z2jERO7YB6L-gvW8'; // Extracted from CW-gP-cre887EAI
@@ -1144,4 +1158,18 @@ function fetchGooglePlaceReviews(container, placeId, apiKey) {
     console.log('💡 Using curated reviews instead');
 
     showCuratedReviews(container);
+}
+
+// ============================================================================
+// FALLBACK: Ensure Google Reviews loads even if DOMContentLoaded already fired
+// ============================================================================
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    console.log('⚠️ Document already loaded, running Google Reviews loader now');
+    setTimeout(() => {
+        const container = document.getElementById('google-reviews-widget');
+        if (container && container.querySelector('.reviews-loading')) {
+            console.log('🔄 Reviews still loading, triggering loadGoogleReviews()');
+            loadGoogleReviews();
+        }
+    }, 100);
 }
