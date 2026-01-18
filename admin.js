@@ -2130,13 +2130,32 @@ function initializePhoneModal() {
         updateStoragePrices();
     });
 
-    // Image file preview
+    // Image file preview and auto-fill URL field
     imageFileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
+            console.log('📷 Image file selected:', file.name, file.size, 'bytes');
+
             const reader = new FileReader();
             reader.onload = function(e) {
-                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                const base64Image = e.target.result;
+
+                // Show preview
+                imagePreview.innerHTML = `<img src="${base64Image}" alt="Preview">`;
+
+                // CRITICAL FIX: Auto-fill the image URL field with base64 data
+                // This ensures the image is saved when the form is submitted
+                const imageUrlInput = document.getElementById('phoneImageUrl');
+                if (imageUrlInput) {
+                    imageUrlInput.value = base64Image;
+                    console.log('✅ Image data saved to form field (base64, ' + Math.round(base64Image.length / 1024) + ' KB)');
+                } else {
+                    console.error('❌ phoneImageUrl field not found!');
+                }
+            };
+            reader.onerror = function() {
+                console.error('❌ Error reading image file');
+                alert('Error reading image file. Please try again.');
             };
             reader.readAsDataURL(file);
         }
