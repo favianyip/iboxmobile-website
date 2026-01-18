@@ -668,9 +668,9 @@
                 appleGrid.innerHTML = '';
                 samsungGrid.innerHTML = '';
 
-                // Try to get phones from adminManager (live data), fallback to hardcoded phoneModels
+                // Priority 1: Try adminManager (localStorage from admin panel)
                 if (typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0) {
-                    // Use admin manager data (live prices)
+                    console.log('✅ Using adminManager data (localStorage)');
                     const applePhones = adminManager.phones.filter(p => p.brand === 'Apple' && p.display !== false);
                     const samsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung' && p.display !== false);
 
@@ -709,8 +709,70 @@
                         };
                         samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
                     });
-                } else {
-                    // Fallback to hardcoded phoneModels
+                }
+                // Priority 2: Try phoneDatabase from quote.js (our fixed data with 40 models)
+                else if (typeof phoneDatabase !== 'undefined') {
+                    console.log('✅ Using phoneDatabase from quote.js (40 models)');
+
+                    // Render Apple models from phoneDatabase
+                    if (phoneDatabase.Apple) {
+                        Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
+                            // Calculate max price from storage variants
+                            const storageOptions = Object.keys(modelData.storage || {});
+                            let maxUsedPrice = modelData.basePrice || 0;
+
+                            // Find highest storage price
+                            if (modelData.storage) {
+                                const prices = Object.values(modelData.storage).map(modifier =>
+                                    modelData.basePrice + modifier
+                                );
+                                maxUsedPrice = Math.max(...prices);
+                            }
+
+                            // NEW price estimate (15% higher if no specific NEW price)
+                            const maxNewPrice = maxUsedPrice * 1.15;
+                            const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+
+                            const model = {
+                                name: modelName,
+                                img: modelData.image ? modelData.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
+                                storage: storageOptions
+                            };
+                            appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                        });
+                    }
+
+                    // Render Samsung models from phoneDatabase
+                    if (phoneDatabase.Samsung) {
+                        Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
+                            // Calculate max price from storage variants
+                            const storageOptions = Object.keys(modelData.storage || {});
+                            let maxUsedPrice = modelData.basePrice || 0;
+
+                            // Find highest storage price
+                            if (modelData.storage) {
+                                const prices = Object.values(modelData.storage).map(modifier =>
+                                    modelData.basePrice + modifier
+                                );
+                                maxUsedPrice = Math.max(...prices);
+                            }
+
+                            // NEW price estimate (15% higher if no specific NEW price)
+                            const maxNewPrice = maxUsedPrice * 1.15;
+                            const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+
+                            const model = {
+                                name: modelName,
+                                img: modelData.image ? modelData.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
+                                storage: storageOptions
+                            };
+                            samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                        });
+                    }
+                }
+                // Priority 3: Fallback to hardcoded phoneModels (last resort)
+                else {
+                    console.warn('⚠️ Using hardcoded phoneModels fallback (limited models)');
                     phoneModels.apple.forEach(model => {
                         const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
                         appleGrid.innerHTML += createModelCard(model, 'Apple', price);
@@ -779,11 +841,11 @@
                 return;
             }
 
-            // Get all phone models - first try localStorage (backend admin data), then fallback to hardcoded
+            // Get all phone models - Priority 1: localStorage, Priority 2: phoneDatabase, Priority 3: hardcoded
             let allModels = [];
 
             try {
-                // Try to get models from localStorage (admin panel managed data)
+                // Priority 1: Try to get models from localStorage (admin panel managed data)
                 const storedPhones = localStorage.getItem('ktmobile_phones');
                 if (storedPhones) {
                     const phonesData = JSON.parse(storedPhones);
@@ -794,13 +856,40 @@
                         storage: phone.storages || [],
                         img: phone.img || 'default.jpg'
                     }));
-                } else {
-                    // Fallback to hardcoded phoneModels
+                }
+                // Priority 2: Use phoneDatabase from quote.js (40 models we just fixed)
+                else if (typeof phoneDatabase !== 'undefined') {
+                    console.log('Search using phoneDatabase (40 models)');
+                    // Convert phoneDatabase to search format
+                    if (phoneDatabase.Apple) {
+                        Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
+                            allModels.push({
+                                name: modelName,
+                                brand: 'Apple',
+                                storage: Object.keys(modelData.storage || {}),
+                                img: modelData.image || 'iphone-16-pro-max.jpg'
+                            });
+                        });
+                    }
+                    if (phoneDatabase.Samsung) {
+                        Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
+                            allModels.push({
+                                name: modelName,
+                                brand: 'Samsung',
+                                storage: Object.keys(modelData.storage || {}),
+                                img: modelData.image || 'galaxy-s24-ultra.jpg'
+                            });
+                        });
+                    }
+                }
+                // Priority 3: Fallback to hardcoded phoneModels
+                else {
+                    console.warn('Search using hardcoded phoneModels fallback');
                     allModels = [...phoneModels.apple, ...phoneModels.samsung];
                 }
             } catch (e) {
                 console.error('Error loading phone data:', e);
-                // Fallback to hardcoded phoneModels
+                // Final fallback to hardcoded phoneModels
                 allModels = [...phoneModels.apple, ...phoneModels.samsung];
             }
 
