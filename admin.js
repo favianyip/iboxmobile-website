@@ -2123,6 +2123,28 @@ function openPhoneModal(phoneId = null) {
         updateBuyPricesStockSection(null);
     }
 
+    // ISSUE FIX #1: Show only relevant price section based on current buyback type
+    // Hide the toggle buttons and show only the section that matches the current view
+    const modalToggleContainer = document.querySelector('#phoneModal .modal-body > div[style*="justify-content: center"]');
+    const usedSection = document.querySelector('.modal-used-section');
+    const newSection = document.querySelector('.modal-new-section');
+
+    if (modalToggleContainer && usedSection && newSection) {
+        // Hide the toggle buttons
+        modalToggleContainer.style.display = 'none';
+
+        // Show only the section that matches current buyback type
+        if (currentBuybackType === 'used') {
+            usedSection.style.display = 'block';
+            newSection.style.display = 'none';
+            modalTitle.textContent = phoneId ? 'Edit Phone - Used Prices' : 'Add New Phone - Used Prices';
+        } else if (currentBuybackType === 'new') {
+            usedSection.style.display = 'none';
+            newSection.style.display = 'block';
+            modalTitle.textContent = phoneId ? 'Edit Phone - New Prices' : 'Add New Phone - New Prices';
+        }
+    }
+
     modal.classList.add('active');
 }
 
@@ -2311,41 +2333,76 @@ function savePhone() {
     const checkedStorages = Array.from(document.querySelectorAll('.storage-checkboxes input:checked'))
         .map(cb => cb.value);
 
-    const storagePrices = {};
-    checkedStorages.forEach(storage => {
-        const input = document.querySelector(`.storage-price-input[data-storage="${storage}"]`);
-        if (input) {
-            storagePrices[storage] = parseFloat(input.value) || 0;
-        }
-    });
+    // ISSUE FIX #1: Only collect prices for the current section being edited
+    let storagePrices = {};
+    let newPhonePrices = {};
+    let basePrice = 0;
 
-    // Get NEW phone prices
-    const newPhonePrices = {};
-    checkedStorages.forEach(storage => {
-        const input = document.querySelector(`.new-price-input[data-storage="${storage}"]`);
-        if (input && input.value) {
-            newPhonePrices[storage] = parseFloat(input.value) || 0;
-        } else {
-            // Auto-calculate if not provided
-            newPhonePrices[storage] = Math.round((storagePrices[storage] || 0) * 1.15);
+    // Get existing phone data if editing
+    const existingPhone = adminManager.currentEditingPhone ? adminManager.getPhone(adminManager.currentEditingPhone) : null;
+
+    if (currentBuybackType === 'used') {
+        // USED PRICES MODE: Only collect and validate used prices
+        checkedStorages.forEach(storage => {
+            const input = document.querySelector(`.storage-price-input[data-storage="${storage}"]`);
+            if (input) {
+                storagePrices[storage] = parseFloat(input.value) || 0;
+            }
+        });
+
+        // Validate that all used storage prices are set
+        const missingPrices = checkedStorages.filter(storage => !storagePrices[storage] || storagePrices[storage] <= 0);
+        if (missingPrices.length > 0) {
+            alert(`Please set used prices for: ${missingPrices.join(', ')}`);
+            return;
         }
-    });
+
+        // Preserve existing new phone prices if editing, otherwise auto-calculate
+        if (existingPhone && existingPhone.newPhonePrices) {
+            newPhonePrices = existingPhone.newPhonePrices;
+        } else {
+            // Auto-calculate new prices as used × 1.15
+            checkedStorages.forEach(storage => {
+                newPhonePrices[storage] = Math.round((storagePrices[storage] || 0) * 1.15);
+            });
+        }
+
+        basePrice = Math.min(...Object.values(storagePrices));
+
+    } else if (currentBuybackType === 'new') {
+        // NEW PRICES MODE: Only collect and validate new prices
+        checkedStorages.forEach(storage => {
+            const input = document.querySelector(`.new-price-input[data-storage="${storage}"]`);
+            if (input) {
+                newPhonePrices[storage] = parseFloat(input.value) || 0;
+            }
+        });
+
+        // Validate that all new storage prices are set
+        const missingPrices = checkedStorages.filter(storage => !newPhonePrices[storage] || newPhonePrices[storage] <= 0);
+        if (missingPrices.length > 0) {
+            alert(`Please set new prices for: ${missingPrices.join(', ')}`);
+            return;
+        }
+
+        // Preserve existing used phone prices if editing, otherwise auto-calculate
+        if (existingPhone && existingPhone.storagePrices) {
+            storagePrices = existingPhone.storagePrices;
+        } else {
+            // Auto-calculate used prices as new / 1.15
+            checkedStorages.forEach(storage => {
+                storagePrices[storage] = Math.round((newPhonePrices[storage] || 0) / 1.15);
+            });
+        }
+
+        basePrice = Math.min(...Object.values(storagePrices));
+    }
 
     // Validate required fields
     if (!brand || !model || checkedStorages.length === 0) {
         alert('Please fill in all required fields (Brand, Model, and at least one Storage option with price)');
         return;
     }
-
-    // Validate that all storage prices are set
-    const missingPrices = checkedStorages.filter(storage => !storagePrices[storage] || storagePrices[storage] <= 0);
-    if (missingPrices.length > 0) {
-        alert(`Please set base prices for: ${missingPrices.join(', ')}`);
-        return;
-    }
-
-    // Calculate basePrice as the minimum storage price (for backwards compatibility)
-    const basePrice = Math.min(...Object.values(storagePrices));
 
     // Get display toggle for refurbishment page
     const displayCheckbox = document.getElementById('phoneDisplay');
@@ -4430,7 +4487,7 @@ function closeImportModal() {
 
 async function runBulkImport() {
     try {
-        console.log('🚀 Starting bulk import...');
+        console.log('🚀 Starting bulk import with updated WhyMobile + RedWhite prices...');
 
         // Show loading indicator
         const importButton = event.target;
@@ -4438,22 +4495,22 @@ async function runBulkImport() {
         importButton.innerHTML = '⏳ Importing...';
         importButton.disabled = true;
 
-        // Fetch the bulk import script
-        const response = await fetch('bulk-import-apple-prices.js');
+        // ISSUE FIX #2: Load the updated price import script
+        const response = await fetch('bulk-import-updated-prices.js');
         if (!response.ok) {
             throw new Error(`Failed to load import script: ${response.status}`);
         }
 
         const scriptText = await response.text();
-        console.log('📥 Loaded bulk import script');
+        console.log('📥 Loaded updated bulk import script (WhyMobile + RedWhite)');
 
-        // Execute the script (this will define the importApplePrices function)
+        // Execute the script (this will define the importUpdatedPrices function)
         eval(scriptText);
 
         // Run the import function if it exists
-        if (typeof importApplePrices === 'function') {
-            console.log('▶️ Running importApplePrices()...');
-            importApplePrices();
+        if (typeof importUpdatedPrices === 'function') {
+            console.log('▶️ Running importUpdatedPrices()...');
+            importUpdatedPrices();
 
             // Reload phone data from localStorage
             adminManager.phones = adminManager.loadPhones();
@@ -4466,10 +4523,10 @@ async function runBulkImport() {
             closeImportModal();
 
             // Show success notification
-            alert('✅ Successfully imported Apple product prices!\n\nPlease check the phone models list to verify all products were imported correctly.');
+            alert('✅ Successfully imported updated prices!\n\n📊 Prices from:\n• WhyMobile (Used & New)\n• RedWhite (Used & New)\n\n💰 Higher prices automatically selected for best buyback rates.\n\nPlease check the phone models list to verify all products were imported correctly.');
             console.log('✅ Import completed successfully');
         } else {
-            throw new Error('importApplePrices function not found in script');
+            throw new Error('importUpdatedPrices function not found in script');
         }
 
     } catch (error) {
