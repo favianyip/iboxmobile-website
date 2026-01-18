@@ -165,7 +165,7 @@ class AdminDataManager {
                 model: 'iPhone 16 Pro Max',
                 image: 'images/phones/iphone-16-pro-max.jpg',
                 storages: ['256GB', '512GB', '1TB'],
-                colors: ['Desert Titanium', 'Natural Titanium', 'White Titanium', 'Black Titanium'],
+                colors: ['Black Titanium', 'Natural Titanium', 'White Titanium', 'Desert Titanium'],
                 basePrice: 1800,
                 storagePrices: { '256GB': 1800, '512GB': 1900, '1TB': 2000 },
                 newPhonePrices: { '256GB': 2070, '512GB': 2185, '1TB': 2300 },
@@ -190,7 +190,7 @@ class AdminDataManager {
                 model: 'iPhone 16 Pro',
                 image: 'images/phones/iphone-16-pro.jpg',
                 storages: ['128GB', '256GB', '512GB', '1TB'],
-                colors: ['Desert Titanium', 'Natural Titanium', 'White Titanium', 'Black Titanium'],
+                colors: ['Black Titanium', 'Natural Titanium', 'White Titanium', 'Desert Titanium'],
                 basePrice: 1600,
                 storagePrices: { '128GB': 1550, '256GB': 1600, '512GB': 1680, '1TB': 1750 },
                 newPhonePrices: { '128GB': 1783, '256GB': 1840, '512GB': 1932, '1TB': 2013 },
@@ -242,7 +242,7 @@ class AdminDataManager {
                 model: 'Galaxy S24 Ultra 5G', // FIXED: Added "5G" to match import
                 image: 'images/phones/galaxy-s24-ultra.jpg',
                 storages: ['256GB', '512GB', '1TB'],
-                colors: ['Titanium Gray', 'Titanium Black', 'Titanium Violet', 'Titanium Yellow'],
+                colors: ['Titanium Black', 'Titanium Gray', 'Titanium Violet', 'Titanium Yellow'],
                 basePrice: 580,
                 storagePrices: { '256GB': 580, '512GB': 650, '1TB': 700 }, // FIXED: Exact USED prices from Excel
                 newPhonePrices: {}, // FIXED: Leave empty - will be filled by import
@@ -558,44 +558,94 @@ function loadAvailableColors() {
     if (stored) {
         return JSON.parse(stored);
     }
-    // Default colors for common phone models
+    // Official factory colors - Updated 2026-01-18
     return [
-        // iPhone colors
+        // iPhone 17 series (2025)
+        'Cosmic Orange',
+        'Deep Blue',
+        'Silver',
+
+        // iPhone 16 Pro/Pro Max (2024)
         'Desert Titanium',
         'Natural Titanium',
         'White Titanium',
         'Black Titanium',
-        'Blue Titanium',
-        'Space Black',
-        'Silver',
-        'Gold',
-        'Deep Purple',
-        'Midnight',
-        'Starlight',
-        'Blue',
+
+        // iPhone 16/16 Plus (2024)
+        'Black',
+        'White',
         'Pink',
-        'Red',
+        'Teal',
+        'Ultramarine',
+
+        // iPhone 15 series
+        'Blue Titanium',
         'Green',
         'Yellow',
-        // Samsung colors
-        'Titanium Gray',
+
+        // iPhone 14 series
+        'Space Black',
+        'Deep Purple',
+
+        // iPhone 13 series & earlier
+        'Midnight',
+        'Starlight',
+        'Gold',
+        'Sierra Blue',
+        'Alpine Green',
+        'Pacific Blue',
+        'Graphite',
+        'Midnight Green',
+        'Purple',
+        'Coral',
+        '(PRODUCT)RED',
+        'Space Gray',
+
+        // Samsung Galaxy S25 Ultra (2025)
+        'Titanium Silverblue',
         'Titanium Black',
+        'Titanium Gray',
+        'Titanium Whitesilver',
+        'Titanium Jetblack',
+        'Titanium Jadegreen',
+        'Titanium Pinkgold',
+
+        // Samsung Galaxy S25/S25+ (2025)
+        'Icy Blue',
+        'Mint',
+        'Navy',
+        'Silver Shadow',
+        'Coral Red',
+        'Blue Black',
+        'Pink Gold',
+
+        // Samsung Galaxy S24 series
+        'Onyx Black',
+        'Marble Gray',
+        'Cobalt Violet',
+        'Amber Yellow',
         'Titanium Violet',
         'Titanium Yellow',
+
+        // Samsung Galaxy older series
         'Phantom Black',
         'Phantom Silver',
         'Phantom White',
+        'Phantom Gray',
+        'Phantom Violet',
+        'Phantom Pink',
         'Cream',
-        'Graphite',
         'Lavender',
-        'Mint',
-        'Navy',
-        'Orange',
-        // Generic
-        'Black',
-        'White',
-        'Grey',
-        'Rose Gold'
+        'Burgundy',
+        'Beige',
+        'Graygreen',
+
+        // Samsung Z Fold/Flip
+        'Phantom Green',
+        'Icy Blue',
+        'Crafted Black',
+        'Bora Purple',
+        'Pink Gold'
     ].sort();
 }
 
