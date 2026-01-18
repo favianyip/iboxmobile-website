@@ -2549,9 +2549,17 @@ function savePhone() {
 
     if (adminManager.currentEditingPhone) {
         adminManager.updatePhone(adminManager.currentEditingPhone, phoneData);
-        alert('Phone updated successfully!');
+
+        // Set a flag to indicate phone data was updated (for customer pages to detect changes)
+        localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
+        alert('Phone updated successfully! Customer pages will show the new image on next load.');
     } else {
         adminManager.addPhone(phoneData);
+
+        // Set a flag to indicate phone data was updated
+        localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
         alert('Phone added successfully!');
     }
 
