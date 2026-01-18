@@ -1840,9 +1840,27 @@ function populateStep2() {
 function initDeviceTypeSelection() {
     const deviceTypeContainer = document.getElementById('device-type-options');
     const usedConditionsContainer = document.getElementById('used-device-conditions');
-    
+    const receiptSection = document.getElementById('receipt-section');
+
     if (!deviceTypeContainer) return;
-    
+
+    // CRITICAL: Set initial visibility based on current deviceType state
+    // This handles cases where deviceType is pre-set from URL params
+    if (quoteState.deviceType) {
+        console.log('⚙️ initDeviceTypeSelection: Initial deviceType =', quoteState.deviceType);
+        if (quoteState.deviceType === 'used') {
+            if (usedConditionsContainer) usedConditionsContainer.classList.add('visible');
+            if (receiptSection) receiptSection.style.display = 'none';
+        } else {
+            if (usedConditionsContainer) usedConditionsContainer.classList.remove('visible');
+            if (receiptSection) receiptSection.style.display = 'block';
+        }
+    } else {
+        // No deviceType set yet - ensure used conditions are hidden by default
+        if (usedConditionsContainer) usedConditionsContainer.classList.remove('visible');
+        console.log('⚙️ initDeviceTypeSelection: No deviceType set, hiding used conditions');
+    }
+
     deviceTypeContainer.querySelectorAll('.device-type-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             // Update selection visual
@@ -1856,6 +1874,7 @@ function initDeviceTypeSelection() {
             if (usedConditionsContainer) {
                 if (quoteState.deviceType === 'used') {
                     usedConditionsContainer.classList.add('visible');
+                    console.log('✅ Showing used device conditions (body, screen, battery, issues, accessories)');
                     // Reset used device conditions when switching to used
                     quoteState.bodyCondition = null;
                     quoteState.screenCondition = null;
@@ -1865,11 +1884,14 @@ function initDeviceTypeSelection() {
                     quoteState.hasReceipt = 'no';
                 } else {
                     usedConditionsContainer.classList.remove('visible');
+                    console.log('✅ Hiding used device conditions (NEW phone selected)');
                     // For new devices, set best conditions automatically
                     quoteState.bodyCondition = 'A';
                     quoteState.screenCondition = 'A';
                     quoteState.batteryHealth = '91-100';
                     quoteState.issues = [];
+                    // Reset accessories since NEW phones include everything
+                    quoteState.accessories = [];
                     // Reset receipt selection for new devices
                     quoteState.hasReceipt = null;
                 }
@@ -1950,10 +1972,12 @@ function updateLivePriceEstimate() {
         // Use EXACT NEW SEALED price from admin data
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             price = adminPhone.newPhonePrices[quoteState.storage];
+            console.log(`✅ NEW SEALED price: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
             // NEW price not available - show $0 or fallback message
             price = 0;
-            console.warn(`NEW SEALED price not available for ${quoteState.model} ${quoteState.storage}`);
+            console.error(`❌ NEW SEALED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
+            console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
         // Receipt bonus (for new phones)
@@ -1964,10 +1988,12 @@ function updateLivePriceEstimate() {
         // Use NEW SEALED price - $150 deduction
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             price = adminPhone.newPhonePrices[quoteState.storage] - 150;
+            console.log(`✅ NEW ACTIVATED price: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
             // NEW price not available - show $0
             price = 0;
-            console.warn(`NEW ACTIVATED price not available for ${quoteState.model} ${quoteState.storage}`);
+            console.error(`❌ NEW ACTIVATED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
+            console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
         // Receipt bonus (for new phones)
@@ -2096,16 +2122,21 @@ function calculateQuote() {
     const breakdown = [];
 
     // Calculate base price based on device type and storage
+    console.log(`📊 Calculating final price for ${quoteState.deviceType} - ${quoteState.model} ${quoteState.storage}`);
+
     if (quoteState.deviceType === 'new-sealed') {
         // Use ONLY exact NEW SEALED price from admin data - NO CALCULATIONS
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             price = adminPhone.newPhonePrices[quoteState.storage];
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: price, type: 'base' });
+            console.log(`✅ Using NEW SEALED price: $${price}`);
         } else {
             // NO NEW price available - show error instead of calculating
             price = 0;
             breakdown.push({ label: `⚠️ ${quoteState.model} (New Sealed) - Price Not Available`, value: 0, type: 'error' });
-            console.error(`NEW SEALED price not available for ${quoteState.model} ${quoteState.storage}`);
+            console.error(`❌ NEW SEALED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
+            console.error('❌ SOLUTION: Open admin.html → Buyback Management → Import Prices → Click "Import Exact Prices"');
+            alert(`⚠️ NEW Phone Pricing Not Available\n\nPlease import pricing data in the admin panel:\n\n1. Open admin.html\n2. Go to Buyback Management\n3. Click "Import Prices"\n4. Click "Clear All & Fresh Import"\n\nThis will load NEW phone prices from the Excel data.`);
         }
     } else if (quoteState.deviceType === 'new-activated') {
         // Use ONLY exact NEW SEALED price - $150 - NO CALCULATIONS
@@ -2114,11 +2145,14 @@ function calculateQuote() {
             price = sealedPrice - 150;
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
             breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
+            console.log(`✅ Using NEW ACTIVATED price: $${sealedPrice} - $150 = $${price}`);
         } else {
             // NO NEW price available - show error instead of calculating
             price = 0;
             breakdown.push({ label: `⚠️ ${quoteState.model} (New Activated) - Price Not Available`, value: 0, type: 'error' });
-            console.error(`NEW ACTIVATED price not available for ${quoteState.model} ${quoteState.storage}`);
+            console.error(`❌ NEW ACTIVATED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
+            console.error('❌ SOLUTION: Open admin.html → Buyback Management → Import Prices → Click "Import Exact Prices"');
+            alert(`⚠️ NEW Phone Pricing Not Available\n\nPlease import pricing data in the admin panel:\n\n1. Open admin.html\n2. Go to Buyback Management\n3. Click "Import Prices"\n4. Click "Clear All & Fresh Import"\n\nThis will load NEW phone prices from the Excel data.`);
         }
     } else {
         // USED device - use ONLY exact storage-specific used price from admin data
@@ -2162,7 +2196,7 @@ function calculateQuote() {
 
         // Battery health
         const batteryDeduction = getDeduction('battery-options', quoteState.batteryHealth);
-        if (batteryDeduction > 0) {
+        if (bodyDeduction > 0) {
             price -= batteryDeduction;
             breakdown.push({ label: `Battery: ${quoteState.batteryHealth}%`, value: -batteryDeduction, type: 'deduction' });
         }
@@ -2172,13 +2206,13 @@ function calculateQuote() {
             price -= issue.deduction;
             breakdown.push({ label: `Issue: ${issue.value}`, value: -issue.deduction, type: 'deduction' });
         });
-    }
 
-    // Accessories
-    quoteState.accessories.forEach(acc => {
-        price += acc.bonus;
-        breakdown.push({ label: `Accessory: ${acc.value}`, value: acc.bonus, type: 'bonus' });
-    });
+        // Accessories (ONLY for USED devices - NEW phones include all accessories)
+        quoteState.accessories.forEach(acc => {
+            price += acc.bonus;
+            breakdown.push({ label: `Accessory: ${acc.value}`, value: acc.bonus, type: 'bonus' });
+        });
+    }
 
     quoteState.finalPrice = Math.max(50, price);
     quoteState.priceBreakdown = breakdown;
