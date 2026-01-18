@@ -1409,8 +1409,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (brandParam && modelParam) {
         // Both brand and model provided - skip directly to Step 2
-        console.log('Direct link detected:', { brand: brandParam, model: modelParam });
-        
+        console.log('================================================================================');
+        console.log('🔗 DIRECT LINK NAVIGATION DETECTED');
+        console.log('================================================================================');
+        console.log('📱 Brand:', brandParam);
+        console.log('📱 Model (raw):', modelParam);
+        console.log('📱 Type:', typeParam || 'used');
+        console.log('📱 Direct:', directParam);
+
         // Normalize model name (remove "Google" prefix if present, ensure OPPO prefix)
         let normalizedModel = modelParam.trim();
         if (brandParam === 'Google' && normalizedModel.startsWith('Google ')) {
@@ -1423,52 +1429,115 @@ document.addEventListener('DOMContentLoaded', function() {
                 normalizedModel = 'OPPO Find X5 Pro';
             }
         }
-        
-        console.log('Normalized model:', normalizedModel);
-        
-        // Try exact match first
+
+        console.log('🔄 Normalized model:', normalizedModel);
+
+        // CRITICAL FIX: Enhanced model matching with multiple strategies
         let foundModel = null;
-        if (phoneDatabase[brandParam] && phoneDatabase[brandParam][normalizedModel]) {
-            foundModel = normalizedModel;
-        } else {
-            // Try to find closest match
-            if (phoneDatabase[brandParam]) {
-                const availableModels = Object.keys(phoneDatabase[brandParam]);
-                console.log('Available models for', brandParam + ':', availableModels);
-                foundModel = availableModels.find(m => 
-                    m.toLowerCase() === normalizedModel.toLowerCase() ||
-                    normalizedModel.toLowerCase().includes(m.toLowerCase()) ||
+        let matchStrategy = '';
+
+        if (phoneDatabase[brandParam]) {
+            const availableModels = Object.keys(phoneDatabase[brandParam]);
+            console.log('📋 Available models in database:', availableModels.length, 'models');
+
+            // Strategy 1: Exact match (case-insensitive)
+            const exactMatch = availableModels.find(m =>
+                m.toLowerCase() === normalizedModel.toLowerCase()
+            );
+            if (exactMatch) {
+                foundModel = exactMatch;
+                matchStrategy = 'Exact match';
+                console.log('✅ Strategy 1 - Exact match found:', exactMatch);
+            }
+
+            // Strategy 2: Partial match - database model contains search term
+            if (!foundModel) {
+                const partialMatch = availableModels.find(m =>
                     m.toLowerCase().includes(normalizedModel.toLowerCase())
                 );
+                if (partialMatch) {
+                    foundModel = partialMatch;
+                    matchStrategy = 'Partial match (model contains search)';
+                    console.log('✅ Strategy 2 - Partial match found:', partialMatch);
+                }
             }
+
+            // Strategy 3: Reverse partial match - search term contains database model
+            if (!foundModel) {
+                const reverseMatch = availableModels.find(m =>
+                    normalizedModel.toLowerCase().includes(m.toLowerCase())
+                );
+                if (reverseMatch) {
+                    foundModel = reverseMatch;
+                    matchStrategy = 'Reverse partial match (search contains model)';
+                    console.log('✅ Strategy 3 - Reverse match found:', reverseMatch);
+                }
+            }
+
+            // Strategy 4: Fuzzy match - remove special characters and spaces
+            if (!foundModel) {
+                const cleanSearch = normalizedModel.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const fuzzyMatch = availableModels.find(m => {
+                    const cleanModel = m.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    return cleanModel === cleanSearch || cleanModel.includes(cleanSearch) || cleanSearch.includes(cleanModel);
+                });
+                if (fuzzyMatch) {
+                    foundModel = fuzzyMatch;
+                    matchStrategy = 'Fuzzy match (normalized comparison)';
+                    console.log('✅ Strategy 4 - Fuzzy match found:', fuzzyMatch);
+                }
+            }
+
+            // Log failure details if no match found
+            if (!foundModel) {
+                console.log('================================================================================');
+                console.log('❌ NO MATCH FOUND - SHOWING BRAND SELECTION');
+                console.log('================================================================================');
+                console.log('🔍 Searched for:', normalizedModel);
+                console.log('📋 Available models:');
+                availableModels.forEach((model, index) => {
+                    console.log(`   ${index + 1}. ${model}`);
+                });
+                console.log('💡 TIP: Model name must match exactly (case-insensitive)');
+                console.log('💡 Common issue: Extra spaces, special characters, or typos');
+                console.log('================================================================================');
+            }
+        } else {
+            console.error('❌ Brand not found in database:', brandParam);
+            console.error('📋 Available brands:', Object.keys(phoneDatabase));
         }
-        
+
         if (foundModel) {
             // Set state directly
             quoteState.brand = brandParam;
             quoteState.model = foundModel;
-            
-            console.log('Model matched:', { original: modelParam, matched: foundModel });
-            
+
+            console.log('================================================================================');
+            console.log('✅ MODEL MATCHED SUCCESSFULLY');
+            console.log('================================================================================');
+            console.log('📱 Original:', modelParam);
+            console.log('📱 Matched:', foundModel);
+            console.log('🎯 Match Strategy:', matchStrategy);
+            console.log('▶️  Proceeding to Step 2 (Device Condition)');
+            console.log('================================================================================');
+
             // Hide brand selector and model selector - skip directly to Step 2
             const brandSelector = document.querySelector('.brand-selector');
             const modelSelector = document.getElementById('model-selector');
-            
+
             if (brandSelector) brandSelector.style.display = 'none';
             if (modelSelector) modelSelector.style.display = 'none';
-            
+
             // Directly populate Step 2 and go to it (skip model selection)
-            console.log('Skipping to Step 2 with model:', foundModel);
             populateStep2();
-            
+
             // Update progress bar
             setTimeout(() => {
                 goToStep(2);
             }, 100);
         } else {
-            console.warn('Model not found in database:', { brand: brandParam, model: modelParam, normalized: normalizedModel });
-            console.log('Available models for', brandParam + ':', phoneDatabase[brandParam] ? Object.keys(phoneDatabase[brandParam]) : 'none');
             // Fallback: try to select brand and show models
+            console.warn('⚠️  Fallback: Showing brand selection page');
             const brandBtn = document.querySelector(`[data-brand="${brandParam}"]`);
             if (brandBtn) {
                 brandBtn.click();

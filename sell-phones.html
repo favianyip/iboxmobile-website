@@ -1003,6 +1003,15 @@
                        storageStr.includes(term);
             });
 
+            // CRITICAL FIX: Sort matches alphabetically in ASCENDING order
+            matches.sort((a, b) => {
+                const nameA = a.name.toLowerCase();
+                const nameB = b.name.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+
+            console.log(`🔍 Search "${term}": Found ${matches.length} matches (sorted alphabetically)`);
+
             // Show suggestions
             if (matches.length > 0) {
                 suggestionsContainer.innerHTML = matches.slice(0, 8).map(model => {
