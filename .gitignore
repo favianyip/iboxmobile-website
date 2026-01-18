@@ -1,22 +1,35 @@
-# Dependencies
-node_modules/
+# IBOX Mobile Singapore - Git Ignore Rules
 
-# Environment files
-*.env
-config.env
-
-# IDE
-.vscode/
-.idea/
-
-# OS files
+# System Files
 .DS_Store
 Thumbs.db
+desktop.ini
+*.swp
+*~
 
-# Temporary files
-*.log
-*.tmp
+# IDE Files
+.vscode/
+.idea/
+*.sublime-*
 
-# Python cache
+# Python
 __pycache__/
 *.pyc
+venv/
+ENV/
+
+# Temporary Files
+*.tmp
+*.bak
+*.log
+~$*.xlsx
+
+# Sensitive Data
+config.json
+credentials.json
+.env
+secrets/
+
+# Local Testing
+test-data/
+sandbox/
