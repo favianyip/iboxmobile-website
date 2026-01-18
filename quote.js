@@ -125,48 +125,57 @@ function updatePhoneDatabaseWithDynamicPrices() {
 // ============================================================================
 
 function loadAdminDataForCustomerPages() {
-    console.log('🔄 Loading admin data from localStorage for customer pages...');
+    console.log('='.repeat(80));
+    console.log('🔄 LOADING ADMIN DATA FROM LOCALSTORAGE');
+    console.log('='.repeat(80));
 
     try {
         // Load phones from localStorage (same as admin panel)
         const storedPhones = localStorage.getItem('ktmobile_phones');
 
         if (!storedPhones) {
-            console.warn('⚠️ No admin phone data found in localStorage');
+            console.error('❌ CRITICAL: No admin phone data found in localStorage!');
+            console.error('💡 SOLUTION: Go to admin panel and click "Import Exact Prices"');
             return;
         }
 
         const adminPhones = JSON.parse(storedPhones);
-        console.log(`✅ Loaded ${adminPhones.length} phones from admin panel`);
+        console.log(`✅ Found ${adminPhones.length} phones in localStorage`);
 
         // Create simulated adminManager object for compatibility
         if (typeof adminManager === 'undefined') {
             window.adminManager = {
                 phones: adminPhones
             };
-            console.log('✅ Created adminManager from localStorage data');
+            console.log('✅ Created adminManager with localStorage data');
         }
+
+        let updatedCount = 0;
+        let createdCount = 0;
 
         // Update phoneDatabase with admin data
         adminPhones.forEach(phone => {
             const brand = phone.brand;
             const model = phone.model;
 
-            // Skip if brand/model doesn't exist in phoneDatabase
+            // Skip if brand doesn't exist in phoneDatabase
             if (!phoneDatabase[brand]) {
-                console.log(`⚠️ Brand ${brand} not in phoneDatabase, skipping`);
+                console.warn(`⚠️  Skip: Brand "${brand}" not in phoneDatabase`);
                 return;
             }
 
             // Create model entry if it doesn't exist
-            if (!phoneDatabase[brand][model]) {
+            const isNew = !phoneDatabase[brand][model];
+            if (isNew) {
                 phoneDatabase[brand][model] = {
                     basePrice: 0,
                     image: '',
                     storage: {},
                     colors: []
                 };
-                console.log(`➕ Created new entry for ${brand} ${model}`);
+                createdCount++;
+            } else {
+                updatedCount++;
             }
 
             // Update with admin data
@@ -197,38 +206,40 @@ function loadAdminDataForCustomerPages() {
                 });
 
                 dbModel.storage = newStorage;
-                console.log(`   Storage options: ${phone.storages.join(', ')}`);
             }
 
             // Update colors - Convert strings to objects with hex
             if (phone.colors && phone.colors.length > 0) {
                 dbModel.colors = phone.colors.map(colorName => {
-                    // Try to find hex from existing database
-                    const existingColor = dbModel.colors.find(c =>
-                        (typeof c === 'string' ? c : c.name) === colorName
-                    );
-
-                    if (existingColor && typeof existingColor === 'object') {
-                        return existingColor; // Keep existing hex
-                    }
-
-                    // Generate default color object
                     return {
                         name: colorName,
                         hex: getColorHex(colorName) || '#CCCCCC'
                     };
                 });
-                console.log(`   Colors: ${phone.colors.join(', ')}`);
+            }
+
+            // Log details for iPhone 17 Pro Max specifically
+            if (model === 'iPhone 17 Pro Max') {
+                console.log('');
+                console.log('📱 iPhone 17 Pro Max Data:');
+                console.log('   Storages:', phone.storages ? phone.storages.join(', ') : 'none');
+                console.log('   Colors:', phone.colors ? phone.colors.join(', ') : 'none');
+                console.log('   Storage Prices:', phone.storagePrices);
+                console.log('   NEW Prices:', phone.newPhonePrices);
+                console.log('   Updated phoneDatabase.storage:', dbModel.storage);
+                console.log('   Updated phoneDatabase.colors:', dbModel.colors.map(c => c.name).join(', '));
             }
         });
 
-        console.log('✅ phoneDatabase updated with admin data');
-        console.log('📊 Available models:', Object.entries(phoneDatabase).map(([brand, models]) =>
-            `${brand}: ${Object.keys(models).length} models`
-        ).join(', '));
+        console.log('');
+        console.log('✅ SYNC COMPLETE:');
+        console.log(`   Updated: ${updatedCount} models`);
+        console.log(`   Created: ${createdCount} new models`);
+        console.log('='.repeat(80));
 
     } catch (error) {
-        console.error('❌ Error loading admin data:', error);
+        console.error('❌ ERROR loading admin data:', error);
+        console.error('Stack trace:', error.stack);
     }
 }
 
@@ -277,9 +288,6 @@ function getColorHex(colorName) {
 
     return colorMap[colorName];
 }
-
-// Load admin data on page load - BEFORE phoneDatabase is used
-loadAdminDataForCustomerPages();
 
 // Load prices on page load
 document.addEventListener('DOMContentLoaded', loadDynamicPrices);
@@ -1011,6 +1019,13 @@ window.selectBrand = function(brand) {
         return false;
     }
 };
+
+// ============================================================================
+// LOAD ADMIN DATA IMMEDIATELY AFTER phoneDatabase IS DEFINED
+// ============================================================================
+console.log('🔄 Initializing admin data sync for customer pages...');
+loadAdminDataForCustomerPages();
+console.log('✅ Admin data sync completed');
 
 // State management
 let quoteState = {
