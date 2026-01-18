@@ -970,6 +970,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileOverlay = document.getElementById('mobileOverlay');
 
     if (hamburgerMenu && navLinks && mobileOverlay) {
+        console.log('📱 Initializing mobile menu...');
+
         // Toggle menu when hamburger is clicked
         hamburgerMenu.addEventListener('click', function() {
             hamburgerMenu.classList.toggle('active');
@@ -977,6 +979,7 @@ document.addEventListener('DOMContentLoaded', function() {
             mobileOverlay.classList.toggle('active');
             // Prevent body scroll when menu is open
             document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+            console.log('📱 Mobile menu toggled:', navLinks.classList.contains('active') ? 'OPEN' : 'CLOSED');
         });
 
         // Close menu when overlay is clicked
@@ -985,17 +988,55 @@ document.addEventListener('DOMContentLoaded', function() {
             navLinks.classList.remove('active');
             mobileOverlay.classList.remove('active');
             document.body.style.overflow = '';
+            console.log('📱 Mobile menu closed via overlay');
         });
 
-        // Close menu when a nav link is clicked
-        const allNavLinks = navLinks.querySelectorAll('a');
+        // Handle dropdown toggle on mobile
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                // Only prevent default and toggle on mobile (screen width <= 768px)
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    const dropdown = this.parentElement;
+                    const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+
+                    // Toggle active class on parent dropdown
+                    dropdown.classList.toggle('dropdown-active');
+
+                    // Toggle visibility of dropdown menu
+                    if (dropdown.classList.contains('dropdown-active')) {
+                        dropdownMenu.style.display = 'block';
+                        console.log('📱 Dropdown expanded:', this.textContent.trim());
+                    } else {
+                        dropdownMenu.style.display = 'none';
+                        console.log('📱 Dropdown collapsed:', this.textContent.trim());
+                    }
+                }
+            });
+        });
+
+        // Close menu when a nav link is clicked (but not dropdown toggles)
+        const allNavLinks = navLinks.querySelectorAll('a:not(.dropdown-toggle)');
         allNavLinks.forEach(link => {
             link.addEventListener('click', function() {
-                hamburgerMenu.classList.remove('active');
-                navLinks.classList.remove('active');
-                mobileOverlay.classList.remove('active');
-                document.body.style.overflow = '';
+                // Small delay to allow navigation to happen
+                setTimeout(() => {
+                    hamburgerMenu.classList.remove('active');
+                    navLinks.classList.remove('active');
+                    mobileOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    console.log('📱 Mobile menu closed via link click:', this.textContent.trim());
+                }, 100);
             });
+        });
+
+        console.log('✅ Mobile menu initialized');
+    } else {
+        console.warn('⚠️ Mobile menu elements not found:', {
+            hamburgerMenu: !!hamburgerMenu,
+            navLinks: !!navLinks,
+            mobileOverlay: !!mobileOverlay
         });
     }
 
