@@ -1772,10 +1772,34 @@ function populateStep2() {
     }
     
     deviceNameEl.textContent = quoteState.model;
-    deviceImageEl.src = model.image;
+
+    // CRITICAL FIX: Handle image path - detect if it's base64 data or a file path
+    let imageSrc = '';
+    if (model.image) {
+        if (model.image.startsWith('data:image')) {
+            // Base64 data - use directly
+            imageSrc = model.image;
+            console.log(`📷 Using base64 image for ${quoteState.model} (${Math.round(model.image.length / 1024)} KB)`);
+        } else if (model.image.startsWith('images/phones/')) {
+            // Full path already included
+            imageSrc = model.image;
+        } else {
+            // Relative path - prepend directory
+            imageSrc = `images/phones/${model.image}`;
+        }
+    } else {
+        // Default fallback image
+        imageSrc = 'images/phones/iphone-16-pro-max.jpg';
+    }
+
+    deviceImageEl.src = imageSrc;
     deviceImageEl.onerror = function() {
+        console.error(`❌ Image failed to load for ${quoteState.model}`);
         this.onerror = null;
         this.src = 'images/phones/iphone-16-pro-max.jpg';
+    };
+    deviceImageEl.onload = function() {
+        console.log(`✅ Image loaded successfully for ${quoteState.model}`);
     };
 
     // Storage options - Sort in ascending order
