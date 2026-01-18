@@ -680,6 +680,25 @@
             return Math.round(price / 10) * 10;
         }
 
+        // Helper function to sort storage options in ascending order
+        function sortStorageOptions(storageArray) {
+            if (!storageArray || storageArray.length === 0) return [];
+
+            return storageArray.sort((a, b) => {
+                // Convert storage string to numeric GB value for comparison
+                const parseStorage = (str) => {
+                    const match = str.match(/^(\d+)(GB|TB)$/i);
+                    if (!match) return 0;
+                    const num = parseInt(match[1]);
+                    const unit = match[2].toUpperCase();
+                    // Convert TB to GB (1TB = 1024GB)
+                    return unit === 'TB' ? num * 1024 : num;
+                };
+
+                return parseStorage(a) - parseStorage(b);
+            });
+        }
+
         // Render models
         function renderModels() {
             const appleGrid = document.getElementById('apple-grid');
@@ -723,7 +742,7 @@
                             const model = {
                                 name: modelName,
                                 img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                storage: storageOptions
+                                storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
                             };
                             appleGrid.innerHTML += createModelCard(model, 'Apple', price);
                         });
@@ -755,7 +774,7 @@
                             const model = {
                                 name: modelName,
                                 img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                storage: storageOptions
+                                storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
                             };
                             samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
                         });
@@ -780,7 +799,7 @@
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
-                            storage: phone.storages || []
+                            storage: sortStorageOptions(phone.storages || []) // Sort storage in ascending order
                         };
                         appleGrid.innerHTML += createModelCard(model, 'Apple', price);
                     });
@@ -798,7 +817,7 @@
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
-                            storage: phone.storages || []
+                            storage: sortStorageOptions(phone.storages || []) // Sort storage in ascending order
                         };
                         samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
                     });
