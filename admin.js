@@ -4541,6 +4541,66 @@ async function runBulkImport() {
     }
 }
 
+async function runBenchmarkImport() {
+    try {
+        console.log('🎯 Starting Benchmark Price Import...');
+        console.log('📊 Source: iPhone_Benchmark_Price_List.xlsx');
+
+        // Show loading indicator
+        const importButton = event.target;
+        const originalText = importButton.innerHTML;
+        importButton.innerHTML = '⏳ Importing Benchmark Prices...';
+        importButton.disabled = true;
+
+        // Load the benchmark import script
+        const response = await fetch('import-benchmark-prices.js');
+        if (!response.ok) {
+            throw new Error(`Failed to load benchmark import script: ${response.status}`);
+        }
+
+        const scriptText = await response.text();
+        console.log('📥 Loaded benchmark import script');
+
+        // Execute the script (this will define the importBenchmarkPrices function)
+        eval(scriptText);
+
+        // Run the import function if it exists
+        if (typeof importBenchmarkPrices === 'function') {
+            console.log('▶️ Running importBenchmarkPrices()...');
+            const result = importBenchmarkPrices();
+
+            // Reload phone data from localStorage
+            adminManager.phones = adminManager.loadPhones();
+
+            // Refresh the UI
+            renderPhones();
+            renderPriceTable();
+
+            // Close modal
+            closeImportModal();
+
+            console.log('✅ Benchmark import completed successfully');
+        } else {
+            throw new Error('importBenchmarkPrices function not found in script');
+        }
+
+        // Reset button (in case modal didn't close)
+        importButton.innerHTML = originalText;
+        importButton.disabled = false;
+
+    } catch (error) {
+        console.error('❌ Benchmark import failed:', error);
+        alert('Benchmark import failed: ' + error.message + '\n\nPlease check the browser console for more details.');
+
+        // Reset button
+        const importButton = event.target;
+        if (importButton) {
+            importButton.innerHTML = '📊 Import Benchmark Prices';
+            importButton.disabled = false;
+        }
+    }
+}
+
 // ============================================
 // MODAL PRICE TYPE TOGGLE (USED vs NEW)
 // ============================================
@@ -4618,6 +4678,7 @@ window.performBulkUpdate = performBulkUpdate;
 window.showImportModal = showImportModal;
 window.closeImportModal = closeImportModal;
 window.runBulkImport = runBulkImport;
+window.runBenchmarkImport = runBenchmarkImport;
 window.currentPriceType = currentPriceType;
 window.switchModalPriceType = switchModalPriceType;
 window.recalculateModalNewPrices = recalculateModalNewPrices;
