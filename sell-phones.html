@@ -824,15 +824,25 @@
                 }
                 // Priority 3: Fallback to hardcoded phoneModels (last resort)
                 else {
-                    console.warn('⚠️ Using hardcoded phoneModels fallback (limited models)');
+                    console.warn('⚠️ Using hardcoded phoneModels fallback');
+                    console.log(`📦 Hardcoded models: ${phoneModels.apple.length} Apple + ${phoneModels.samsung.length} Samsung`);
+
                     phoneModels.apple.forEach(model => {
                         const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                        const sortedModel = {
+                            ...model,
+                            storage: sortStorageOptions(model.storage || []) // Sort storage in ascending order
+                        };
+                        appleGrid.innerHTML += createModelCard(sortedModel, 'Apple', price);
                     });
 
                     phoneModels.samsung.forEach(model => {
                         const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                        const sortedModel = {
+                            ...model,
+                            storage: sortStorageOptions(model.storage || []) // Sort storage in ascending order
+                        };
+                        samsungGrid.innerHTML += createModelCard(sortedModel, 'Samsung', price);
                     });
                 }
 
@@ -845,12 +855,18 @@
         // Create model card HTML
         function createModelCard(model, brand, price) {
             const searchKey = model.name.toLowerCase().replace(/\s+/g, '-');
+
+            // Ensure storage is sorted (in case it wasn't sorted earlier)
+            const sortedStorage = Array.isArray(model.storage)
+                ? sortStorageOptions(model.storage)
+                : [];
+
             return `
                 <div class="model-card" onclick="navigateToEvaluation('${brand}', '${model.name}')" data-model="${searchKey}">
                     <img src="images/phones/${model.img}" alt="${model.name}" onerror="this.style.display='none'">
                     <h3>${model.name}</h3>
                     <div class="storage-badges">
-                        ${model.storage.map(s => `<span class="storage-badge">${s}</span>`).join('')}
+                        ${sortedStorage.map(s => `<span class="storage-badge">${s}</span>`).join('')}
                     </div>
                     <div class="price-info">
                         <div class="price-label">Get up to</div>
