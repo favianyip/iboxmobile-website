@@ -1173,17 +1173,10 @@ console.log('✅ Admin data sync completed');
 
 // Load condition modifiers from localStorage (set by admin panel)
 function loadConditionModifiers() {
-    try {
-        const stored = localStorage.getItem('ktmobile_condition_modifiers');
-        if (stored) {
-            return JSON.parse(stored);
-        }
-    } catch (e) {
-        console.error('Error loading condition modifiers:', e);
-    }
+    console.log('🔍 Loading condition modifiers from localStorage...');
 
-    // Default modifiers if not found in localStorage
-    return {
+    // Default modifiers (fallback values)
+    const defaults = {
         receipt: { yes: 30, no: 0 },
         country: { local: 0, export: -50 },
         deviceType: { 'new-sealed': 0, 'new-activated': -150 },
@@ -1191,12 +1184,40 @@ function loadConditionModifiers() {
         screen: { A: 0, B: 0, C: -40, D: -150 },
         battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 }
     };
+
+    try {
+        const stored = localStorage.getItem('ktmobile_condition_modifiers');
+        console.log('📦 Raw localStorage value:', stored);
+
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            console.log('✅ Parsed modifiers from localStorage:', parsed);
+
+            // Merge stored values with defaults (stored values take priority)
+            const merged = { ...defaults };
+            for (const [key, value] of Object.entries(parsed)) {
+                merged[key] = { ...defaults[key], ...value };
+            }
+
+            console.log('🔀 Merged modifiers (admin values override defaults):', merged);
+            return merged;
+        } else {
+            console.log('⚠️ No modifiers in localStorage, using defaults');
+        }
+    } catch (e) {
+        console.error('❌ Error loading condition modifiers:', e);
+    }
+
+    console.log('📋 Returning default modifiers:', defaults);
+    return defaults;
 }
 
 // Get specific modifier value
 function getModifierValue(conditionType, grade) {
     const modifiers = loadConditionModifiers();
-    return modifiers[conditionType]?.[grade] || 0;
+    const value = modifiers[conditionType]?.[grade] || 0;
+    console.log(`💰 Modifier value for ${conditionType}.${grade} = ${value}`);
+    return value;
 }
 
 // State management
