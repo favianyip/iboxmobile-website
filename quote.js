@@ -1253,11 +1253,16 @@ window.selectBrand = function(brand) {
 };
 
 // ============================================================================
-// LOAD ADMIN DATA IMMEDIATELY AFTER phoneDatabase IS DEFINED
+// DISABLED: Do NOT sync localStorage to phoneDatabase
 // ============================================================================
-console.log('🔄 Initializing admin data sync for customer pages...');
-loadAdminDataForCustomerPages();
-console.log('✅ Admin data sync completed');
+// REASON: We want phoneDatabase to be the SINGLE source of truth (backend prices)
+// NOT modified by localStorage. This ensures mobile and desktop show IDENTICAL prices.
+//
+// console.log('🔄 Initializing admin data sync for customer pages...');
+// loadAdminDataForCustomerPages();  // DISABLED - causes mobile/desktop price differences
+// console.log('✅ Admin data sync completed');
+
+console.log('✅ phoneDatabase loaded with backend prices (NOT modified by localStorage)');
 
 // Load condition modifiers from localStorage (set by admin panel)
 function loadConditionModifiers() {
