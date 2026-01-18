@@ -1171,6 +1171,34 @@ console.log('🔄 Initializing admin data sync for customer pages...');
 loadAdminDataForCustomerPages();
 console.log('✅ Admin data sync completed');
 
+// Load condition modifiers from localStorage (set by admin panel)
+function loadConditionModifiers() {
+    try {
+        const stored = localStorage.getItem('ktmobile_condition_modifiers');
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('Error loading condition modifiers:', e);
+    }
+
+    // Default modifiers if not found in localStorage
+    return {
+        receipt: { yes: 30, no: 0 },
+        country: { local: 0, export: -50 },
+        deviceType: { 'new-sealed': 0, 'new-activated': -150 },
+        body: { A: 0, B: -20, C: -60, D: -120 },
+        screen: { A: 0, B: 0, C: -40, D: -150 },
+        battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 }
+    };
+}
+
+// Get specific modifier value
+function getModifierValue(conditionType, grade) {
+    const modifiers = loadConditionModifiers();
+    return modifiers[conditionType]?.[grade] || 0;
+}
+
 // State management
 let quoteState = {
     brand: null,
@@ -1717,14 +1745,28 @@ function populateStep2() {
         this.src = 'images/phones/iphone-16-pro-max.jpg';
     };
 
-    // Storage options
+    // Storage options - Sort in ascending order
     const storageOptions = document.getElementById('storage-options');
     if (!storageOptions) {
         throw new Error('Storage options container not found');
     }
-    
+
     storageOptions.innerHTML = '';
-    Object.keys(model.storage).forEach(storage => {
+
+    // Sort storage keys in ascending order (256GB, 512GB, 1TB, 2TB)
+    const sortedStorageKeys = Object.keys(model.storage).sort((a, b) => {
+        // Extract number and unit (e.g., "256GB" -> 256, "1TB" -> 1024)
+        const parseStorage = (str) => {
+            const match = str.match(/^(\d+)(GB|TB)$/i);
+            if (!match) return 0;
+            const num = parseInt(match[1]);
+            const unit = match[2].toUpperCase();
+            return unit === 'TB' ? num * 1024 : num; // Convert TB to GB for comparison
+        };
+        return parseStorage(a) - parseStorage(b);
+    });
+
+    sortedStorageKeys.forEach(storage => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.dataset.value = storage;
@@ -1980,15 +2022,18 @@ function updateLivePriceEstimate() {
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
-        // Receipt bonus (for new phones)
+        // Receipt bonus (for new phones) - Load from admin panel modifiers
         if (quoteState.hasReceipt === 'yes') {
-            price += 30;
+            const receiptBonus = getModifierValue('receipt', 'yes');
+            price += receiptBonus;
+            console.log(`Receipt bonus: +$${receiptBonus}`);
         }
     } else if (quoteState.deviceType === 'new-activated') {
-        // Use NEW SEALED price - $150 deduction
+        // Use NEW SEALED price - Load deduction from admin panel modifiers
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
-            price = adminPhone.newPhonePrices[quoteState.storage] - 150;
-            console.log(`✅ NEW ACTIVATED price: $${price} for ${quoteState.model} ${quoteState.storage}`);
+            const activatedDeduction = Math.abs(getModifierValue('deviceType', 'new-activated'));
+            price = adminPhone.newPhonePrices[quoteState.storage] - activatedDeduction;
+            console.log(`✅ NEW ACTIVATED price: $${price} for ${quoteState.model} ${quoteState.storage} (deduction: -$${activatedDeduction})`);
         } else {
             // NEW price not available - show $0
             price = 0;
@@ -1996,9 +2041,11 @@ function updateLivePriceEstimate() {
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
-        // Receipt bonus (for new phones)
+        // Receipt bonus (for new phones) - Load from admin panel modifiers
         if (quoteState.hasReceipt === 'yes') {
-            price += 30;
+            const receiptBonus = getModifierValue('receipt', 'yes');
+            price += receiptBonus;
+            console.log(`Receipt bonus: +$${receiptBonus}`);
         }
     } else {
         // USED device - use exact storage-specific USED price
@@ -2012,22 +2059,33 @@ function updateLivePriceEstimate() {
             }
         }
 
-        // Country deduction
+        // Country deduction - Load from admin panel modifiers
         if (quoteState.country === 'export') {
-            price -= 50;
+            const countryDeduction = Math.abs(getModifierValue('country', 'export'));
+            price -= countryDeduction;
+            console.log(`Country deduction (export): -$${countryDeduction}`);
         }
 
-        // Body condition
-        const bodyDeduction = getDeduction('body-options', quoteState.bodyCondition);
-        price -= bodyDeduction;
+        // Body condition - Load from admin panel modifiers
+        const bodyDeduction = Math.abs(getModifierValue('body', quoteState.bodyCondition));
+        if (bodyDeduction > 0) {
+            price -= bodyDeduction;
+            console.log(`Body condition (${quoteState.bodyCondition}): -$${bodyDeduction}`);
+        }
 
-        // Screen condition
-        const screenDeduction = getDeduction('screen-options', quoteState.screenCondition);
-        price -= screenDeduction;
+        // Screen condition - Load from admin panel modifiers
+        const screenDeduction = Math.abs(getModifierValue('screen', quoteState.screenCondition));
+        if (screenDeduction > 0) {
+            price -= screenDeduction;
+            console.log(`Screen condition (${quoteState.screenCondition}): -$${screenDeduction}`);
+        }
 
-        // Battery health
-        const batteryDeduction = getDeduction('battery-options', quoteState.batteryHealth);
-        price -= batteryDeduction;
+        // Battery health - Load from admin panel modifiers
+        const batteryDeduction = Math.abs(getModifierValue('battery', quoteState.batteryHealth));
+        if (batteryDeduction > 0) {
+            price -= batteryDeduction;
+            console.log(`Battery health (${quoteState.batteryHealth}): -$${batteryDeduction}`);
+        }
 
         // Issues
         quoteState.issues.forEach(issue => {
@@ -2166,37 +2224,39 @@ function calculateQuote() {
         }
     }
 
-    // Receipt bonus
+    // Receipt bonus - Load from admin panel modifiers
     if (quoteState.hasReceipt === 'yes') {
-        price += 30;
-        breakdown.push({ label: 'Official Receipt Available', value: 30, type: 'bonus' });
+        const receiptBonus = getModifierValue('receipt', 'yes');
+        price += receiptBonus;
+        breakdown.push({ label: 'Official Receipt Available', value: receiptBonus, type: 'bonus' });
     }
 
-    // Country adjustment
+    // Country adjustment - Load from admin panel modifiers
     if (quoteState.country === 'export') {
-        price -= 50;
-        breakdown.push({ label: 'Export Set', value: -50, type: 'deduction' });
+        const countryDeduction = Math.abs(getModifierValue('country', 'export'));
+        price -= countryDeduction;
+        breakdown.push({ label: 'Export Set', value: -countryDeduction, type: 'deduction' });
     }
 
     // Only apply condition deductions for used devices
     if (quoteState.deviceType === 'used') {
-        // Body condition
-        const bodyDeduction = getDeduction('body-options', quoteState.bodyCondition);
+        // Body condition - Load from admin panel modifiers
+        const bodyDeduction = Math.abs(getModifierValue('body', quoteState.bodyCondition));
         if (bodyDeduction > 0) {
             price -= bodyDeduction;
             breakdown.push({ label: `Body: Grade ${quoteState.bodyCondition}`, value: -bodyDeduction, type: 'deduction' });
         }
 
-        // Screen condition
-        const screenDeduction = getDeduction('screen-options', quoteState.screenCondition);
+        // Screen condition - Load from admin panel modifiers
+        const screenDeduction = Math.abs(getModifierValue('screen', quoteState.screenCondition));
         if (screenDeduction > 0) {
             price -= screenDeduction;
             breakdown.push({ label: `Screen: Grade ${quoteState.screenCondition}`, value: -screenDeduction, type: 'deduction' });
         }
 
-        // Battery health
-        const batteryDeduction = getDeduction('battery-options', quoteState.batteryHealth);
-        if (bodyDeduction > 0) {
+        // Battery health - Load from admin panel modifiers
+        const batteryDeduction = Math.abs(getModifierValue('battery', quoteState.batteryHealth));
+        if (batteryDeduction > 0) {
             price -= batteryDeduction;
             breakdown.push({ label: `Battery: ${quoteState.batteryHealth}%`, value: -batteryDeduction, type: 'deduction' });
         }
