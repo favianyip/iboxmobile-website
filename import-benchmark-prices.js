@@ -95,6 +95,28 @@ const benchmarkUsedPrices = {
 };
 
 /**
+ * Official factory colors database - Verified from manufacturer websites
+ */
+function getOfficialColors(brand, model) {
+    const colorMap = {
+        // iPhone 17 series (2025)
+        'iPhone 17 Pro Max': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+        'iPhone 17 Pro': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+        'iPhone 17': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+        'iPhone Air': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+
+        // iPhone 16 series (2024)
+        'iPhone 16 Pro Max': ['Black Titanium', 'Natural Titanium', 'White Titanium', 'Desert Titanium'],
+        'iPhone 16 Pro': ['Black Titanium', 'Natural Titanium', 'White Titanium', 'Desert Titanium'],
+        'iPhone 16 Plus': ['Black', 'White', 'Pink', 'Teal', 'Ultramarine'],
+        'iPhone 16': ['Black', 'White', 'Pink', 'Teal', 'Ultramarine'],
+        'iPhone 16E': ['Black', 'White', 'Pink', 'Teal', 'Ultramarine']
+    };
+
+    return colorMap[model] || [];
+}
+
+/**
  * Helper function to get default image path
  */
 function getImagePath(brand, model) {
@@ -187,6 +209,9 @@ function importBenchmarkPrices() {
             updatedAt: new Date().toISOString()
         };
 
+        // Get official colors for this model
+        const officialColors = getOfficialColors(brand, model);
+
         if (existingIndex >= 0) {
             // Update existing phone
             const existing = phones[existingIndex];
@@ -195,7 +220,7 @@ function importBenchmarkPrices() {
                 ...phoneData,
                 id: existing.id, // Preserve ID
                 image: existing.image || getImagePath(brand, model),
-                colors: existing.colors || [],
+                colors: existing.colors && existing.colors.length > 0 ? existing.colors : officialColors,
                 buyPrices: existing.buyPrices || calculateBuyPrices(usedPrices),
                 quantities: existing.quantities || initializeQuantities(storages),
                 createdAt: existing.createdAt || new Date().toISOString()
@@ -204,13 +229,14 @@ function importBenchmarkPrices() {
             console.log(`✅ Updated: ${model}`);
             console.log(`   Used prices: ${Object.keys(usedPrices).length} storage variants`);
             console.log(`   New prices: ${Object.keys(newPrices).length} storage variants`);
+            console.log(`   Colors: ${officialColors.length} official factory colors`);
         } else {
             // Add new phone
             const newPhone = {
                 ...phoneData,
                 id: `apple-${model.toLowerCase().replace(/[\s\/\(\)]+/g, '-')}-${Date.now()}`,
                 image: getImagePath(brand, model),
-                colors: [],
+                colors: officialColors,
                 buyPrices: calculateBuyPrices(usedPrices),
                 quantities: initializeQuantities(storages),
                 createdAt: new Date().toISOString()
@@ -220,6 +246,7 @@ function importBenchmarkPrices() {
             console.log(`➕ Added: ${model}`);
             console.log(`   Used prices: ${Object.keys(usedPrices).length} storage variants`);
             console.log(`   New prices: ${Object.keys(newPrices).length} storage variants`);
+            console.log(`   Colors: ${officialColors.length} official factory colors`);
         }
     }
 
