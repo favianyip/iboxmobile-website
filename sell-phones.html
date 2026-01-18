@@ -582,6 +582,14 @@
 
         // Initialize page
         function initPage() {
+            console.log('=== SELL-PHONES.HTML INITIALIZATION ===');
+            console.log('phoneDatabase available:', typeof phoneDatabase !== 'undefined');
+            console.log('adminManager available:', typeof adminManager !== 'undefined');
+            if (typeof phoneDatabase !== 'undefined') {
+                console.log('phoneDatabase.Apple models:', Object.keys(phoneDatabase.Apple || {}).length);
+                console.log('phoneDatabase.Samsung models:', Object.keys(phoneDatabase.Samsung || {}).length);
+            }
+
             // Check URL parameter
             const urlParams = new URLSearchParams(window.location.search);
             const typeParam = urlParams.get('type');
@@ -953,8 +961,9 @@
             }
         });
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', initPage);
+        // Initialize on page load - WAIT for all scripts to load (including deferred quote.js)
+        // Use 'load' instead of 'DOMContentLoaded' to ensure phoneDatabase is available
+        window.addEventListener('load', initPage);
     </script>
 </body>
 </html>
