@@ -245,7 +245,7 @@ class AdminDataManager {
                 colors: ['Titanium Black', 'Titanium Gray', 'Titanium Violet', 'Titanium Yellow'],
                 basePrice: 580,
                 storagePrices: { '256GB': 580, '512GB': 650, '1TB': 700 }, // Exact USED prices from Excel
-                newPhonePrices: { '256GB': 760, '512GB': 850, '1TB': 920 }, // NEW sealed phone prices
+                newPhonePrices: {}, // S24 not available as NEW - only USED/refurbished
                 buyPrices: {
                     '256GB': { excellent: 580, good: 551, fair: 493 },
                     '512GB': { excellent: 650, good: 618, fair: 553 },
@@ -270,7 +270,7 @@ class AdminDataManager {
                 colors: ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
                 basePrice: 380,
                 storagePrices: { '256GB': 380, '512GB': 450 }, // Exact USED prices from Excel
-                newPhonePrices: { '256GB': 500, '512GB': 600 }, // NEW sealed phone prices
+                newPhonePrices: {}, // S24 not available as NEW - only USED/refurbished
                 buyPrices: {
                     '256GB': { excellent: 380, good: 361, fair: 323 },
                     '512GB': { excellent: 450, good: 428, fair: 383 }
