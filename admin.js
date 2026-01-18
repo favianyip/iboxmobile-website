@@ -142,11 +142,8 @@ class AdminDataManager {
                         };
                     });
                     
-                    // Calculate newPhonePrices (new sealed prices) as used * 1.15
-                    const newPhonePrices = {};
-                    Object.entries(storagePrices).forEach(([storage, usedPrice]) => {
-                        newPhonePrices[storage] = Math.round(usedPrice * 1.15);
-                    });
+                    // FIXED: Use provided newPhonePrices, don't auto-calculate
+                    const newPhonePrices = data.newPhonePrices || {};
 
                     phones.push({
                         id: `${brand}-${model.replace(/\s+/g, '-')}-${Date.now()}`,
@@ -1275,9 +1272,10 @@ function renderPhones() {
         let displayPrice;
         let priceLabel;
         if (currentBuybackType === 'new') {
-            displayPrice = phone.newPhonePrices
+            // FIXED: No auto-calculation! Use exact NEW prices from database
+            displayPrice = phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0
                 ? Math.max(...Object.values(phone.newPhonePrices))
-                : (phone.storagePrices ? Math.max(...Object.values(phone.storagePrices)) * 1.15 : (phone.basePrice || 0) * 1.15);
+                : 0;
             priceLabel = 'New Sealed';
         } else {
             displayPrice = phone.storagePrices
@@ -2185,14 +2183,11 @@ function updateStoragePrices() {
         </div>
     `).join('');
 
-    // New phone prices section
+    // New phone prices section - FIXED: No auto-calculation!
     if (newPriceContainer) {
         newPriceContainer.innerHTML = checkedStorages.map(storage => {
-            const usedPrice = adminManager.currentEditingPhone
-                ? (adminManager.getPhone(adminManager.currentEditingPhone)?.storagePrices?.[storage] || 0)
-                : 0;
             const newPrice = adminManager.currentEditingPhone
-                ? (adminManager.getPhone(adminManager.currentEditingPhone)?.newPhonePrices?.[storage] || Math.round(usedPrice * 1.15))
+                ? (adminManager.getPhone(adminManager.currentEditingPhone)?.newPhonePrices?.[storage] || 0)
                 : 0;
 
             return `
@@ -2204,11 +2199,8 @@ function updateStoragePrices() {
                                data-storage="${storage}"
                                value="${newPrice}"
                                min="0" step="10"
-                               placeholder="Auto: ${Math.round(usedPrice * 1.15)}"
+                               placeholder="Enter new/sealed price"
                                style="max-width: 200px;">
-                        <span style="color: var(--text-light); font-size: 0.75rem;">
-                            (Auto: $${Math.round(usedPrice * 1.15)})
-                        </span>
                     </div>
                 </div>
             `;
@@ -2357,14 +2349,12 @@ function savePhone() {
             return;
         }
 
-        // Preserve existing new phone prices if editing, otherwise auto-calculate
+        // Preserve existing new phone prices if editing, otherwise leave empty
         if (existingPhone && existingPhone.newPhonePrices) {
             newPhonePrices = existingPhone.newPhonePrices;
         } else {
-            // Auto-calculate new prices as used × 1.15
-            checkedStorages.forEach(storage => {
-                newPhonePrices[storage] = Math.round((storagePrices[storage] || 0) * 1.15);
-            });
+            // FIXED: Don't auto-calculate! Leave empty - prices should come from import
+            newPhonePrices = {};
         }
 
         basePrice = Math.min(...Object.values(storagePrices));
@@ -2385,14 +2375,12 @@ function savePhone() {
             return;
         }
 
-        // Preserve existing used phone prices if editing, otherwise auto-calculate
+        // Preserve existing used phone prices if editing, otherwise leave empty
         if (existingPhone && existingPhone.storagePrices) {
             storagePrices = existingPhone.storagePrices;
         } else {
-            // Auto-calculate used prices as new / 1.15
-            checkedStorages.forEach(storage => {
-                storagePrices[storage] = Math.round((newPhonePrices[storage] || 0) / 1.15);
-            });
+            // FIXED: Don't auto-calculate! Leave empty - prices should come from import
+            storagePrices = {};
         }
 
         basePrice = Math.min(...Object.values(storagePrices));
@@ -4601,6 +4589,67 @@ async function runBenchmarkImport() {
     }
 }
 
+async function runExactPriceImport() {
+    try {
+        console.log('🎯 Starting EXACT PRICE IMPORT - NO AUTO-CALCULATIONS');
+        console.log('📊 Source: Apple_USED_NEW_FULL_REVIEW.xlsx & Samsung_USED_NEW_FULL_REVIEW.xlsx');
+
+        // Show loading indicator
+        const importButton = event.target;
+        const originalText = importButton.innerHTML;
+        importButton.innerHTML = '⏳ Importing Exact Prices...';
+        importButton.disabled = true;
+
+        // Load the exact price import script
+        const response = await fetch('import-exact-prices.js');
+        if (!response.ok) {
+            throw new Error(`Failed to load exact price import script: ${response.status}`);
+        }
+
+        const scriptText = await response.text();
+        console.log('📥 Loaded exact price import script');
+
+        // Execute the script (this will define the importExactPrices function)
+        eval(scriptText);
+
+        // Run the import function if it exists
+        if (typeof importExactPrices === 'function') {
+            console.log('▶️ Running importExactPrices()...');
+            const result = importExactPrices();
+
+            // Reload phone data from localStorage
+            adminManager.phones = adminManager.loadPhones();
+
+            // Refresh the UI
+            renderPhones();
+            renderPriceTable();
+
+            // Close modal
+            closeImportModal();
+
+            console.log('✅ Exact price import completed successfully');
+            console.log(`   Updated: ${result.updated}, Added: ${result.added}, Total: ${result.total}`);
+        } else {
+            throw new Error('importExactPrices function not found in script');
+        }
+
+        // Reset button (in case modal didn't close)
+        importButton.innerHTML = originalText;
+        importButton.disabled = false;
+
+    } catch (error) {
+        console.error('❌ Exact price import failed:', error);
+        alert('Exact price import failed: ' + error.message + '\n\nPlease check the browser console for more details.');
+
+        // Reset button
+        const importButton = event.target;
+        if (importButton) {
+            importButton.innerHTML = '🎯 Import Exact Prices Now';
+            importButton.disabled = false;
+        }
+    }
+}
+
 // ============================================
 // MODAL PRICE TYPE TOGGLE (USED vs NEW)
 // ============================================
@@ -4679,6 +4728,7 @@ window.showImportModal = showImportModal;
 window.closeImportModal = closeImportModal;
 window.runBulkImport = runBulkImport;
 window.runBenchmarkImport = runBenchmarkImport;
+window.runExactPriceImport = runExactPriceImport;
 window.currentPriceType = currentPriceType;
 window.switchModalPriceType = switchModalPriceType;
 window.recalculateModalNewPrices = recalculateModalNewPrices;
