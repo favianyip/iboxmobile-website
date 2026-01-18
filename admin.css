@@ -1289,10 +1289,56 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 768px) {
+    /* ============================================ */
+    /* MOBILE RESPONSIVE ADMIN PANEL */
+    /* ============================================ */
+
+    /* Fix zoom issue - reduce font sizes and spacing */
+    html {
+        font-size: 14px; /* Reduced from default 16px */
+    }
+
+    body {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        touch-action: manipulation;
+    }
+
+    /* Header adjustments */
+    .admin-nav {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+    }
+
+    .admin-nav h1 {
+        font-size: 1.25rem;
+    }
+
+    .admin-badge {
+        font-size: 0.625rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    /* Sidebar - collapsible on mobile */
     .admin-sidebar {
         width: 100%;
         position: relative;
         height: auto;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .sidebar-menu {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .menu-item {
+        font-size: 0.875rem;
+        padding: 0.75rem 0.5rem;
+        text-align: center;
     }
 
     .admin-main {
@@ -1301,25 +1347,161 @@ input:checked + .slider:before {
 
     .admin-content {
         margin-left: 0;
-        padding: 1rem;
+        margin-top: 0;
+        padding: 0.75rem;
         width: 100%;
         max-width: 100%;
     }
 
+    /* Section headers */
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .section-header p {
+        font-size: 0.75rem !important;
+    }
+
+    /* Action buttons row */
+    .action-buttons {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .action-buttons .btn {
+        flex: 1 1 auto;
+        min-width: 140px;
+        font-size: 0.875rem;
+        padding: 0.6rem 1rem;
+    }
+
+    /* Phones grid */
     .phones-grid {
         grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
-    
+
+    /* Phone cards - more compact */
+    .phone-card-admin {
+        padding: 1rem;
+    }
+
+    .phone-card-admin h3 {
+        font-size: 1rem;
+    }
+
+    .phone-card-admin p {
+        font-size: 0.75rem;
+    }
+
+    /* Filters bar */
     .filters-bar {
         flex-direction: column;
+        gap: 0.5rem;
     }
-    
-    .filter-select {
-        width: 100%;
-        min-width: auto;
-    }
-    
+
+    .filter-select,
     .filter-search {
         width: 100%;
+        min-width: auto;
+        font-size: 0.875rem;
+        padding: 0.6rem;
+    }
+
+    /* Forms */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        font-size: 0.875rem;
+        padding: 0.6rem;
+    }
+
+    /* Modals */
+    .modal-content {
+        width: 95%;
+        max-width: 95% !important;
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.125rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    /* Buttons */
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.6rem 1rem;
+        min-height: 44px; /* iOS touch target */
+    }
+
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        min-height: 36px;
+    }
+
+    /* Tables */
+    table {
+        font-size: 0.75rem;
+    }
+
+    th, td {
+        padding: 0.5rem;
+    }
+
+    /* Import prices section - CRITICAL FOR MOBILE */
+    .import-section {
+        padding: 1rem;
+    }
+
+    .import-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .import-box {
+        padding: 1rem;
+    }
+
+    .import-box h3 {
+        font-size: 1rem;
+    }
+
+    /* Ensure all action buttons are visible */
+    .section-header .action-buttons {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    /* Stats cards */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
     }
 }

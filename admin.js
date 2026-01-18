@@ -16,17 +16,41 @@ class AdminDataManager {
 
     /**
      * Load phones from localStorage or initialize from quote.js data
+     * CRITICAL FIX: Always sync with phoneDatabase to get ALL models
      */
     loadPhones() {
+        console.log('🔄 Loading phones...');
+
+        // Check if phoneDatabase exists and count models
+        let db = window.phoneDatabase || (typeof phoneDatabase !== 'undefined' ? phoneDatabase : null);
+        let phoneDatabaseCount = 0;
+
+        if (db) {
+            Object.values(db).forEach(brand => {
+                phoneDatabaseCount += Object.keys(brand).length;
+            });
+            console.log(`📱 phoneDatabase has ${phoneDatabaseCount} models`);
+        }
+
         const stored = localStorage.getItem('ktmobile_phones');
         if (stored) {
             const phones = JSON.parse(stored);
+            console.log(`💾 localStorage has ${phones.length} models`);
+
+            // CRITICAL FIX: If phoneDatabase has MORE models, re-initialize
+            if (phoneDatabaseCount > phones.length) {
+                console.warn(`⚠️  phoneDatabase has ${phoneDatabaseCount} models but localStorage only has ${phones.length}`);
+                console.log('🔄 Re-initializing from phoneDatabase to get ALL models...');
+                return this.initializePhones();
+            }
+
             // Run migration to add missing fields
             this.migratePhoneData(phones);
             return phones;
         }
 
         // Initialize from existing quote.js data structure
+        console.log('📦 No localStorage data, initializing from phoneDatabase...');
         return this.initializePhones();
     }
 
