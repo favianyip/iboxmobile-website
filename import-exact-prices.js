@@ -120,6 +120,11 @@ const samsungNewPrices = {
 // ============================================================================
 
 function getImagePath(brand, model) {
+    // Use smart image mapper if available, otherwise fall back to simple path
+    if (typeof getSmartImage === 'function') {
+        return getSmartImage(brand, model);
+    }
+    // Fallback to simple auto-generation
     const modelLower = model.toLowerCase().replace(/\s+/g, '-');
     return `images/phones/${modelLower}.jpg`;
 }
