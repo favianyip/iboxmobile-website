@@ -37,11 +37,18 @@ class AdminDataManager {
             const phones = JSON.parse(stored);
             console.log(`💾 localStorage has ${phones.length} models`);
 
-            // CRITICAL FIX: If phoneDatabase has MORE models, re-initialize
-            if (phoneDatabaseCount > phones.length) {
-                console.warn(`⚠️  phoneDatabase has ${phoneDatabaseCount} models but localStorage only has ${phones.length}`);
-                console.log('🔄 Re-initializing from phoneDatabase to get ALL models...');
-                return this.initializePhones();
+            // DISABLED: Don't re-initialize from phoneDatabase if localStorage has import data
+            // Reason: Excel import (62 models) is SOURCE OF TRUTH, not phoneDatabase (69 hardcoded models)
+            // phoneDatabase has old/test models that aren't in current Excel files
+            // if (phoneDatabaseCount > phones.length) {
+            //     console.warn(`⚠️  phoneDatabase has ${phoneDatabaseCount} models but localStorage only has ${phones.length}`);
+            //     console.log('🔄 Re-initializing from phoneDatabase to get ALL models...');
+            //     return this.initializePhones();
+            // }
+
+            if (phoneDatabaseCount !== phones.length) {
+                console.log(`ℹ️  phoneDatabase: ${phoneDatabaseCount} hardcoded models, localStorage: ${phones.length} imported models from Excel`);
+                console.log(`ℹ️  Using localStorage (Excel import) as source of truth`);
             }
 
             // CRITICAL FIX: Ensure all phones have proper storagePrices from phoneDatabase
