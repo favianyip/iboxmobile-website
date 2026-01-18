@@ -191,7 +191,20 @@
                     <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
                         Set price adjustments based on phone condition. These modifiers are applied to base prices when calculating buyback quotes.
                     </p>
+
+                    <!-- Used/New Toggle for Condition Modifiers -->
+                    <div style="display: flex; justify-content: center; gap: 1rem; margin: 1.5rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <button class="condition-type-btn active" id="usedModifierToggle" onclick="switchConditionModifierType('used')" style="padding: 0.75rem 2rem; border: none; background: linear-gradient(135deg, #C9A84C 0%, #B8973B 100%); color: white; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3); transition: all 0.3s ease;">
+                            📱 Used Phone Modifiers
+                        </button>
+                        <button class="condition-type-btn" id="newModifierToggle" onclick="switchConditionModifierType('new')" style="padding: 0.75rem 2rem; border: none; background: #e9ecef; color: #666; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;">
+                            📦 New Phone Modifiers
+                        </button>
+                    </div>
                 </div>
+
+                <!-- USED Phone Condition Modifiers (default visible) -->
+                <div class="used-condition-modifiers" id="usedConditionModifiers">
                     <div class="condition-pricing-container">
                         <div class="condition-group-admin">
                             <h3>Body Condition Modifiers</h3>
@@ -377,6 +390,106 @@
                                             <td><strong>Original Box</strong></td>
                                             <td><input type="number" class="modifier-input" value="20" data-condition="accessory" data-grade="box"></td>
                                             <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('accessory', 'box')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW Phone Condition Modifiers (initially hidden) -->
+                <div class="new-condition-modifiers" id="newConditionModifiers" style="display: none;">
+                    <div class="condition-pricing-container">
+                        <p style="background: #fff3cd; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 2rem;">
+                            <strong>ℹ️ NEW Sealed Phone Modifiers:</strong><br>
+                            NEW sealed phones have limited modifiers since they're brand new and factory sealed. Only receipt and country affect the price.
+                        </p>
+
+                        <div class="condition-group-admin">
+                            <h3>Receipt Availability</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Receipt Status</th>
+                                            <th>Description</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="receiptModifierTable">
+                                        <tr>
+                                            <td><strong>Has Receipt</strong></td>
+                                            <td>Original purchase receipt from authorized retailer</td>
+                                            <td><input type="number" class="modifier-input" value="30" data-condition="receipt" data-grade="yes"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('receipt', 'yes')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>No Receipt</strong></td>
+                                            <td>No official receipt available</td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="receipt" data-grade="no"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('receipt', 'no')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="condition-group-admin">
+                            <h3>Country of Purchase</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Purchase Location</th>
+                                            <th>Description</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="countryModifierTable">
+                                        <tr>
+                                            <td><strong>Local Singapore Set</strong></td>
+                                            <td>Purchased in Singapore from authorized retailer</td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="country" data-grade="local"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('country', 'local')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Export Set</strong></td>
+                                            <td>Purchased overseas or from unofficial channels</td>
+                                            <td><input type="number" class="modifier-input" value="-50" data-condition="country" data-grade="export"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('country', 'export')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="condition-group-admin">
+                            <h3>Device Type (Sealed Status)</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="deviceTypeModifierTable">
+                                        <tr>
+                                            <td><strong>New Sealed</strong></td>
+                                            <td>Factory sealed, never opened</td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="deviceType" data-grade="new-sealed"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('deviceType', 'new-sealed')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>New Activated</strong></td>
+                                            <td>Opened but unused, like new</td>
+                                            <td><input type="number" class="modifier-input" value="-150" data-condition="deviceType" data-grade="new-activated"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('deviceType', 'new-activated')">Save</button></td>
                                         </tr>
                                     </tbody>
                                 </table>
