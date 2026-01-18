@@ -803,6 +803,8 @@
                     console.log('   Sample models:', samsungModels.slice(0, 5).join(', '));
                 }
 
+                // CRITICAL FIX: Wrap rendering in proper if block
+                if (phoneDatabase.Apple || phoneDatabase.Samsung) {
                     // Render Apple models from phoneDatabase
                     if (phoneDatabase.Apple) {
                         Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
