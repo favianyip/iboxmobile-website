@@ -663,6 +663,11 @@
             document.getElementById(brand + '-models').classList.add('active');
         }
 
+        // Helper function to round price to nearest $10
+        function roundToNearest10(price) {
+            return Math.round(price / 10) * 10;
+        }
+
         // Render models
         function renderModels() {
             const appleGrid = document.getElementById('apple-grid');
@@ -697,7 +702,7 @@
 
                             // NEW price estimate (15% higher if no specific NEW price)
                             const maxNewPrice = maxUsedPrice * 1.15;
-                            const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                            const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
 
                             const model = {
                                 name: modelName,
@@ -725,7 +730,7 @@
 
                             // NEW price estimate (15% higher if no specific NEW price)
                             const maxNewPrice = maxUsedPrice * 1.15;
-                            const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                            const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
 
                             const model = {
                                 name: modelName,
@@ -751,7 +756,7 @@
                             ? Math.max(...Object.values(phone.storagePrices))
                             : phone.basePrice || 0;
 
-                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
@@ -769,7 +774,7 @@
                             ? Math.max(...Object.values(phone.storagePrices))
                             : phone.basePrice || 0;
 
-                        const price = currentCondition === 'used' ? Math.round(maxUsedPrice) : Math.round(maxNewPrice);
+                        const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
