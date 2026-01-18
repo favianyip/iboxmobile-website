@@ -1438,6 +1438,43 @@ function populateStep2() {
     // Initialize device type selection
     initDeviceTypeSelection();
 
+    // Disable NEW device type options if model doesn't have NEW prices
+    if (typeof adminManager !== 'undefined' && adminManager.phones) {
+        const adminPhone = adminManager.phones.find(p => p.brand === quoteState.brand && p.model === quoteState.model);
+        const hasNewPrices = adminPhone && adminPhone.newPhonePrices && Object.keys(adminPhone.newPhonePrices).length > 0;
+
+        if (!hasNewPrices) {
+            // Disable NEW SEALED and NEW ACTIVATED buttons
+            const newSealedBtn = document.querySelector('[data-value="new-sealed"]');
+            const newActivatedBtn = document.querySelector('[data-value="new-activated"]');
+
+            if (newSealedBtn) {
+                newSealedBtn.disabled = true;
+                newSealedBtn.style.opacity = '0.4';
+                newSealedBtn.style.cursor = 'not-allowed';
+                newSealedBtn.title = 'New Sealed prices not available for this model';
+                console.log('⚠️ NEW SEALED option disabled - no NEW prices available');
+            }
+
+            if (newActivatedBtn) {
+                newActivatedBtn.disabled = true;
+                newActivatedBtn.style.opacity = '0.4';
+                newActivatedBtn.style.cursor = 'not-allowed';
+                newActivatedBtn.title = 'New Activated prices not available for this model';
+                console.log('⚠️ NEW ACTIVATED option disabled - no NEW prices available');
+            }
+
+            // Auto-select USED if NEW was previously selected
+            if (quoteState.deviceType === 'new-sealed' || quoteState.deviceType === 'new-activated') {
+                const usedBtn = document.querySelector('[data-value="used"]');
+                if (usedBtn) {
+                    usedBtn.click();
+                    console.log('✅ Auto-switched to USED (NEW prices not available)');
+                }
+            }
+        }
+    }
+
     // Auto-select device type if coming from Trade In buttons
     if (window.preferredDeviceType) {
         setTimeout(() => {
@@ -1767,46 +1804,38 @@ function calculateQuote() {
 
     // Calculate base price based on device type and storage
     if (quoteState.deviceType === 'new-sealed') {
-        // Use NEW SEALED price from admin data
+        // Use ONLY exact NEW SEALED price from admin data - NO CALCULATIONS
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             price = adminPhone.newPhonePrices[quoteState.storage];
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: price, type: 'base' });
-        } else if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
-            // Fallback: Use used price * 1.15
-            price = Math.round(adminPhone.storagePrices[quoteState.storage] * 1.15);
-            breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: price, type: 'base' });
         } else {
-            // Final fallback: Use old base price + 200
-            price = (adminPhone?.basePrice || model.basePrice) + 200;
-            breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
+            // NO NEW price available - show error instead of calculating
+            price = 0;
+            breakdown.push({ label: `⚠️ ${quoteState.model} (New Sealed) - Price Not Available`, value: 0, type: 'error' });
+            console.error(`NEW SEALED price not available for ${quoteState.model} ${quoteState.storage}`);
         }
     } else if (quoteState.deviceType === 'new-activated') {
-        // Use NEW SEALED price - $150
+        // Use ONLY exact NEW SEALED price - $150 - NO CALCULATIONS
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             const sealedPrice = adminPhone.newPhonePrices[quoteState.storage];
             price = sealedPrice - 150;
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
             breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
-        } else if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
-            // Fallback: Use used price * 1.15 - 150
-            const sealedPrice = Math.round(adminPhone.storagePrices[quoteState.storage] * 1.15);
-            price = sealedPrice - 150;
-            breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
-            breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
         } else {
-            // Final fallback: Use old base price + 100
-            price = (adminPhone?.basePrice || model.basePrice) + 100;
-            breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
+            // NO NEW price available - show error instead of calculating
+            price = 0;
+            breakdown.push({ label: `⚠️ ${quoteState.model} (New Activated) - Price Not Available`, value: 0, type: 'error' });
+            console.error(`NEW ACTIVATED price not available for ${quoteState.model} ${quoteState.storage}`);
         }
     } else {
-        // USED device - use storage-specific used price
+        // USED device - use ONLY exact storage-specific used price from admin data
         if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
             price = adminPhone.storagePrices[quoteState.storage];
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (Used)`, value: price, type: 'base' });
         } else {
-            // Fallback to old base price
+            // Fallback to basePrice for USED only (for backwards compatibility)
             price = adminPhone?.basePrice || model.basePrice;
-            breakdown.push({ label: `${quoteState.model} Base Price`, value: price, type: 'base' });
+            breakdown.push({ label: `${quoteState.model} Base Price (Used)`, value: price, type: 'base' });
         }
     }
 
