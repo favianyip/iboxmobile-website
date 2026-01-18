@@ -4034,89 +4034,95 @@ window.updateModelFilter = updateModelFilter;
 // ============================================
 
 /**
- * Export all admin data to an EXCEL file
- * This allows admins to save their changes and commit to git
+ * Export all admin data to CSV files (CSP-compliant, no eval)
+ * Creates a ZIP-like download with multiple CSV files
  */
 function exportAllData() {
     try {
-        console.log('📊 Starting Excel export...');
+        console.log('📊 Starting CSV export (CSP-compliant)...');
 
         // Get all data from localStorage
         const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
-        const brands = JSON.parse(localStorage.getItem('ktmobile_brands') || '{}');
-        const conditionModifiers = JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}');
-        const appointments = JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]');
-        const generalSettings = JSON.parse(localStorage.getItem('ibox_general_settings') || '{}');
 
-        // Create workbook
-        const wb = XLSX.utils.book_new();
+        // Helper function to convert array to CSV
+        function arrayToCSV(data) {
+            return data.map(row =>
+                row.map(cell => {
+                    // Escape quotes and wrap in quotes if contains comma, quote, or newline
+                    const cellStr = String(cell ?? '');
+                    if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                        return '"' + cellStr.replace(/"/g, '""') + '"';
+                    }
+                    return cellStr;
+                }).join(',')
+            ).join('\n');
+        }
+
+        // Helper function to download CSV
+        function downloadCSV(content, filename) {
+            const BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+            const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
 
         // ========================================
-        // Sheet 1: Phone USED Prices
+        // CSV 1: USED Prices
         // ========================================
-        const usedPricesData = [];
-        usedPricesData.push(['USED PHONE PRICES - IBOX MOBILE SINGAPORE']);
-        usedPricesData.push(['Export Date:', new Date().toISOString()]);
-        usedPricesData.push([]);
-        usedPricesData.push(['Brand', 'Model', 'Storage', 'Used Price (SGD)', 'Display', 'Available', 'Colors']);
+        const usedData = [];
+        usedData.push(['Brand', 'Model', 'Storage', 'Used Price (SGD)', 'Display', 'Available', 'Colors']);
 
         phones.forEach(phone => {
             if (phone.storages && phone.storagePrices) {
                 phone.storages.forEach(storage => {
-                    usedPricesData.push([
+                    usedData.push([
                         phone.brand,
                         phone.model,
                         storage,
                         phone.storagePrices[storage] || 0,
                         phone.display ? 'YES' : 'NO',
                         phone.available ? 'YES' : 'NO',
-                        (phone.colors || []).join(', ')
+                        (phone.colors || []).join('; ')
                     ]);
                 });
             }
         });
 
-        const wsUsed = XLSX.utils.aoa_to_sheet(usedPricesData);
-        XLSX.utils.book_append_sheet(wb, wsUsed, 'USED Prices');
-
         // ========================================
-        // Sheet 2: Phone NEW Prices
+        // CSV 2: NEW Prices
         // ========================================
-        const newPricesData = [];
-        newPricesData.push(['NEW PHONE PRICES - IBOX MOBILE SINGAPORE']);
-        newPricesData.push(['Export Date:', new Date().toISOString()]);
-        newPricesData.push([]);
-        newPricesData.push(['Brand', 'Model', 'Storage', 'New Price (SGD)', 'Display', 'Available', 'Colors']);
+        const newData = [];
+        newData.push(['Brand', 'Model', 'Storage', 'New Price (SGD)', 'Display', 'Available', 'Colors']);
 
         phones.forEach(phone => {
             if (phone.storages && phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
                 phone.storages.forEach(storage => {
                     if (phone.newPhonePrices[storage]) {
-                        newPricesData.push([
+                        newData.push([
                             phone.brand,
                             phone.model,
                             storage,
                             phone.newPhonePrices[storage] || 0,
                             phone.display ? 'YES' : 'NO',
                             phone.available ? 'YES' : 'NO',
-                            (phone.colors || []).join(', ')
+                            (phone.colors || []).join('; ')
                         ]);
                     }
                 });
             }
         });
 
-        const wsNew = XLSX.utils.aoa_to_sheet(newPricesData);
-        XLSX.utils.book_append_sheet(wb, wsNew, 'NEW Prices');
-
         // ========================================
-        // Sheet 3: Complete Phone List with All Data
+        // CSV 3: Complete Database
         // ========================================
         const completeData = [];
-        completeData.push(['COMPLETE PHONE DATABASE - IBOX MOBILE SINGAPORE']);
-        completeData.push(['Export Date:', new Date().toISOString()]);
-        completeData.push([]);
-        completeData.push(['Brand', 'Model', 'Storage', 'Used Price', 'New Price', 'Colors', 'Display', 'Available', 'Image Path']);
+        completeData.push(['Brand', 'Model', 'Storage', 'Used Price', 'New Price', 'Colors', 'Display', 'Available']);
 
         phones.forEach(phone => {
             if (phone.storages) {
@@ -4127,52 +4133,45 @@ function exportAllData() {
                         storage,
                         phone.storagePrices ? (phone.storagePrices[storage] || 0) : 0,
                         phone.newPhonePrices ? (phone.newPhonePrices[storage] || 0) : 0,
-                        (phone.colors || []).join(', '),
+                        (phone.colors || []).join('; '),
                         phone.display ? 'YES' : 'NO',
-                        phone.available ? 'YES' : 'NO',
-                        phone.image || ''
+                        phone.available ? 'YES' : 'NO'
                     ]);
                 });
             }
         });
 
-        const wsComplete = XLSX.utils.aoa_to_sheet(completeData);
-        XLSX.utils.book_append_sheet(wb, wsComplete, 'Complete Database');
+        // Generate filenames with date
+        const dateStr = new Date().toISOString().split('T')[0];
 
-        // ========================================
-        // Sheet 4: Summary & Statistics
-        // ========================================
-        const summaryData = [];
-        summaryData.push(['IBOX MOBILE SINGAPORE - DATA SUMMARY']);
-        summaryData.push(['Export Date:', new Date().toISOString()]);
-        summaryData.push([]);
-        summaryData.push(['Category', 'Count/Value']);
-        summaryData.push(['Total Phone Models', phones.length]);
-        summaryData.push(['Apple Models', phones.filter(p => p.brand === 'Apple').length]);
-        summaryData.push(['Samsung Models', phones.filter(p => p.brand === 'Samsung').length]);
-        summaryData.push(['Models with NEW Prices', phones.filter(p => p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0).length]);
-        summaryData.push(['Models with USED Prices', phones.filter(p => p.storagePrices && Object.keys(p.storagePrices).length > 0).length]);
-        summaryData.push(['Visible Models (Display=YES)', phones.filter(p => p.display === true).length]);
-        summaryData.push(['Total Appointments', appointments.length]);
-        summaryData.push([]);
-        summaryData.push(['GENERAL SETTINGS']);
-        summaryData.push(['Setting', 'Value']);
-        Object.entries(generalSettings).forEach(([key, value]) => {
-            summaryData.push([key, value]);
-        });
+        // Download all CSVs
+        downloadCSV(arrayToCSV(usedData), `IBOX-USED-Prices-${dateStr}.csv`);
 
-        const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-        XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+        setTimeout(() => {
+            downloadCSV(arrayToCSV(newData), `IBOX-NEW-Prices-${dateStr}.csv`);
+        }, 500);
 
-        // Generate Excel file
-        const fileName = `IBOX-Mobile-Buyback-Data-${new Date().toISOString().split('T')[0]}.xlsx`;
-        XLSX.writeFile(wb, fileName);
+        setTimeout(() => {
+            downloadCSV(arrayToCSV(completeData), `IBOX-Complete-Database-${dateStr}.csv`);
+        }, 1000);
 
-        console.log('✅ Excel export complete!');
-        alert(`✅ Excel Backup Saved Successfully!\n\n📊 All Prices & Settings Exported to Excel:\n• USED Prices (${phones.length} models)\n• NEW Prices (${phones.filter(p => p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0).length} models)\n• Complete Database\n• Summary & Statistics\n\n💾 File: ${fileName}\n📁 Location: Your Downloads folder\n\n⚠️ IMPORTANT:\n1. Save this Excel file in a safe location\n2. Use it for price reviews and updates\n3. Export after every major price change!\n\n💡 TIP: Open in Excel/Google Sheets to view all data!`);
+        console.log('✅ CSV export complete!');
+
+        const usedCount = phones.filter(p => p.storagePrices && Object.keys(p.storagePrices).length > 0).length;
+        const newCount = phones.filter(p => p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0).length;
+
+        alert(`✅ CSV Export Successful!\n\n📊 3 CSV Files Downloaded:\n` +
+              `1️⃣ USED Prices (${usedCount} models)\n` +
+              `2️⃣ NEW Prices (${newCount} models)\n` +
+              `3️⃣ Complete Database (${phones.length} models)\n\n` +
+              `💾 Files saved to Downloads folder\n` +
+              `📁 Date: ${dateStr}\n\n` +
+              `✅ CSP-Compliant (No security errors)\n` +
+              `✅ Excel/Google Sheets compatible\n\n` +
+              `💡 TIP: Open CSV files in Excel or Google Sheets!`);
 
         if (typeof showNotification === 'function') {
-            showNotification('✓ All prices and settings exported to Excel!', 'success');
+            showNotification('✓ All prices exported to CSV files!', 'success');
         }
     } catch (error) {
         console.error('Export error:', error);
