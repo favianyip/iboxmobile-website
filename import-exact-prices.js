@@ -110,6 +110,73 @@ const samsungNewPrices = {
 };
 
 // ============================================================================
+// OFFICIAL FACTORY COLORS DATABASE
+// ============================================================================
+
+function getOfficialColors(brand, model) {
+    const colorMap = {
+        // Apple iPhones - Based on official factory colors from Apple.com
+        'iPhone 17 Pro Max': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+        'iPhone 17 Pro': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+        'iPhone 17': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+        'iPhone Air': ['Cosmic Orange', 'Deep Blue', 'Silver'],
+        'iPhone 16 Pro Max': ['Black Titanium', 'Natural Titanium', 'White Titanium', 'Desert Titanium'],
+        'iPhone 16 Pro': ['Black Titanium', 'Natural Titanium', 'White Titanium', 'Desert Titanium'],
+        'iPhone 16 Plus': ['Black', 'White', 'Pink', 'Teal', 'Ultramarine'],
+        'iPhone 16': ['Black', 'White', 'Pink', 'Teal', 'Ultramarine'],
+        'iPhone 16E': ['Black', 'White', 'Pink', 'Teal', 'Ultramarine'],
+        'iPhone 15 Pro Max': ['Natural Titanium', 'Black Titanium', 'White Titanium', 'Blue Titanium'],
+        'iPhone 15 Pro': ['Natural Titanium', 'Black Titanium', 'White Titanium', 'Blue Titanium'],
+        'iPhone 15 Plus': ['Pink', 'Yellow', 'Blue', 'Green', 'Black'],
+        'iPhone 15': ['Pink', 'Yellow', 'Blue', 'Green', 'Black'],
+        'iPhone 14 Pro Max': ['Deep Purple', 'Space Black', 'Silver', 'Gold'],
+        'iPhone 14 Pro': ['Deep Purple', 'Space Black', 'Silver', 'Gold'],
+        'iPhone 14 Plus': ['Blue', 'Purple', 'Midnight', 'Starlight', 'Yellow', '(PRODUCT)RED'],
+        'iPhone 14': ['Blue', 'Purple', 'Midnight', 'Starlight', 'Yellow', '(PRODUCT)RED'],
+        'iPhone 13 Pro Max': ['Graphite', 'Gold', 'Silver', 'Sierra Blue', 'Alpine Green'],
+        'iPhone 13 Pro': ['Graphite', 'Gold', 'Silver', 'Sierra Blue', 'Alpine Green'],
+        'iPhone 13 Mini': ['Midnight', 'Starlight', '(PRODUCT)RED', 'Blue', 'Pink', 'Green'],
+        'iPhone 13': ['Midnight', 'Starlight', '(PRODUCT)RED', 'Blue', 'Pink', 'Green'],
+        'iPhone 12 Pro Max': ['Silver', 'Graphite', 'Gold', 'Pacific Blue'],
+        'iPhone 12 Pro': ['Silver', 'Graphite', 'Gold', 'Pacific Blue'],
+        'iPhone 12 Mini': ['Black', 'White', '(PRODUCT)RED', 'Green', 'Blue', 'Purple'],
+        'iPhone 12': ['Black', 'White', '(PRODUCT)RED', 'Green', 'Blue', 'Purple'],
+        'iPhone 11 Pro Max': ['Gold', 'Silver', 'Space Gray', 'Midnight Green'],
+        'iPhone 11 Pro': ['Gold', 'Silver', 'Space Gray', 'Midnight Green'],
+        'iPhone 11': ['Purple', 'Yellow', 'Green', 'Black', 'White', '(PRODUCT)RED'],
+        'iPhone XS Max': ['Gold', 'Silver', 'Space Gray'],
+        'iPhone XS': ['Gold', 'Silver', 'Space Gray'],
+        'iPhone XR': ['Black', 'White', 'Blue', 'Yellow', 'Coral', '(PRODUCT)RED'],
+        'iPhone SE (2022)': ['Midnight', 'Starlight', '(PRODUCT)RED'],
+
+        // Samsung - Based on official factory colors from Samsung.com
+        'Galaxy S25 Ultra 5G': ['Titanium Silverblue', 'Titanium Black', 'Titanium Gray', 'Titanium Whitesilver', 'Titanium Jade Green', 'Titanium Pink Gold', 'Titanium Jet Black'],
+        'Galaxy S25+ 5G': ['Icy Blue', 'Mint', 'Navy', 'Silver Shadow', 'Coral Red', 'Blue Black', 'Pink Gold'],
+        'Galaxy S25 5G': ['Icy Blue', 'Mint', 'Navy', 'Silver Shadow', 'Coral Red', 'Blue Black', 'Pink Gold'],
+        'Galaxy S24 Ultra 5G': ['Titanium Black', 'Titanium Gray', 'Titanium Violet', 'Titanium Yellow', 'Titanium Green', 'Titanium Orange', 'Titanium Blue'],
+        'Galaxy S24 Plus 5G': ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
+        'Galaxy S24 5G': ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
+        'Galaxy S24 FE 5G': ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green'],
+        'Galaxy S23 Ultra 5G': ['Green', 'Phantom Black', 'Cream', 'Lavender', 'Lime', 'Sky Blue', 'Graphite', 'Red'],
+        'Galaxy S23+ 5G': ['Green', 'Phantom Black', 'Cream', 'Lavender', 'Lime', 'Graphite'],
+        'Galaxy S23 5G': ['Green', 'Phantom Black', 'Cream', 'Lavender', 'Lime', 'Graphite'],
+        'Galaxy S23 FE': ['Green', 'Phantom Black', 'Cream', 'Lavender'],
+        'Galaxy S22 Ultra 5G': ['Phantom Black', 'Phantom White', 'Burgundy', 'Green'],
+        'Galaxy Z Fold 7 5G': ['Jet Black', 'Blue Shadow', 'Silver Shadow', 'Mint'],
+        'Galaxy Z Flip 7 5G': ['Jet Black', 'Blue Shadow', 'Coral Red', 'Mint'],
+        'Galaxy Z Flip 7 FE 5G': ['Jet Black', 'Blue Shadow', 'Coral Red', 'Mint'],
+        'Galaxy A56 5G': ['Navy', 'Ice Blue', 'Lilac'],
+        'Galaxy A55 5G': ['Navy', 'Ice Blue', 'Lilac'],
+        'Galaxy A36 5G': ['Navy', 'Black', 'Silver'],
+        'Galaxy A26 5G': ['Navy', 'Black', 'Silver'],
+        'Galaxy A17 5G': ['Navy', 'Black', 'Silver'],
+        'Galaxy A17 4G': ['Navy', 'Black', 'Silver']
+    };
+
+    return colorMap[model] || [];
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -258,6 +325,9 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
         updatedAt: new Date().toISOString()
     };
 
+    // Get official colors for this model
+    const officialColors = getOfficialColors(brand, model);
+
     if (existingIndex >= 0) {
         // Update existing
         const existing = phones[existingIndex];
@@ -266,12 +336,12 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
             ...phoneData,
             id: existing.id,
             image: existing.image || getImagePath(brand, model),
-            colors: existing.colors || [],
+            colors: existing.colors && existing.colors.length > 0 ? existing.colors : officialColors,
             buyPrices: existing.buyPrices || calculateBuyPrices(usedPrices),
             quantities: existing.quantities || initializeQuantities(storages),
             createdAt: existing.createdAt || new Date().toISOString()
         };
-        console.log(`✅ Updated: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length})`);
+        console.log(`✅ Updated: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length})`);
         return 'updated';
     } else {
         // Add new
@@ -279,12 +349,12 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
             ...phoneData,
             id: `${brand.toLowerCase()}-${model.toLowerCase().replace(/[\s\/\(\)]+/g, '-')}-${Date.now()}`,
             image: getImagePath(brand, model),
-            colors: [],
+            colors: officialColors,
             buyPrices: calculateBuyPrices(usedPrices),
             quantities: initializeQuantities(storages),
             createdAt: new Date().toISOString()
         });
-        console.log(`➕ Added: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length})`);
+        console.log(`➕ Added: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length})`);
         return 'added';
     }
 }

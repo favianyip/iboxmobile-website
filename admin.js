@@ -217,7 +217,7 @@ class AdminDataManager {
                 model: 'iPhone 15 Pro Max',
                 image: 'images/phones/iphone-15-pro-max.jpg',
                 storages: ['256GB', '512GB', '1TB'],
-                colors: ['Natural Titanium', 'Blue Titanium', 'White Titanium', 'Black Titanium'],
+                colors: ['Natural Titanium', 'Black Titanium', 'White Titanium', 'Blue Titanium'],
                 basePrice: 1500,
                 storagePrices: { '256GB': 1500, '512GB': 1600, '1TB': 1700 },
                 newPhonePrices: { '256GB': 1725, '512GB': 1840, '1TB': 1955 },
@@ -267,7 +267,7 @@ class AdminDataManager {
                 model: 'Galaxy S24 5G', // FIXED: Added "5G" to match import
                 image: 'images/phones/galaxy-s24.jpg',
                 storages: ['256GB', '512GB'],
-                colors: ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow'],
+                colors: ['Onyx Black', 'Marble Gray', 'Cobalt Violet', 'Amber Yellow', 'Jade Green', 'Sapphire Blue', 'Sandstone Orange'],
                 basePrice: 380,
                 storagePrices: { '256GB': 380, '512GB': 450 }, // FIXED: Exact USED prices from Excel
                 newPhonePrices: {}, // FIXED: Leave empty - will be filled by import
