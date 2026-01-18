@@ -1208,6 +1208,7 @@ body {
     /* Dropdown in mobile menu */
     .dropdown-menu {
         position: static !important;
+        display: none !important; /* Hidden by default on mobile */
         opacity: 1 !important;
         visibility: visible !important;
         transform: none !important;
@@ -1217,6 +1218,11 @@ body {
         margin: 0 !important;
     }
 
+    /* Show dropdown when parent has dropdown-active class */
+    .dropdown-active .dropdown-menu {
+        display: block !important;
+    }
+
     .dropdown-menu li {
         border-bottom: none;
     }
@@ -1224,6 +1230,21 @@ body {
     .dropdown-menu li a {
         padding: 0.75rem 2rem !important;
         font-size: 0.95rem !important;
+    }
+
+    /* Dropdown toggle indicator on mobile */
+    .dropdown-toggle {
+        position: relative;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    /* Rotate arrow when dropdown is active */
+    .dropdown-active .dropdown-toggle span {
+        transform: rotate(180deg);
+        display: inline-block;
     }
 
     /* Mobile overlay */

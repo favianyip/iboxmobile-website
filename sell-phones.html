@@ -680,6 +680,25 @@
             return Math.round(price / 10) * 10;
         }
 
+        // Helper function to sort storage options in ascending order
+        function sortStorageOptions(storageArray) {
+            if (!storageArray || storageArray.length === 0) return [];
+
+            return storageArray.sort((a, b) => {
+                // Convert storage string to numeric GB value for comparison
+                const parseStorage = (str) => {
+                    const match = str.match(/^(\d+)(GB|TB)$/i);
+                    if (!match) return 0;
+                    const num = parseInt(match[1]);
+                    const unit = match[2].toUpperCase();
+                    // Convert TB to GB (1TB = 1024GB)
+                    return unit === 'TB' ? num * 1024 : num;
+                };
+
+                return parseStorage(a) - parseStorage(b);
+            });
+        }
+
         // Render models
         function renderModels() {
             const appleGrid = document.getElementById('apple-grid');
@@ -723,7 +742,7 @@
                             const model = {
                                 name: modelName,
                                 img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                storage: storageOptions
+                                storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
                             };
                             appleGrid.innerHTML += createModelCard(model, 'Apple', price);
                         });
@@ -755,7 +774,7 @@
                             const model = {
                                 name: modelName,
                                 img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                storage: storageOptions
+                                storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
                             };
                             samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
                         });
@@ -780,7 +799,7 @@
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'iphone-16-pro-max.jpg',
-                            storage: phone.storages || []
+                            storage: sortStorageOptions(phone.storages || []) // Sort storage in ascending order
                         };
                         appleGrid.innerHTML += createModelCard(model, 'Apple', price);
                     });
@@ -798,22 +817,32 @@
                         const model = {
                             name: phone.model,
                             img: phone.image ? phone.image.replace('images/phones/', '') : 'galaxy-s24-ultra.jpg',
-                            storage: phone.storages || []
+                            storage: sortStorageOptions(phone.storages || []) // Sort storage in ascending order
                         };
                         samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
                     });
                 }
                 // Priority 3: Fallback to hardcoded phoneModels (last resort)
                 else {
-                    console.warn('⚠️ Using hardcoded phoneModels fallback (limited models)');
+                    console.warn('⚠️ Using hardcoded phoneModels fallback');
+                    console.log(`📦 Hardcoded models: ${phoneModels.apple.length} Apple + ${phoneModels.samsung.length} Samsung`);
+
                     phoneModels.apple.forEach(model => {
                         const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                        const sortedModel = {
+                            ...model,
+                            storage: sortStorageOptions(model.storage || []) // Sort storage in ascending order
+                        };
+                        appleGrid.innerHTML += createModelCard(sortedModel, 'Apple', price);
                     });
 
                     phoneModels.samsung.forEach(model => {
                         const price = currentCondition === 'used' ? model.usedPrice : model.newPrice;
-                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                        const sortedModel = {
+                            ...model,
+                            storage: sortStorageOptions(model.storage || []) // Sort storage in ascending order
+                        };
+                        samsungGrid.innerHTML += createModelCard(sortedModel, 'Samsung', price);
                     });
                 }
 
@@ -826,12 +855,18 @@
         // Create model card HTML
         function createModelCard(model, brand, price) {
             const searchKey = model.name.toLowerCase().replace(/\s+/g, '-');
+
+            // Ensure storage is sorted (in case it wasn't sorted earlier)
+            const sortedStorage = Array.isArray(model.storage)
+                ? sortStorageOptions(model.storage)
+                : [];
+
             return `
                 <div class="model-card" onclick="navigateToEvaluation('${brand}', '${model.name}')" data-model="${searchKey}">
                     <img src="images/phones/${model.img}" alt="${model.name}" onerror="this.style.display='none'">
                     <h3>${model.name}</h3>
                     <div class="storage-badges">
-                        ${model.storage.map(s => `<span class="storage-badge">${s}</span>`).join('')}
+                        ${sortedStorage.map(s => `<span class="storage-badge">${s}</span>`).join('')}
                     </div>
                     <div class="price-info">
                         <div class="price-label">Get up to</div>
