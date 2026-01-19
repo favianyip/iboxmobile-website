@@ -1364,7 +1364,13 @@ function renderPhones() {
     // Start with all phones
     let phones = adminManager.phones || [];
 
-    console.log('Total phones:', phones.length);
+    console.log('📱 renderPhones() - Total phones in memory:', phones.length);
+    console.log('🔍 Current filters:', {
+        brand: brandFilter || '(none)',
+        model: modelFilter || '(none)',
+        search: searchQuery || '(none)',
+        priceType: currentBuybackType || 'used'
+    });
 
     // CRITICAL FIX: If no phones in memory, reload from localStorage FIRST
     // DO NOT call initializePhones() which falls back to hardcoded phoneDatabase!
@@ -1381,36 +1387,58 @@ function renderPhones() {
         }
     }
 
+    const originalCount = phones.length;
+
     // Filter by brand
     if (brandFilter) {
+        const beforeFilter = phones.length;
         phones = phones.filter(p => p.brand === brandFilter);
+        console.log(`🔍 Brand filter "${brandFilter}": ${beforeFilter} → ${phones.length} phones`);
     }
 
     // Filter by model
     if (modelFilter) {
+        const beforeFilter = phones.length;
         phones = phones.filter(p => p.model === modelFilter);
+        console.log(`🔍 Model filter "${modelFilter}": ${beforeFilter} → ${phones.length} phones`);
     }
 
     // Filter by search query
     if (searchQuery) {
+        const beforeFilter = phones.length;
         const lowerQuery = searchQuery.toLowerCase();
         phones = phones.filter(p =>
             p.model.toLowerCase().includes(lowerQuery) ||
             p.brand.toLowerCase().includes(lowerQuery)
         );
+        console.log(`🔍 Search filter "${searchQuery}": ${beforeFilter} → ${phones.length} phones`);
     }
 
     // FILTER: If viewing NEW phone prices, hide phones that don't have NEW prices
     if (currentBuybackType === 'new') {
+        const beforeFilter = phones.length;
+        const phonesWithoutNewPrices = [];
+
         phones = phones.filter(p => {
             // Check if phone has at least one NEW price greater than 0
             if (p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0) {
                 const hasNonZeroPrice = Object.values(p.newPhonePrices).some(price => price > 0);
+                if (!hasNonZeroPrice) {
+                    phonesWithoutNewPrices.push(`${p.brand} ${p.model}`);
+                }
                 return hasNonZeroPrice;
             }
+            phonesWithoutNewPrices.push(`${p.brand} ${p.model}`);
             return false; // No NEW prices, hide this phone
         });
+
+        console.log(`🔍 NEW price filter: ${beforeFilter} → ${phones.length} phones`);
+        if (phonesWithoutNewPrices.length > 0) {
+            console.log('⚠️  Hidden (no NEW prices):', phonesWithoutNewPrices.join(', '));
+        }
     }
+
+    console.log(`📊 FINAL: Showing ${phones.length} of ${originalCount} total phones`);
 
     if (phones.length === 0) {
         grid.innerHTML = `
@@ -1873,26 +1901,33 @@ function saveConditionModifier(conditionType, grade) {
 
 function renderPriceTable() {
     console.log('=== renderPriceTable called ===');
-    
+
     // Try both possible IDs for backward compatibility
     const tbody = document.getElementById('buybackPriceTableBody') || document.getElementById('priceTableBody');
     const brandFilter = document.getElementById('buybackPriceBrandFilter')?.value || document.getElementById('priceBrandFilter')?.value || '';
-    
+
     if (!tbody) {
         console.error('Price table body not found! Looking for: buybackPriceTableBody or priceTableBody');
         return;
     }
-    
-    // Filter to Apple and Samsung only
+
+    // REMOVED FILTER: Don't filter to Apple/Samsung only - show ALL phones
     let phones = adminManager.phones || [];
-    phones = phones.filter(p => p.brand === 'Apple' || p.brand === 'Samsung');
+    const allPhonesCount = phones.length;
+    console.log('📱 Total phones in localStorage:', allPhonesCount);
+
+    // List all brands available
+    const allBrands = [...new Set(phones.map(p => p.brand))];
+    console.log('📦 Brands in database:', allBrands.join(', '));
 
     // Filter by brand if selected
     if (brandFilter) {
+        const beforeFilter = phones.length;
         phones = phones.filter(p => p.brand === brandFilter);
+        console.log(`🔍 Brand filter "${brandFilter}": ${beforeFilter} → ${phones.length} phones`);
     }
 
-    console.log('Phones to display:', phones.length);
+    console.log('📊 Phones to display in table:', phones.length);
 
     if (phones.length === 0) {
         tbody.innerHTML = `
@@ -2710,31 +2745,60 @@ function savePhone() {
         phoneData.createdAt = new Date().toISOString();
     }
 
+    console.log('💾 SAVING PHONE TO LOCALSTORAGE...');
+    console.log('Phone Data:', {
+        brand: phoneData.brand,
+        model: phoneData.model,
+        storages: phoneData.storages,
+        usedPrices: phoneData.storagePrices,
+        newPrices: phoneData.newPhonePrices
+    });
+
     if (adminManager.currentEditingPhone) {
+        console.log('📝 UPDATING existing phone ID:', adminManager.currentEditingPhone);
         adminManager.updatePhone(adminManager.currentEditingPhone, phoneData);
 
         // Set a flag to indicate phone data was updated (for customer pages to detect changes)
         localStorage.setItem('ktmobile_last_update', new Date().toISOString());
 
+        // Verify save
+        const savedPhones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+        console.log('✅ SAVED! Total phones in localStorage:', savedPhones.length);
+        console.log('✅ Updated phone:', savedPhones.find(p => p.id === adminManager.currentEditingPhone));
+
         alert('Phone updated successfully! Customer pages will show the new image on next load.');
     } else {
-        adminManager.addPhone(phoneData);
+        console.log('➕ ADDING new phone...');
+        const newPhone = adminManager.addPhone(phoneData);
 
         // Set a flag to indicate phone data was updated
         localStorage.setItem('ktmobile_last_update', new Date().toISOString());
 
-        alert('Phone added successfully!');
+        // Verify save
+        const savedPhones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+        console.log('✅ SAVED! Total phones in localStorage:', savedPhones.length);
+        console.log('✅ New phone added:', newPhone);
+        console.log('🔍 Can find in localStorage?', savedPhones.some(p => p.model === phoneData.model && p.brand === phoneData.brand));
+
+        alert(`Phone added successfully!\n\nBrand: ${phoneData.brand}\nModel: ${phoneData.model}\nTotal phones: ${savedPhones.length}\n\nCheck console (F12) for detailed logs.`);
     }
 
     closePhoneModal();
-    
+
+    // Force reload from localStorage before rendering
+    console.log('🔄 Reloading phones from localStorage before render...');
+    adminManager.phones = adminManager.loadPhones();
+    console.log('📱 Loaded phones:', adminManager.phones.length);
+
     // Update model dropdown if brand filter is active
     const brandFilter = document.getElementById('brandFilter');
     if (brandFilter) {
         updateModelDropdown(brandFilter.value);
     }
-    
+
+    console.log('🖼️  Rendering phones grid...');
     renderPhones();
+    console.log('📊 Rendering price table...');
     renderPriceTable();
 }
 
