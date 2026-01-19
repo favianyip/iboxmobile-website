@@ -271,6 +271,20 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
         ? getMasterColors(brand, model)
         : [];
 
+    // Calculate buyPrices: Use USED prices if available, otherwise use NEW prices as starting point
+    let initialBuyPrices;
+    if (Object.keys(usedPrices).length > 0) {
+        // Has USED prices - use them
+        initialBuyPrices = calculateBuyPrices(usedPrices);
+    } else if (Object.keys(newPrices).length > 0) {
+        // No USED prices but has NEW prices - use NEW as starting point for admin to edit
+        initialBuyPrices = calculateBuyPrices(newPrices);
+        console.log(`  ℹ️  ${model}: Creating buyPrices from NEW prices (admin can edit these for USED condition)`);
+    } else {
+        // No prices at all
+        initialBuyPrices = {};
+    }
+
     if (existingIndex >= 0) {
         // Update existing - FORCE UPDATE COLORS with official colors
         const existing = phones[existingIndex];
@@ -280,7 +294,7 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
             id: existing.id,
             image: existing.image || getImagePath(brand, model),
             colors: officialColors.length > 0 ? officialColors : existing.colors || [], // Use official colors if available
-            buyPrices: existing.buyPrices || calculateBuyPrices(usedPrices),
+            buyPrices: existing.buyPrices || initialBuyPrices,
             quantities: existing.quantities || initializeQuantities(storages),
             createdAt: existing.createdAt || new Date().toISOString()
         };
@@ -293,7 +307,7 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
             id: `${brand.toLowerCase()}-${model.toLowerCase().replace(/[\s\/\(\)]+/g, '-')}-${Date.now()}`,
             image: getImagePath(brand, model),
             colors: officialColors,
-            buyPrices: calculateBuyPrices(usedPrices),
+            buyPrices: initialBuyPrices,
             quantities: initializeQuantities(storages),
             createdAt: new Date().toISOString()
         });
