@@ -345,7 +345,7 @@ function loadAdminDataForCustomerPages() {
 // Helper function to get color hex values
 function getColorHex(colorName) {
     const colorMap = {
-        // Titanium colors
+        // Titanium colors (iPhone Pro models)
         'Desert Titanium': '#8B7355',
         'Natural Titanium': '#A8A8A0',
         'White Titanium': '#F5F5F0',
@@ -357,16 +357,33 @@ function getColorHex(colorName) {
         'Cosmic Orange': '#FF6B35',
         'Blue': '#007AFF',
         'Deep Blue': '#003D82',
+        'Light Blue': '#5AC8FA',
+        'Pacific Blue': '#1C3F60',
+        'Sierra Blue': '#69ABCE',
+        'Sky Blue': '#87CEEB',
         'Silver': '#C0C0C0',
         'Gold': '#FFD700',
+        'Rose Gold': '#E0BFB8',
+        'Graphite': '#4A4A4A',
+        'Space Gray': '#5C5C5C',
+        'Space Black': '#2C2C2E',
         'Black': '#000000',
+        'Jet Black': '#0A0A0A',
+        'Midnight': '#191970',
+        'Midnight Green': '#35423C',
         'White': '#FFFFFF',
+        'Starlight': '#FAF9F6',
         'Pink': '#FFB6C1',
+        'Coral': '#FF6B6B',
         'Green': '#4CD964',
+        'Alpine Green': '#576856',
         'Yellow': '#FFD60A',
         'Purple': '#BF5AF2',
+        'Deep Purple': '#6F4E7C',
         'Red': '#FF3B30',
         '(PRODUCT)RED': '#E10A0A',
+        'Teal': '#008080',
+        'Ultramarine': '#4169E1',
 
         // Samsung colors
         'Titanium Black': '#1C1C1C',
@@ -377,12 +394,32 @@ function getColorHex(colorName) {
         'Titanium Orange': '#FF9500',
         'Titanium Blue': '#0A84FF',
         'Onyx Black': '#000000',
+        'Phantom Black': '#1C1C1C',
+        'Phantom Silver': '#D1D1D6',
+        'Phantom Gray': '#8E8E93',
+        'Phantom White': '#F5F5F5',
         'Marble Gray': '#B4B4B8',
         'Cobalt Violet': '#8E7CC3',
         'Amber Yellow': '#FFD60A',
         'Jade Green': '#32D74B',
         'Sapphire Blue': '#0A84FF',
-        'Sandstone Orange': '#FF9F0A'
+        'Sandstone Orange': '#FF9F0A',
+        'Cloud Navy': '#2C3E50',
+        'Cloud White': '#F8F8F8',
+        'Lavender': '#E6E6FA',
+        'Mint': '#98FF98',
+        'Cream': '#FFFDD0',
+        'Burgundy': '#800020',
+        'Bronze': '#CD7F32',
+
+        // Generic/fallback colors
+        'Gray': '#808080',
+        'Dark Gray': '#404040',
+        'Light Gray': '#D3D3D3',
+        'Beige': '#F5F5DC',
+        'Brown': '#964B00',
+        'Navy': '#000080',
+        'Turquoise': '#40E0D0'
     };
 
     return colorMap[colorName];
@@ -1472,6 +1509,7 @@ function loadConditionModifiers() {
     // Default modifiers (fallback values)
     const defaults = {
         receipt: { yes: 30, no: 0 },
+        activation: { sealed: 0, activated: -150 },  // New: Activation status for new phones
         country: { local: 0, export: -50 },
         deviceType: { 'new-sealed': 0, 'new-activated': -150 },
         body: { A: 0, B: -20, C: -60, D: -120 },
@@ -1633,6 +1671,27 @@ function updateConditionButtonsFromStorage() {
         });
     }
 
+    // NEW: Update activation status buttons (for new phones)
+    const activationContainer = document.getElementById('activation-options');
+    if (activationContainer) {
+        activationContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const activationStatus = btn.dataset.value; // 'sealed' or 'activated'
+            if (modifiers.activation && modifiers.activation[activationStatus] !== undefined) {
+                const value = modifiers.activation[activationStatus];
+                // Activation can be 0 (sealed) or negative (activated deduction)
+                if (value >= 0) {
+                    btn.dataset.bonus = value;
+                    btn.dataset.deduction = 0;
+                    console.log(`   Activation ${activationStatus}: +$${value}`);
+                } else {
+                    btn.dataset.bonus = 0;
+                    btn.dataset.deduction = Math.abs(value);
+                    console.log(`   Activation ${activationStatus}: -$${Math.abs(value)}`);
+                }
+            }
+        });
+    }
+
     console.log('✅ Condition buttons updated with admin modifier values');
 }
 
@@ -1647,6 +1706,7 @@ let quoteState = {
     storage: null,
     storageAdjustment: 0,
     color: null,
+    activationStatus: null, // 'sealed' or 'activated' (for new phones only)
     hasReceipt: null, // 'yes' or 'no'
     country: 'local',
     bodyCondition: null,
@@ -2409,8 +2469,11 @@ function populateStep2() {
     colorOptions.innerHTML = '';
     model.colors.forEach(color => {
         const colorName = typeof color === 'string' ? color : color.name;
-        const colorHex = typeof color === 'string' ? '#CCCCCC' : (color.hex || '#CCCCCC');
-        
+        // CRITICAL FIX: Use getColorHex() to look up color, don't default to gray
+        const colorHex = typeof color === 'string'
+            ? (getColorHex(colorName) || '#CCCCCC')  // Look up hex for string colors
+            : (color.hex || getColorHex(colorName) || '#CCCCCC');  // Use hex or look up
+
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.dataset.value = colorName;
@@ -2484,9 +2547,12 @@ function populateStep2() {
         }, 100);
     }
     
+    // Activation status (new phones only)
+    initOptionButtons('activation-options', 'activationStatus');
+
     // Receipt options
     initOptionButtons('receipt-options', 'hasReceipt');
-    
+
     // Country options
     initOptionButtons('country-options', 'country');
     initOptionButtons('body-options', 'bodyCondition');
@@ -2506,6 +2572,7 @@ function populateStep2() {
 function initDeviceTypeSelection() {
     const deviceTypeContainer = document.getElementById('device-type-options');
     const usedConditionsContainer = document.getElementById('used-device-conditions');
+    const activationSection = document.getElementById('activation-section');
     const receiptSection = document.getElementById('receipt-section');
 
     if (!deviceTypeContainer) return;
@@ -2516,9 +2583,11 @@ function initDeviceTypeSelection() {
         console.log('⚙️ initDeviceTypeSelection: Initial deviceType =', quoteState.deviceType);
         if (quoteState.deviceType === 'used') {
             if (usedConditionsContainer) usedConditionsContainer.classList.add('visible');
+            if (activationSection) activationSection.style.display = 'none';
             if (receiptSection) receiptSection.style.display = 'none';
         } else {
             if (usedConditionsContainer) usedConditionsContainer.classList.remove('visible');
+            if (activationSection) activationSection.style.display = 'block';
             if (receiptSection) receiptSection.style.display = 'block';
         }
     } else {
@@ -2563,16 +2632,18 @@ function initDeviceTypeSelection() {
                 }
             }
             
-            // Show/hide receipt section (only for NEW phones - sealed/activated)
+            // Show/hide activation and receipt sections (only for NEW phones)
+            const activationSection = document.getElementById('activation-section');
             const receiptSection = document.getElementById('receipt-section');
-            if (receiptSection) {
-                if (quoteState.deviceType === 'used') {
-                    receiptSection.style.display = 'none';
-                } else {
-                    receiptSection.style.display = 'block';
-                }
+            if (quoteState.deviceType === 'used') {
+                if (activationSection) activationSection.style.display = 'none';
+                if (receiptSection) receiptSection.style.display = 'none';
+                quoteState.activationStatus = null; // Reset activation status for used devices
+            } else {
+                if (activationSection) activationSection.style.display = 'block';
+                if (receiptSection) receiptSection.style.display = 'block';
             }
-            
+
             // Update live price estimate
             updateLivePriceEstimate();
         });
@@ -2588,8 +2659,9 @@ function areRequiredFieldsSelected() {
     if (!quoteState.color) return false;
     if (!quoteState.country) return false;
     
-    // For NEW devices (sealed/activated), receipt is required
+    // For NEW devices (sealed/activated), activation status and receipt are required
     if (quoteState.deviceType !== 'used') {
+        if (!quoteState.activationStatus) return false;
         if (quoteState.hasReceipt === undefined || quoteState.hasReceipt === null) return false;
     }
     
@@ -2646,6 +2718,14 @@ function updateLivePriceEstimate() {
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
+        // NEW: Activation status modifier (for new phones)
+        if (quoteState.activationStatus) {
+            const activationModifier = getModifierValue('activation', quoteState.activationStatus);
+            price += activationModifier; // Can be 0 (sealed) or negative (activated)
+            const sign = activationModifier >= 0 ? '+' : '';
+            console.log(`Activation status (${quoteState.activationStatus}): ${sign}$${activationModifier}`);
+        }
+
         // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers
         // Apply modifier for BOTH 'yes' and 'no' cases
         if (quoteState.hasReceipt) {
@@ -2665,6 +2745,14 @@ function updateLivePriceEstimate() {
             price = 0;
             console.error(`❌ NEW ACTIVATED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
+        }
+
+        // NEW: Activation status modifier (for new phones)
+        if (quoteState.activationStatus) {
+            const activationModifier = getModifierValue('activation', quoteState.activationStatus);
+            price += activationModifier; // Can be 0 (sealed) or negative (activated)
+            const sign = activationModifier >= 0 ? '+' : '';
+            console.log(`Activation status (${quoteState.activationStatus}): ${sign}$${activationModifier}`);
         }
 
         // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers
