@@ -382,10 +382,10 @@
         }
     </style>
     <script src="scripts/parse-competitor-prices.js"></script>
-    <script src="admin.js?v=20260119" defer></script>
-    <script src="quote.js?v=20260119" defer></script>
+    <script src="admin.js?v=20260119b" defer></script>
+    <script src="quote.js?v=20260119b" defer></script>
     <!-- REMOVED script.js - Causes ReferenceError, not needed for sell-phones -->
-    <script src="auth.js?v=20260119" defer></script>
+    <script src="auth.js?v=20260119b" defer></script>
 </head>
 <body>
     <header class="header">
@@ -800,25 +800,40 @@
                         let maxPrice = 0;
 
                         if (currentCondition === 'used') {
-                            // USED: Use exact storagePrices from Excel import
-                            if (phone.storagePrices && Object.keys(phone.storagePrices).length > 0) {
-                                const prices = Object.values(phone.storagePrices).filter(p => p > 0);
-                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} USED: $${maxPrice} (highest from storagePrices: ${JSON.stringify(phone.storagePrices)})`);
+                            // USED: Check buyPrices from backend (admin-editable, includes Excel imports)
+                            if (phone.buyPrices && Object.keys(phone.buyPrices).length > 0) {
+                                // Extract "excellent" condition prices from buyPrices
+                                const excellentPrices = [];
+                                for (const [storage, conditions] of Object.entries(phone.buyPrices)) {
+                                    if (conditions && conditions.excellent > 0) {
+                                        excellentPrices.push(conditions.excellent);
+                                    }
+                                }
+
+                                if (excellentPrices.length > 0) {
+                                    maxPrice = Math.max(...excellentPrices);
+                                    console.log(`  ✅ ${modelName} USED: $${maxPrice} (from backend buyPrices)`);
+                                } else {
+                                    maxPrice = 0;
+                                    console.log(`  ⚠️  ${modelName} USED: buyPrices exist but all prices are $0`);
+                                }
                             } else {
-                                console.warn(`  ${modelName} USED: No storagePrices in Excel import`);
-                                console.warn(`  Available data:`, {storages: phone.storages, storagePrices: phone.storagePrices, basePrice: phone.basePrice});
+                                console.log(`  ⚠️  ${modelName} USED: No buyPrices in backend - admin needs to set prices`);
                                 maxPrice = 0;
                             }
                         } else {
-                            // NEW: Use exact newPhonePrices from Excel import
+                            // NEW: Check newPhonePrices from backend (admin-editable, includes Excel imports)
                             if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
                                 const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
-                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} NEW: $${maxPrice} (highest from newPhonePrices: ${JSON.stringify(phone.newPhonePrices)})`);
+                                if (prices.length > 0) {
+                                    maxPrice = Math.max(...prices);
+                                    console.log(`  ✅ ${modelName} NEW: $${maxPrice} (from backend newPhonePrices)`);
+                                } else {
+                                    maxPrice = 0;
+                                    console.log(`  ⚠️  ${modelName} NEW: newPhonePrices exist but all prices are $0`);
+                                }
                             } else {
-                                console.warn(`  ${modelName} NEW: No newPhonePrices in Excel import`);
-                                console.warn(`  Available data:`, {storages: phone.storages, newPhonePrices: phone.newPhonePrices, basePrice: phone.basePrice});
+                                console.log(`  ⚠️  ${modelName} NEW: No newPhonePrices in backend - admin needs to set prices`);
                                 maxPrice = 0;
                             }
                         }
@@ -860,25 +875,40 @@
                         let maxPrice = 0;
 
                         if (currentCondition === 'used') {
-                            // USED: Use exact storagePrices from Excel import
-                            if (phone.storagePrices && Object.keys(phone.storagePrices).length > 0) {
-                                const prices = Object.values(phone.storagePrices).filter(p => p > 0);
-                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} USED: $${maxPrice} (highest from storagePrices: ${JSON.stringify(phone.storagePrices)})`);
+                            // USED: Check buyPrices from backend (admin-editable, includes Excel imports)
+                            if (phone.buyPrices && Object.keys(phone.buyPrices).length > 0) {
+                                // Extract "excellent" condition prices from buyPrices
+                                const excellentPrices = [];
+                                for (const [storage, conditions] of Object.entries(phone.buyPrices)) {
+                                    if (conditions && conditions.excellent > 0) {
+                                        excellentPrices.push(conditions.excellent);
+                                    }
+                                }
+
+                                if (excellentPrices.length > 0) {
+                                    maxPrice = Math.max(...excellentPrices);
+                                    console.log(`  ✅ ${modelName} USED: $${maxPrice} (from backend buyPrices)`);
+                                } else {
+                                    maxPrice = 0;
+                                    console.log(`  ⚠️  ${modelName} USED: buyPrices exist but all prices are $0`);
+                                }
                             } else {
-                                console.warn(`  ${modelName} USED: No storagePrices in Excel import`);
-                                console.warn(`  Available data:`, {storages: phone.storages, storagePrices: phone.storagePrices, basePrice: phone.basePrice});
+                                console.log(`  ⚠️  ${modelName} USED: No buyPrices in backend - admin needs to set prices`);
                                 maxPrice = 0;
                             }
                         } else {
-                            // NEW: Use exact newPhonePrices from Excel import
+                            // NEW: Check newPhonePrices from backend (admin-editable, includes Excel imports)
                             if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
                                 const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
-                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} NEW: $${maxPrice} (highest from newPhonePrices: ${JSON.stringify(phone.newPhonePrices)})`);
+                                if (prices.length > 0) {
+                                    maxPrice = Math.max(...prices);
+                                    console.log(`  ✅ ${modelName} NEW: $${maxPrice} (from backend newPhonePrices)`);
+                                } else {
+                                    maxPrice = 0;
+                                    console.log(`  ⚠️  ${modelName} NEW: newPhonePrices exist but all prices are $0`);
+                                }
                             } else {
-                                console.warn(`  ${modelName} NEW: No newPhonePrices in Excel import`);
-                                console.warn(`  Available data:`, {storages: phone.storages, newPhonePrices: phone.newPhonePrices, basePrice: phone.basePrice});
+                                console.log(`  ⚠️  ${modelName} NEW: No newPhonePrices in backend - admin needs to set prices`);
                                 maxPrice = 0;
                             }
                         }
