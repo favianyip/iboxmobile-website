@@ -286,7 +286,21 @@ function importExactPrices() {
             deviceType: { 'new-sealed': 0, 'new-activated': -150 },
             body: { A: 0, B: -20, C: -60, D: -120 },
             screen: { A: 0, B: 0, C: -40, D: -150 },
-            battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 }
+            battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 },
+            issue: {
+                power: -300,
+                faceid: -150,
+                display: -200,
+                touch: -180,
+                camera: -120,
+                speaker: -80,
+                wifi: -100,
+                charging: -90
+            },
+            accessory: {
+                cable: 10,
+                box: 20
+            }
         };
         localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(defaultConditionModifiers));
         console.log('✅ Condition modifiers initialized with defaults');
