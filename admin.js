@@ -2387,19 +2387,23 @@ function updateStoragePrices() {
         currentPhone = adminManager.getPhone(adminManager.currentEditingPhone);
     }
 
-    // Used prices section with intelligent fallback
+    // Used prices section - read from buyPrices (backend-editable)
     container.innerHTML = checkedStorages.map(storage => {
         let usedPrice = 0;
 
         if (currentPhone) {
-            // Try storagePrices first
-            if (currentPhone.storagePrices && currentPhone.storagePrices[storage]) {
+            // Read from buyPrices (backend, admin-editable)
+            if (currentPhone.buyPrices && currentPhone.buyPrices[storage]) {
+                usedPrice = currentPhone.buyPrices[storage].excellent || 0;
+            }
+            // Fallback: Try storagePrices (Excel import)
+            else if (currentPhone.storagePrices && currentPhone.storagePrices[storage]) {
                 usedPrice = currentPhone.storagePrices[storage];
             }
-            // Fallback to basePrice if storagePrices is missing
+            // Last resort: basePrice
             else if (currentPhone.basePrice) {
                 usedPrice = currentPhone.basePrice;
-                console.warn(`⚠️  ${currentPhone.model} missing storagePrices[${storage}], using basePrice: $${usedPrice}`);
+                console.warn(`⚠️  ${currentPhone.model} no buyPrices[${storage}], using basePrice: $${usedPrice}`);
             }
         }
 
@@ -2654,20 +2658,21 @@ function savePhone() {
         ['excellent', 'good', 'fair'].forEach(condition => {
             const priceInput = document.querySelector(`.buy-price-modal-input[data-storage="${storage}"][data-condition="${condition}"]`);
             const quantityInput = document.querySelector(`.buy-quantity-modal-input[data-storage="${storage}"][data-condition="${condition}"]`);
-            
+
             if (priceInput) {
                 buyPrices[storage][condition] = parseFloat(priceInput.value) || 0;
             } else {
-                // Default pricing if not set
-                const storagePrice = storagePrices[storage] || parseFloat(basePrice) || 0;
-                const conditionModifiers = {
-                    'excellent': 0,
-                    'good': -50,
-                    'fair': -150
+                // Calculate buyPrices from the ACTUAL storage price entered by admin
+                // This comes from the storage price input field that admin just edited
+                const storagePrice = storagePrices[storage] || 0;
+                const conditionMultipliers = {
+                    'excellent': 1.0,    // 100% of storage price
+                    'good': 0.95,        // 95% of storage price
+                    'fair': 0.85         // 85% of storage price
                 };
-                buyPrices[storage][condition] = storagePrice + conditionModifiers[condition];
+                buyPrices[storage][condition] = Math.round(storagePrice * conditionMultipliers[condition]);
             }
-            
+
             if (quantityInput) {
                 quantities[storage][condition] = parseInt(quantityInput.value) || 0;
             } else {
