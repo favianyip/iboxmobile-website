@@ -497,6 +497,36 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- SAVE ALL & SYNC BUTTON -->
+                <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 12px; border: 2px solid #4caf50;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h3 style="color: #2e7d32; margin: 0;">💾 Save & Sync All Condition Modifiers</h3>
+                            <p style="color: #558b2f; margin: 0.5rem 0 0 0; font-size: 0.9rem;">Saves all condition modifiers and syncs to all devices (web + mobile)</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveAllConditionModifiersAndSync()" style="padding: 1rem 2rem; font-size: 1rem; background: #4caf50; border: none; border-radius: 8px; font-weight: 600;">
+                            🔄 Save All & Sync to All Devices
+                        </button>
+                    </div>
+                </div>
+
+                <!-- VERSION HISTORY SECTION -->
+                <div style="margin-top: 2rem; padding: 1.5rem; background: #f5f5f5; border-radius: 12px; border: 2px solid #ddd;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="color: #333; margin: 0;">📜 Version History</h3>
+                            <p style="color: #666; margin: 0.5rem 0 0 0; font-size: 0.9rem;">Saved versions - select to restore previous settings</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="saveCurrentVersion()" style="padding: 0.75rem 1.5rem;">
+                            📸 Save Current as New Version
+                        </button>
+                    </div>
+                    <div id="versionHistoryList" style="max-height: 300px; overflow-y: auto;">
+                        <!-- Version history will be populated by JavaScript -->
+                        <p style="color: #999; text-align: center; padding: 2rem;">No saved versions yet. Click "Save Current as New Version" to create one.</p>
+                    </div>
+                </div>
             </section>
 
             <!-- Buyback Colors & Storage Section - REMOVED (Consolidated into Phone Models) -->
@@ -1418,16 +1448,22 @@
                         </p>
                     </div>
 
-                    <!-- Option 2: Excel Upload (Coming Soon) -->
-                    <div class="import-option" style="padding: 1.5rem; border: 2px solid #6c757d; border-radius: 8px;">
-                        <h4>📊 Excel/CSV Import (Coming Soon)</h4>
-                        <p>Upload Excel file with custom price data</p>
-                        <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" disabled style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1rem;">
-                        <button class="btn btn-secondary" disabled style="width: 100%;">
-                            Upload Excel File
+                    <!-- Option 2: Export All Data to Excel -->
+                    <div class="import-option" style="padding: 1.5rem; border: 2px solid #28a745; border-radius: 8px; background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(32, 134, 55, 0.05) 100%);">
+                        <h4 style="color: #28a745;">📊 Export All Data to Excel</h4>
+                        <p style="margin: 0.5rem 0; font-size: 0.875rem; color: var(--text-dark);">
+                            Export complete backup including:<br>
+                            ✓ All phone models & brands<br>
+                            ✓ USED & NEW prices per storage<br>
+                            ✓ Colors per model<br>
+                            ✓ Condition modifiers (body/screen/battery)<br>
+                            ✓ Settings & configuration
+                        </p>
+                        <button class="btn btn-success" onclick="exportAllDataToExcel()" style="width: 100%; margin-top: 1rem; font-weight: 600; background: #28a745; border: none;">
+                            📥 Export All Data to Excel
                         </button>
                         <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
-                            This feature will be available in next update
+                            Use this for backup & reference. File saved as: ibox_mobile_backup_[date].xlsx
                         </p>
                     </div>
                 </div>
