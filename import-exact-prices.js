@@ -39,7 +39,7 @@ const appleUsedPrices = {
     "iPhone 16": { "128GB": 670, "256GB": 720, "512GB": 770 },
     "iPhone 16 Plus": { "128GB": 750, "256GB": 800, "512GB": 850 },
     "iPhone 16 Pro": { "128GB": 870, "256GB": 920, "512GB": 970, "1TB": 1020 },
-    "iPhone 16 Pro Max": { "256GB": 1020, "512GB": 1070, "1TB": 1120 },
+    "iPhone 16 Pro Max": { "256GB": 900, "512GB": 950, "1TB": 1000 },
     "iPhone 16E": { "128GB": 520, "256GB": 620, "512GB": 720 },
     "iPhone 17": { "256GB": 900, "512GB": 1150 },
     "iPhone 17 Pro": { "256GB": 1350, "512GB": 1550, "1TB": 1750 },
@@ -49,26 +49,26 @@ const appleUsedPrices = {
 
 // ============================================================================
 // APPLE PHONES - NEW PRICES (from NEW_HIGHEST_ALL sheet)
-// Total Models: 17
+// Total Models: 17 (Updated 2026-01-19)
 // ============================================================================
 const appleNewPrices = {
     "iPhone 14": { "128GB": 350, "256GB": 400, "512GB": 450 },
     "iPhone 14 Plus": { "128GB": 420, "256GB": 470, "512GB": 520 },
-    "iPhone 14 Pro": { "128GB": 500, "1TB": 650, "256GB": 550, "512GB": 600 },
-    "iPhone 14 Pro Max": { "128GB": 600, "1TB": 750, "256GB": 650, "512GB": 700 },
+    "iPhone 14 Pro": { "128GB": 500, "256GB": 550, "512GB": 600, "1TB": 650 },
+    "iPhone 14 Pro Max": { "128GB": 600, "256GB": 650, "512GB": 700, "1TB": 750 },
     "iPhone 15": { "128GB": 500, "256GB": 550, "512GB": 600 },
     "iPhone 15 Plus": { "128GB": 550, "256GB": 600, "512GB": 650 },
-    "iPhone 15 Pro": { "128GB": 600, "1TB": 750, "256GB": 650, "512GB": 700 },
-    "iPhone 15 Pro Max": { "1TB": 900, "256GB": 800, "512GB": 850 },
-    "iPhone 16": { "128GB": 920, "256GB": 1020 },
-    "iPhone 16 Plus": { "128GB": 1050, "256GB": 1150 },
-    "iPhone 16 Pro": { "128GB": 870, "1TB": 1020, "256GB": 920, "512GB": 970 },
-    "iPhone 16 Pro Max": { "1TB": 1120, "256GB": 1020, "512GB": 1070 },
+    "iPhone 15 Pro": { "128GB": 600, "256GB": 650, "512GB": 700, "1TB": 750 },
+    "iPhone 15 Pro Max": { "256GB": 800, "512GB": 850, "1TB": 900 },
+    "iPhone 16": { "128GB": 920, "256GB": 1020, "512GB": 1070 },
+    "iPhone 16 Plus": { "128GB": 1050, "256GB": 1150, "512GB": 1200 },
+    "iPhone 16 Pro": { "128GB": 870, "256GB": 920, "512GB": 970, "1TB": 1020 },
+    "iPhone 16 Pro Max": { "256GB": 1020, "512GB": 1070, "1TB": 1120 },
     "iPhone 16E": { "128GB": 650, "256GB": 770, "512GB": 870 },
     "iPhone 17": { "256GB": 1200, "512GB": 1370 },
-    "iPhone 17 Pro": { "1TB": 1950, "256GB": 1600, "512GB": 1750 },
-    "iPhone 17 Pro Max": { "1TB": 2220, "256GB": 1720, "2TB": 2420, "512GB": 2000 },
-    "iPhone Air": { "1TB": 1320, "256GB": 1000, "512GB": 1220 }
+    "iPhone 17 Pro": { "256GB": 1600, "512GB": 1750, "1TB": 1950 },
+    "iPhone 17 Pro Max": { "256GB": 1720, "512GB": 2000, "1TB": 2220, "2TB": 2420 },
+    "iPhone Air": { "256GB": 1000, "512GB": 1220, "1TB": 1320 }
 };
 
 // ============================================================================
@@ -133,29 +133,36 @@ const samsungUsedPrices = {
 
 // ============================================================================
 // SAMSUNG PHONES - NEW PRICES (from NEW_HIGHEST_ALL sheet)
-// Total Models: 20
+// Total Models: 21 (Updated 2026-01-19)
 // ============================================================================
 const samsungNewPrices = {
-    "Galaxy A17 4G": { "8/128GB": 160 },
-    "Galaxy A17 5G": { "8/128GB": 200 },
-    "Galaxy A26 5G": { "8/256GB": 270 },
-    "Galaxy A36 5G": { "8/256GB": 330 },
+    // Galaxy Z Fold Series
+    "Galaxy Z Fold 7 5G": { "256GB": 1630, "512GB": 1780, "1TB": 1860 },
+
+    // Galaxy Z Flip Series
+    "Galaxy Z Flip 7 5G": { "256GB": 900, "512GB": 950 },
+    "Galaxy Z Flip 7 FE 5G": { "128GB": 620, "256GB": 770 },
+
+    // Galaxy S25 Series
+    "Galaxy S25 5G": { "256GB": 850, "512GB": 950 },
+    "Galaxy S25+ 5G": { "256GB": 920, "512GB": 1120 },
+    "Galaxy S25 Ultra 5G": { "256GB": 1020, "512GB": 1200, "1TB": 1350 },
+    "Galaxy S25 Edge 5G": { "256GB": 770, "512GB": 870 },
+    "Galaxy S25 FE 5G": { "128GB": 520, "256GB": 620, "512GB": 670 },
+
+    // Galaxy A Series
+    "Galaxy A36 5G": { "8/256GB": 340 },
     "Galaxy A56 5G": { "8/256GB": 380, "12/256GB": 420 },
-    "Galaxy Buds 3": { "Base": 50 },
-    "Galaxy Buds 3 Pro": { "Base": 130 },
-    "Galaxy S25 5G": { "256GB": 760, "512GB": 850 },
-    "Galaxy S25 FE 5G": { "128GB": 480, "256GB": 580, "512GB": 660 },
-    "Galaxy S25 Ultra 5G": { "256GB": 1040, "512GB": 1250, "1TB": 1350 },
-    "Galaxy S25+ 5G": { "256GB": 880, "512GB": 1000 },
-    "Galaxy Tab A11+ 128 5G": { "Base": 320 },
+
+    // Tablets & Wearables
     "Galaxy Tab A11+ 128 WiFi": { "Base": 260 },
+    "Galaxy Tab A11+ 128 5G": { "Base": 320 },
     "Galaxy Watch 8 40mm Bluetooth": { "Base": 280 },
     "Galaxy Watch 8 44mm Bluetooth": { "Base": 300 },
     "Galaxy Watch 8 Classic 46mm Bluetooth": { "Base": 360 },
     "Galaxy Watch Ultra 47mm (2025)": { "Base": 480 },
-    "Galaxy Z Flip 7 5G": { "256GB": 800, "512GB": 920 },
-    "Galaxy Z Flip 7 FE 5G": { "128GB": 500, "256GB": 680 },
-    "Galaxy Z Fold 7 5G": { "256GB": 1630, "512GB": 1780, "1TB": 1860 }
+    "Galaxy Buds 3": { "Base": 50 },
+    "Galaxy Buds 3 Pro": { "Base": 130 }
 };
 
 // ============================================================================

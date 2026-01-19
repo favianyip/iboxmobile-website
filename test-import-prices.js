@@ -62,7 +62,7 @@ if (modelsWithCalculatedUsed.length > 0) {
 console.log('\n🔍 VERIFICATION OF KEY MODELS:');
 
 const testModels = [
-    { brand: 'Apple', model: 'iPhone 16 Pro Max', expectedUsedPrice: { '256GB': 1020, '512GB': 1070, '1TB': 1120 } },
+    { brand: 'Apple', model: 'iPhone 16 Pro Max', expectedUsedPrice: { '256GB': 900, '512GB': 950, '1TB': 1000 } },
     { brand: 'Apple', model: 'iPhone 16 Pro', expectedUsedPrice: { '128GB': 870, '256GB': 920, '512GB': 970, '1TB': 1020 } },
     { brand: 'Apple', model: 'iPhone 15 Pro Max', expectedUsedPrice: { '256GB': 800, '512GB': 850, '1TB': 900 } },
     { brand: 'Apple', model: 'iPhone 14 Pro Max', expectedUsedPrice: { '128GB': 600, '256GB': 650, '512GB': 700, '1TB': 750 } },
