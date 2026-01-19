@@ -2571,9 +2571,9 @@ function updateLivePriceEstimate() {
         price += acc.bonus;
     });
     
-    // Ensure minimum price
-    price = Math.max(50, price);
-    
+    // REMOVED: Math.max(50, price) - Prices should match backend exactly
+    price = Math.max(0, price); // Only prevent negative prices
+
     // Animate price update
     estimatePriceEl.textContent = '$' + price.toLocaleString();
     estimatePriceEl.style.transform = 'scale(1.1)';
@@ -2755,7 +2755,9 @@ function calculateQuote() {
         });
     }
 
-    quoteState.finalPrice = Math.max(50, price);
+    // REMOVED: Math.max(50, price) - No artificial minimum price floor
+    // Prices should match backend exactly
+    quoteState.finalPrice = Math.max(0, price); // Only prevent negative prices
     quoteState.priceBreakdown = breakdown;
 
     return quoteState.finalPrice;

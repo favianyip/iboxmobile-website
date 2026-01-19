@@ -571,48 +571,11 @@
     </div>
 
     <script>
-        // Helper function to get competitive price
-        function getCompetitivePrice(modelName, storage, condition) {
-            const brand = modelName.includes('iPhone') ? 'iphone' : 'samsung';
-            const fullModelKey = `${modelName} ${storage}`;
-
-            try {
-                if (competitorData && competitorData[condition] && competitorData[condition][brand]) {
-                    const priceData = competitorData[condition][brand][fullModelKey];
-                    if (priceData && priceData.highest) {
-                        return priceData.highest;
-                    }
-                }
-            } catch (e) {
-                console.warn(`Price not found for ${fullModelKey} (${condition})`);
-            }
-
-            // Return null if not found - will use base price display
-            return null;
-        }
-
-        // Helper function to get starting price (lowest storage variant)
-        function getStartingPrice(modelName, storageOptions, condition) {
-            const brand = modelName.includes('iPhone') ? 'iphone' : 'samsung';
-
-            // Try to find the first available storage price
-            for (let storage of storageOptions) {
-                const fullModelKey = `${modelName} ${storage}`;
-                try {
-                    if (competitorData && competitorData[condition] && competitorData[condition][brand]) {
-                        const priceData = competitorData[condition][brand][fullModelKey];
-                        if (priceData && priceData.highest) {
-                            return priceData.highest;
-                        }
-                    }
-                } catch (e) {
-                    continue;
-                }
-            }
-
-            // Fallback prices if not found in competitive data
-            return condition === 'used' ? 500 : 700;
-        }
+        // ============================================================================
+        // REMOVED: getCompetitivePrice and getStartingPrice functions
+        // These were dead code - defined but never called
+        // All prices now come from adminManager.phones (Excel import)
+        // ============================================================================
 
         // ============================================================================
         // DISABLED: HARDCODED PHONE MODELS - NO LONGER USED!
