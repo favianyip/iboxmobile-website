@@ -767,8 +767,10 @@
                     console.log(`📦 Total phones in backend: ${adminManager.phones.length}`);
 
                     // Filter and render Apple models
-                    const applePhones = adminManager.phones.filter(p => p.brand === 'Apple');
-                    console.log(`📱 Apple phones: ${applePhones.length}`);
+                    // CRITICAL: Only show phones with display !== false AND available !== false
+                    const allApplePhones = adminManager.phones.filter(p => p.brand === 'Apple');
+                    const applePhones = allApplePhones.filter(p => p.display !== false && p.available !== false);
+                    console.log(`📱 Apple phones: ${applePhones.length} visible (${allApplePhones.length} total, ${allApplePhones.length - applePhones.length} hidden)`);
 
                     applePhones.forEach(phone => {
                         const modelName = phone.model;
@@ -826,8 +828,10 @@
                 }
 
                     // Filter and render Samsung models
-                    const samsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung');
-                    console.log(`📱 Samsung phones: ${samsungPhones.length}`);
+                    // CRITICAL: Only show phones with display !== false AND available !== false
+                    const allSamsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung');
+                    const samsungPhones = allSamsungPhones.filter(p => p.display !== false && p.available !== false);
+                    console.log(`📱 Samsung phones: ${samsungPhones.length} visible (${allSamsungPhones.length} total, ${allSamsungPhones.length - samsungPhones.length} hidden)`);
 
                     samsungPhones.forEach(phone => {
                         const modelName = phone.model;
