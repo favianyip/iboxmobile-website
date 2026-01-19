@@ -10,9 +10,17 @@
 
 // ============================================================================
 // APPLE PHONES - USED PRICES (from USED_HIGHEST_ALL sheet)
-// Total Models: 32 (Updated 2026-01-19)
+// Total Models: 38 (Updated 2026-01-19) - Added older models: iPhone 7/7Plus/8/8Plus/X/SE2
 // ============================================================================
 const appleUsedPrices = {
+    // Older Models (iPhone 7-X generation)
+    "iPhone 7": { "32GB": 40, "128GB": 50, "256GB": 60 },
+    "iPhone 7 Plus": { "32GB": 50, "128GB": 60, "256GB": 70 },
+    "iPhone 8": { "64GB": 70, "256GB": 90 },
+    "iPhone 8 Plus": { "64GB": 100, "256GB": 120 },
+    "iPhone X": { "64GB": 150, "256GB": 180 },
+    "iPhone SE (2nd Gen)": { "64GB": 60, "128GB": 80, "256GB": 100 },
+    // iPhone XR/XS generation
     "iPhone XR": { "64GB": 50, "128GB": 80, "256GB": 110 },
     "iPhone XS": { "64GB": 70, "256GB": 100, "512GB": 130 },
     "iPhone XS Max": { "64GB": 120, "256GB": 150, "512GB": 180 },

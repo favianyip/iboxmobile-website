@@ -1167,7 +1167,7 @@
                         : 'Various storage options';
 
                     return `
-                        <div class="autocomplete-item" onclick="selectModel('${brand}', '${model.name.replace(/'/g, "\\'")}')">
+                        <div class="autocomplete-item" onclick="selectSearchModel('${brand}', '${model.name.replace(/'/g, "\\'")}')">
                             <div>
                                 <div class="model-name">${model.name}</div>
                                 <div class="model-storage">${storageDisplay}</div>
@@ -1186,8 +1186,9 @@
             filterDevices(term);
         }
 
-        // Select model from autocomplete
-        function selectModel(brand, modelName) {
+        // Select model from autocomplete - RENAMED to avoid collision with quote.js selectModel
+        function selectSearchModel(brand, modelName) {
+            console.log('🔍 selectSearchModel called:', { brand, modelName });
             // Navigate directly to the model
             navigateToEvaluation(brand, modelName);
         }
