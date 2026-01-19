@@ -17,11 +17,11 @@ const appleUsedPrices = {
     "iPhone 11 Pro": { "256GB": 210, "512GB": 240, "64GB": 170 },
     "iPhone 11 Pro Max": { "256GB": 250, "512GB": 280, "64GB": 220 },
     "iPhone 12": { "128GB": 250, "256GB": 300, "64GB": 200 },
-    "iPhone 12 Mini": { "128GB": 150, "256GB": 180, "64GB": 120 },
+    "iPhone 12 mini": { "128GB": 150, "256GB": 180, "64GB": 120 },
     "iPhone 12 Pro": { "128GB": 300, "256GB": 350, "512GB": 400 },
     "iPhone 12 Pro Max": { "128GB": 350, "256GB": 400, "512GB": 450 },
     "iPhone 13": { "128GB": 300, "256GB": 350, "512GB": 400 },
-    "iPhone 13 Mini": { "128GB": 250, "256GB": 300, "512GB": 350 },
+    "iPhone 13 mini": { "128GB": 250, "256GB": 300, "512GB": 350 },
     "iPhone 13 Pro": { "128GB": 380, "1TB": 530, "256GB": 430, "512GB": 480 },
     "iPhone 13 Pro Max": { "128GB": 460, "1TB": 610, "256GB": 510, "512GB": 560 },
     "iPhone 16": { "128GB": 670, "256GB": 720, "512GB": 770 },
@@ -31,7 +31,7 @@ const appleUsedPrices = {
     "iPhone 17 Pro": { "1TB": 1750, "256GB": 1350, "512GB": 1550 },
     "iPhone 17 Pro Max": { "1TB": 1920, "256GB": 1520, "2TB": 2070, "512GB": 1750 },
     "iPhone Air": { "1TB": 1100, "256GB": 850, "512GB": 1000 },
-    "iPhone SE (2022)": { "128GB": 170, "256GB": 220, "64GB": 120 },
+    "iPhone SE (3rd Gen)": { "128GB": 170, "256GB": 220, "64GB": 120 },
     "iPhone XR": { "128GB": 80, "256GB": 110, "64GB": 50 },
     "iPhone XS": { "256GB": 100, "512GB": 130, "64GB": 70 },
     "iPhone XS Max": { "256GB": 150, "512GB": 180, "64GB": 120 }
@@ -153,7 +153,7 @@ function initializeQuantities(storages) {
 function importExactPrices() {
     console.log('🎯 Starting EXACT PRICE IMPORT - NO AUTO-CALCULATIONS');
     console.log('📊 Source: Apple_USED_NEW_FULL_REVIEW.xlsx & Samsung_USED_NEW_FULL_REVIEW.xlsx');
-    console.log('='*80);
+    console.log('='.repeat(80));
 
     const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
     let updated = 0;
@@ -209,25 +209,26 @@ function importExactPrices() {
         else if (result === 'added') added++;
     }
 
-    // Save to localStorage
+    // Save to localStorage with timestamp
     localStorage.setItem('ktmobile_phones', JSON.stringify(phones));
+    localStorage.setItem('ktmobile_last_update', new Date().toISOString());
 
-    console.log('\n' + '='*80);
+    console.log('\n' + '='.repeat(80));
     console.log('✅ EXACT PRICE IMPORT COMPLETE!');
     console.log(`📊 Updated: ${updated} phones`);
     console.log(`➕ Added: ${added} phones`);
     console.log(`📦 Total: ${phones.length} phones in database`);
-    console.log('='*80);
+    console.log('='.repeat(80));
 
-    alert(`✅ Exact Price Import Successful!\n\n` +
+    alert(`✅ Price Import Successful!\n\n` +
           `📊 Source:\n` +
           `• Apple_USED_NEW_FULL_REVIEW.xlsx\n` +
           `• Samsung_USED_NEW_FULL_REVIEW.xlsx\n\n` +
           `📱 Updated: ${updated} phones\n` +
           `➕ Added: ${added} phones\n` +
           `📦 Total: ${phones.length} phones\n\n` +
-          `✨ All prices are EXACT from Excel files.\n` +
-          `✨ NO auto-calculations applied.`);
+          `✨ USED & NEW prices loaded from Excel.\n` +
+          `✨ For NEW-only models, USED prices calculated at 65% of NEW.`);
 
     // Refresh admin panel
     if (typeof renderPhones === 'function') renderPhones();
@@ -250,14 +251,32 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
         return normalizedExisting === normalizedModel;
     });
 
+    // CRITICAL FIX: If model has NEW prices but no USED prices, calculate USED from NEW
+    // USED prices are typically 65-70% of NEW prices for buyback
+    let finalUsedPrices = usedPrices;
+    let usedPricesCalculated = false;
+
+    if (Object.keys(usedPrices).length === 0 && Object.keys(newPrices).length > 0) {
+        // Calculate USED prices from NEW prices (65% of NEW price for buyback)
+        finalUsedPrices = {};
+        const USED_TO_NEW_RATIO = 0.65; // Used buyback is typically 65% of new price
+
+        for (const [storage, newPrice] of Object.entries(newPrices)) {
+            finalUsedPrices[storage] = Math.round(newPrice * USED_TO_NEW_RATIO);
+        }
+        usedPricesCalculated = true;
+        console.log(`  📊 ${model}: Calculated USED prices from NEW (65% ratio) - ${Object.keys(finalUsedPrices).length} storages`);
+    }
+
     const phoneData = {
         brand: brand,
         model: model,
         storages: storages,
-        storagePrices: usedPrices,        // EXACT USED prices from Excel
+        storagePrices: finalUsedPrices,   // USED prices (from Excel or calculated from NEW)
         newPhonePrices: newPrices,        // EXACT NEW prices from Excel
-        basePrice: Object.values(usedPrices).length > 0
-            ? Math.min(...Object.values(usedPrices))
+        usedPricesCalculated: usedPricesCalculated, // Flag to indicate if USED prices were calculated
+        basePrice: Object.values(finalUsedPrices).length > 0
+            ? Math.min(...Object.values(finalUsedPrices))
             : Object.values(newPrices).length > 0
                 ? Math.min(...Object.values(newPrices))
                 : 0,
@@ -271,15 +290,15 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
         ? getMasterColors(brand, model)
         : [];
 
-    // Calculate buyPrices: Use USED prices if available, otherwise use NEW prices as starting point
+    // Calculate buyPrices: Use USED prices (exact or calculated)
     let initialBuyPrices;
-    if (Object.keys(usedPrices).length > 0) {
-        // Has USED prices - use them
-        initialBuyPrices = calculateBuyPrices(usedPrices);
+    if (Object.keys(finalUsedPrices).length > 0) {
+        // Has USED prices (either from Excel or calculated from NEW)
+        initialBuyPrices = calculateBuyPrices(finalUsedPrices);
     } else if (Object.keys(newPrices).length > 0) {
-        // No USED prices but has NEW prices - use NEW as starting point for admin to edit
+        // Fallback: use NEW prices directly (shouldn't happen with the fix above)
         initialBuyPrices = calculateBuyPrices(newPrices);
-        console.log(`  ℹ️  ${model}: Creating buyPrices from NEW prices (admin can edit these for USED condition)`);
+        console.log(`  ⚠️  ${model}: Using NEW prices as buyPrices fallback`);
     } else {
         // No prices at all
         initialBuyPrices = {};
@@ -298,7 +317,8 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
             quantities: existing.quantities || initializeQuantities(storages),
             createdAt: existing.createdAt || new Date().toISOString()
         };
-        console.log(`✅ Updated: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length}, BuyPrices: ${Object.keys(initialBuyPrices).length})`);
+        const calcFlag = usedPricesCalculated ? ' [USED calculated from NEW]' : '';
+        console.log(`✅ Updated: ${brand} ${model} (Used: ${Object.keys(finalUsedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length}, BuyPrices: ${Object.keys(initialBuyPrices).length})${calcFlag}`);
         return 'updated';
     } else {
         // Add new
@@ -311,7 +331,8 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
             quantities: initializeQuantities(storages),
             createdAt: new Date().toISOString()
         });
-        console.log(`➕ Added: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length})`);
+        const calcFlag = usedPricesCalculated ? ' [USED calculated from NEW]' : '';
+        console.log(`➕ Added: ${brand} ${model} (Used: ${Object.keys(finalUsedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length})${calcFlag}`);
         return 'added';
     }
 }
@@ -322,7 +343,7 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
 
 function updateAllPhoneColors() {
     console.log('🎨 Starting Official Colors Update for ALL phones...');
-    console.log('='*80);
+    console.log('='.repeat(80));
 
     const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
     let updated = 0;
@@ -364,13 +385,13 @@ function updateAllPhoneColors() {
     localStorage.setItem('ktmobile_available_colors', JSON.stringify(sortedColors));
     console.log(`\n🎨 Updated global color list with ${sortedColors.length} unique colors`);
 
-    console.log('\n' + '='*80);
+    console.log('\n' + '='.repeat(80));
     console.log('✅ OFFICIAL COLORS UPDATE COMPLETE!');
     console.log(`🎨 Updated: ${updated} phones`);
     console.log(`⏭️  Skipped: ${skipped} phones (no official colors in database)`);
     console.log(`📦 Total: ${phones.length} phones in database`);
     console.log(`🎨 Global color list: ${sortedColors.length} unique colors`);
-    console.log('='*80);
+    console.log('='.repeat(80));
 
     alert(`✅ Official Colors Update Successful!\\n\\n` +
           `🎨 Updated: ${updated} phones\\n` +

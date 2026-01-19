@@ -4990,6 +4990,9 @@ async function runExactPriceImport() {
             console.log('▶️ Running importExactPrices()...');
             const result = importExactPrices();
 
+            // Update timestamp (in case import script didn't set it)
+            localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
             // Reload phone data from localStorage
             adminManager.phones = adminManager.loadPhones();
 
@@ -5000,7 +5003,7 @@ async function runExactPriceImport() {
             // Close modal
             closeImportModal();
 
-            console.log('✅ Exact price import completed successfully');
+            console.log('✅ Price import completed successfully');
             console.log(`   Updated: ${result.updated}, Added: ${result.added}, Total: ${result.total}`);
         } else {
             throw new Error('importExactPrices function not found in script');
@@ -5081,6 +5084,9 @@ async function clearAndReimport() {
         if (typeof importExactPrices === 'function') {
             const result = importExactPrices();
 
+            // Update timestamp (in case import script didn't set it)
+            localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
             // Reload from localStorage
             adminManager.phones = adminManager.loadPhones();
 
@@ -5094,8 +5100,8 @@ async function clearAndReimport() {
                   `🗑️  Cleared all old data\n` +
                   `➕ Added: ${result.added} phones\n` +
                   `📦 Total: ${result.total} phones\n\n` +
-                  `✨ All prices are fresh from Excel files.\n` +
-                  `✨ NO calculated prices remaining.`);
+                  `✨ USED & NEW prices loaded from Excel.\n` +
+                  `✨ For NEW-only models, USED prices calculated at 65%.`);
 
             console.log('✅ Complete reset and import successful');
         } else {
