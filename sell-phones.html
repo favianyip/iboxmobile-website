@@ -572,75 +572,15 @@
             return condition === 'used' ? 500 : 700;
         }
 
-        // Model data with both used and new prices from competitive data
-        const phoneModels = {
-            apple: [
-                // Updated with highest competitor prices from WhyMobile and RedWhite
-                { name: 'iPhone 17 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB', '2TB'], usedPrice: 1520, newPrice: 2450 },
-                { name: 'iPhone 17 Pro', img: 'iphone-16-pro.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1550, newPrice: 1840 },
-                { name: 'iPhone 17 Air', img: 'iphone-16.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1100, newPrice: 1320 },
-                { name: 'iPhone 17', img: 'iphone-16.jpg', storage: ['256GB', '512GB'], usedPrice: 1150, newPrice: 1370 },
-                { name: 'iPhone 16 Pro Max', img: 'iphone-16-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1100, newPrice: 1630 },
-                { name: 'iPhone 16 Pro', img: 'iphone-16-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 970, newPrice: 1500 },
-                { name: 'iPhone 16 Plus', img: 'iphone-16-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 850, newPrice: 1150 },
-                { name: 'iPhone 16', img: 'iphone-16.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 770, newPrice: 1020 },
-                { name: 'iPhone 16e', img: 'iphone-se-3rd-gen.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 720, newPrice: 870 },
-                { name: 'iPhone 15 Pro Max', img: 'iphone-15-pro-max.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 900, newPrice: 900 },
-                { name: 'iPhone 15 Pro', img: 'iphone-15-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 750, newPrice: 750 },
-                { name: 'iPhone 15 Plus', img: 'iphone-15-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 650, newPrice: 650 },
-                { name: 'iPhone 15', img: 'iphone-15.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 600, newPrice: 600 },
-                { name: 'iPhone 14 Pro Max', img: 'iphone-14-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 750, newPrice: 750 },
-                { name: 'iPhone 14 Pro', img: 'iphone-14-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 650, newPrice: 650 },
-                { name: 'iPhone 14 Plus', img: 'iphone-14-plus.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 520, newPrice: 520 },
-                { name: 'iPhone 14', img: 'iphone-14.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 450, newPrice: 450 },
-                { name: 'iPhone 13 Pro Max', img: 'iphone-13-pro-max.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 610, newPrice: 610 },
-                { name: 'iPhone 13 Pro', img: 'iphone-13-pro.jpg', storage: ['128GB', '256GB', '512GB', '1TB'], usedPrice: 530, newPrice: 530 },
-                { name: 'iPhone 13 mini', img: 'iphone-13-mini.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 350, newPrice: 350 },
-                { name: 'iPhone 13', img: 'iphone-13.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 400, newPrice: 400 },
-                { name: 'iPhone 12 Pro Max', img: 'iphone-12-pro-max.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 450, newPrice: 450 },
-                { name: 'iPhone 12 Pro', img: 'iphone-12-pro.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 400, newPrice: 400 },
-                { name: 'iPhone 12', img: 'iphone-12.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 300, newPrice: 300 },
-                { name: 'iPhone 12 mini', img: 'iphone-12-mini.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 180, newPrice: 180 },
-                { name: 'iPhone 11 Pro Max', img: 'iphone-11-pro-max.jpg', storage: ['64GB', '256GB', '512GB'], usedPrice: 300, newPrice: 300 },
-                { name: 'iPhone 11 Pro', img: 'iphone-11-pro.jpg', storage: ['64GB', '256GB', '512GB'], usedPrice: 250, newPrice: 250 },
-                { name: 'iPhone 11', img: 'iphone-11.jpg', storage: ['64GB', '128GB', '256GB'], usedPrice: 200, newPrice: 200 }
-            ],
-            samsung: [
-                // Updated with highest competitor prices from WhyMobile and RedWhite
-                { name: 'Galaxy S25 Ultra', img: 'galaxy-s24-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1050, newPrice: 1250 },
-                { name: 'Galaxy S25 Plus', img: 'galaxy-s24-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 850, newPrice: 1120 },
-                { name: 'Galaxy S25', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 700, newPrice: 950 },
-                { name: 'Galaxy S25 Edge', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 670, newPrice: 870 },
-                { name: 'Galaxy S25 FE', img: 'galaxy-s24.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 520, newPrice: 670 },
-                { name: 'Galaxy S24 Ultra', img: 'galaxy-s24-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 850, newPrice: 850 },
-                { name: 'Galaxy S24 Plus', img: 'galaxy-s24-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 620, newPrice: 620 },
-                { name: 'Galaxy S24', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 550, newPrice: 550 },
-                { name: 'Galaxy S24 FE', img: 'galaxy-s24.jpg', storage: ['256GB', '512GB'], usedPrice: 420, newPrice: 420 },
-                { name: 'Galaxy S23 Ultra', img: 'galaxy-s23-ultra.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 600, newPrice: 600 },
-                { name: 'Galaxy S23 Plus', img: 'galaxy-s23-plus.jpg', storage: ['256GB', '512GB'], usedPrice: 450, newPrice: 450 },
-                { name: 'Galaxy S23', img: 'galaxy-s23.jpg', storage: ['128GB', '256GB'], usedPrice: 350, newPrice: 350 },
-                { name: 'Galaxy S23 FE', img: 'galaxy-s23.jpg', storage: ['256GB'], usedPrice: 220, newPrice: 220 },
-                { name: 'Galaxy S22 Ultra', img: 'galaxy-s22-ultra.jpg', storage: ['256GB', '512GB'], usedPrice: 400, newPrice: 400 },
-                { name: 'Galaxy S22 Plus', img: 'galaxy-s22-plus.jpg', storage: ['128GB', '256GB'], usedPrice: 250, newPrice: 250 },
-                { name: 'Galaxy S22', img: 'galaxy-s22.jpg', storage: ['128GB', '256GB'], usedPrice: 200, newPrice: 200 },
-                { name: 'Galaxy Z Fold 7', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 1620, newPrice: 1920 },
-                { name: 'Galaxy Z Fold 6', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 970, newPrice: 970 },
-                { name: 'Galaxy Z Fold 5', img: 'galaxy-z-fold5.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 650, newPrice: 650 },
-                { name: 'Galaxy Z Fold 4', img: 'galaxy-z-fold4.jpg', storage: ['256GB', '512GB', '1TB'], usedPrice: 500, newPrice: 500 },
-                { name: 'Galaxy Z Flip 7', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 770, newPrice: 950 },
-                { name: 'Galaxy Z Flip 7 FE', img: 'galaxy-z-flip5.jpg', storage: ['128GB', '256GB'], usedPrice: 570, newPrice: 770 },
-                { name: 'Galaxy Z Flip 6', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 450, newPrice: 450 },
-                { name: 'Galaxy Z Flip 5', img: 'galaxy-z-flip5.jpg', storage: ['256GB', '512GB'], usedPrice: 300, newPrice: 300 },
-                { name: 'Galaxy Z Flip 4', img: 'galaxy-z-flip4.jpg', storage: ['128GB', '256GB', '512GB'], usedPrice: 200, newPrice: 200 },
-                { name: 'Samsung TriFold', img: 'galaxy-z-fold5.jpg', storage: ['512GB'], usedPrice: 4220, newPrice: 4220 },
-                { name: 'Galaxy A56', img: 'galaxy-s22.jpg', storage: ['12/256GB', '8/256GB'], usedPrice: 270, newPrice: 420 },
-                { name: 'Galaxy A55', img: 'galaxy-s22.jpg', storage: ['8/256GB'], usedPrice: 220, newPrice: 220 },
-                { name: 'Galaxy A36', img: 'galaxy-s22.jpg', storage: ['8/256GB'], usedPrice: 270, newPrice: 340 },
-                { name: 'Galaxy A26', img: 'galaxy-s22.jpg', storage: ['8/256GB'], usedPrice: 270, newPrice: 270 },
-                { name: 'Galaxy A17 5G', img: 'galaxy-s22.jpg', storage: ['8/128GB'], usedPrice: 200, newPrice: 200 },
-                { name: 'Galaxy A17 4G', img: 'galaxy-s22.jpg', storage: ['8/128GB'], usedPrice: 160, newPrice: 160 }
-            ]
-        };
+        // ============================================================================
+        // DISABLED: HARDCODED PHONE MODELS - NO LONGER USED!
+        // ============================================================================
+        // REASON: User requirement "everything in user interface must follow 1 to 1 in backend settings"
+        // NOW USING: adminManager.phones (Excel import data from localStorage)
+        // NO hardcoded models, NO hardcoded prices, NO hardcoded storage options
+        //
+        // OLD HARDCODED DATA REMOVED - see git history if needed
+        // ============================================================================
 
         let currentCondition = 'used'; // Default to used
         let currentBrand = 'apple'; // Default to Apple
@@ -648,21 +588,25 @@
         // Initialize page
         function initPage() {
             console.log('='.repeat(80));
-            console.log('📱 SIMPLIFIED SELL-PHONES INITIALIZATION');
-            console.log('💡 NOW USING ONLY phoneDatabase (backend prices)');
-            console.log('💡 NO localStorage dependency - works on all devices!');
+            console.log('📱 SELL-PHONES INITIALIZATION');
+            console.log('💡 NOW USING adminManager.phones (Excel import from localStorage)');
+            console.log('💡 NO hardcoded phoneDatabase - 1-to-1 with backend!');
+            console.log('💡 User requirement: "everything must follow backend settings"');
             console.log('='.repeat(80));
 
             const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             console.log('📱 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
             console.log('📱 Screen:', window.innerWidth + 'px');
 
-            if (typeof phoneDatabase !== 'undefined') {
-                console.log('✅ phoneDatabase loaded');
-                console.log('📱 Apple models:', Object.keys(phoneDatabase.Apple || {}).length);
-                console.log('📱 Samsung models:', Object.keys(phoneDatabase.Samsung || {}).length);
+            if (typeof adminManager !== 'undefined' && adminManager.phones) {
+                console.log('✅ adminManager.phones loaded from Excel import');
+                const appleCount = adminManager.phones.filter(p => p.brand === 'Apple').length;
+                const samsungCount = adminManager.phones.filter(p => p.brand === 'Samsung').length;
+                console.log('📱 Apple models:', appleCount);
+                console.log('📱 Samsung models:', samsungCount);
+                console.log('📦 Total models:', adminManager.phones.length);
             } else {
-                console.error('❌ phoneDatabase not loaded! quote.js may have failed.');
+                console.error('❌ adminManager.phones not loaded! User needs to import data in admin panel.');
             }
 
             // Check URL parameters
@@ -777,9 +721,11 @@
         // Render models
         function renderModels() {
             console.log('='.repeat(80));
-            console.log('🔄 RENDERING MODELS FOR SELL-PHONES.HTML');
+            console.log('🔄 RENDERING MODELS FROM BACKEND (adminManager.phones)');
             console.log('='.repeat(80));
             console.log('📱 Current Condition:', currentCondition);
+            console.log('💡 Data Source: Excel import (localStorage)');
+            console.log('💡 NO hardcoded models, NO calculated prices');
             console.log('📱 Device Type:', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'MOBILE' : 'DESKTOP');
             console.log('📱 Screen Width:', window.innerWidth + 'px');
 
@@ -794,116 +740,148 @@
                 appleGrid.innerHTML = '';
                 samsungGrid.innerHTML = '';
 
-                // CRITICAL: Check phoneDatabase availability and sync status
-                console.log('📦 phoneDatabase available:', typeof phoneDatabase !== 'undefined');
+                // CRITICAL: Check adminManager.phones availability (Excel import data)
                 console.log('📦 adminManager available:', typeof adminManager !== 'undefined');
+                console.log('📦 adminManager.phones available:', typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0);
 
-                if (typeof phoneDatabase === 'undefined') {
-                    console.error('❌ CRITICAL: phoneDatabase is not defined!');
-                    console.error('💡 This means quote.js did not load or execute properly');
-                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">Error: Phone database not loaded. Please refresh the page.</p>';
-                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">Error: Phone database not loaded. Please refresh the page.</p>';
+                if (typeof adminManager === 'undefined' || !adminManager.phones || adminManager.phones.length === 0) {
+                    console.error('❌ CRITICAL: adminManager.phones not available!');
+                    console.error('💡 User must run "Clear All & Fresh Import" in admin panel');
+                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data imported. Please go to admin panel and click "Clear All & Fresh Import".</p>';
+                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data imported. Please go to admin panel and click "Clear All & Fresh Import".</p>';
+                    // Fade in error message
+                    appleGrid.style.opacity = '1';
+                    samsungGrid.style.opacity = '1';
                     return;
                 }
 
-                // Priority 1: Try phoneDatabase from quote.js FIRST (has all 40 models with correct data)
-                console.log('✅ Using phoneDatabase from quote.js');
+                // Using adminManager.phones from Excel import (localStorage)
+                console.log('✅ Using adminManager.phones from Excel import (localStorage)');
+                console.log(`📦 Total phones: ${adminManager.phones.length}`);
 
-                // Log sample data for verification
-                if (phoneDatabase.Apple) {
-                    const appleModels = Object.keys(phoneDatabase.Apple);
-                    console.log(`📱 Apple models available: ${appleModels.length}`);
-                    console.log('   Sample models:', appleModels.slice(0, 5).join(', '));
+                // CRITICAL FIX: Use adminManager.phones (Excel import) instead of phoneDatabase (hardcoded)
+                // User requirement: "everything in user interface must follow 1 to 1 in backend settings"
 
-                    // Check for iPhone 17 specifically (user reported issue)
-                    if (phoneDatabase.Apple['iPhone 17']) {
-                        console.log('✅ iPhone 17 found in database');
-                        console.log('   Base Price: $' + phoneDatabase.Apple['iPhone 17'].basePrice);
-                    } else {
-                        console.error('❌ iPhone 17 NOT found in database!');
-                    }
-                }
+                if (typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0) {
+                    console.log('✅ Using adminManager.phones (Excel import data)');
+                    console.log(`📦 Total phones in backend: ${adminManager.phones.length}`);
 
-                if (phoneDatabase.Samsung) {
-                    const samsungModels = Object.keys(phoneDatabase.Samsung);
-                    console.log(`📱 Samsung models available: ${samsungModels.length}`);
-                    console.log('   Sample models:', samsungModels.slice(0, 5).join(', '));
-                }
+                    // Filter and render Apple models
+                    const applePhones = adminManager.phones.filter(p => p.brand === 'Apple');
+                    console.log(`📱 Apple phones: ${applePhones.length}`);
 
-                // CRITICAL FIX: Wrap rendering in proper if block
-                if (phoneDatabase.Apple || phoneDatabase.Samsung) {
-                    // Render Apple models from phoneDatabase
-                    if (phoneDatabase.Apple) {
-                        Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
-                            // Calculate max price from storage variants
-                            const storageOptions = Object.keys(modelData.storage || {});
-                            let maxUsedPrice = modelData.basePrice || 0;
+                    applePhones.forEach(phone => {
+                        const modelName = phone.model;
+                        const storageOptions = phone.storages || [];
 
-                            // Find highest storage price
-                            if (modelData.storage) {
-                                const prices = Object.values(modelData.storage).map(modifier =>
-                                    modelData.basePrice + modifier
-                                );
-                                maxUsedPrice = Math.max(...prices);
+                        // CRITICAL: Get EXACT prices from Excel import - NO CALCULATIONS!
+                        let maxPrice = 0;
+
+                        if (currentCondition === 'used') {
+                            // USED: Use exact storagePrices from Excel import
+                            if (phone.storagePrices && Object.keys(phone.storagePrices).length > 0) {
+                                const prices = Object.values(phone.storagePrices).filter(p => p > 0);
+                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+                                console.log(`  ${modelName} USED: $${maxPrice} (from Excel storagePrices)`);
+                            } else {
+                                console.warn(`  ${modelName} USED: No storagePrices in Excel import`);
+                                maxPrice = 0;
                             }
-
-                            // NEW price estimate (15% higher if no specific NEW price)
-                            const maxNewPrice = maxUsedPrice * 1.15;
-                            const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
-
-                            // Get image - phoneDatabase already synced with adminManager by quote.js loadAdminDataForCustomerPages()
-                            // Just use the image directly from phoneDatabase (it's already updated with admin changes)
-                            const imageUrl = modelData.image || 'iphone-16-pro-max.jpg';
-
-                            const model = {
-                                name: modelName,
-                                img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
-                            };
-                            appleGrid.innerHTML += createModelCard(model, 'Apple', price);
-                        });
-                    }
-
-                    // Render Samsung models from phoneDatabase
-                    if (phoneDatabase.Samsung) {
-                        Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
-                            // Calculate max price from storage variants
-                            const storageOptions = Object.keys(modelData.storage || {});
-                            let maxUsedPrice = modelData.basePrice || 0;
-
-                            // Find highest storage price
-                            if (modelData.storage) {
-                                const prices = Object.values(modelData.storage).map(modifier =>
-                                    modelData.basePrice + modifier
-                                );
-                                maxUsedPrice = Math.max(...prices);
+                        } else {
+                            // NEW: Use exact newPhonePrices from Excel import
+                            if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
+                                const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
+                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+                                console.log(`  ${modelName} NEW: $${maxPrice} (from Excel newPhonePrices)`);
+                            } else {
+                                console.warn(`  ${modelName} NEW: No newPhonePrices in Excel import`);
+                                maxPrice = 0;
                             }
+                        }
 
-                            // NEW price estimate (15% higher if no specific NEW price)
-                            const maxNewPrice = maxUsedPrice * 1.15;
-                            const price = currentCondition === 'used' ? roundToNearest10(maxUsedPrice) : roundToNearest10(maxNewPrice);
+                        // CRITICAL: Skip phones with no price data (don't show $0 phones)
+                        if (maxPrice === 0) {
+                            console.log(`  ⚠️  Skipping ${modelName} - no ${currentCondition} price data`);
+                            return; // Skip this phone
+                        }
 
-                            // Get image - phoneDatabase already synced with adminManager by quote.js loadAdminDataForCustomerPages()
-                            // Just use the image directly from phoneDatabase (it's already updated with admin changes)
-                            const imageUrl = modelData.image || 'galaxy-s24-ultra.jpg';
+                        const price = roundToNearest10(maxPrice);
 
-                            const model = {
-                                name: modelName,
-                                img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
-                            };
-                            samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
-                        });
-                    }
+                        // Get image from phone data (already in Excel import)
+                        const imageUrl = phone.image || 'iphone-16-pro-max.jpg';
+
+                        const model = {
+                            name: modelName,
+                            img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
+                            storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
+                        };
+                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                    });
+                    console.log(`✅ Rendered ${applePhones.length} Apple phones`);
                 }
-                // SIMPLIFIED: NO Priority 2 or 3 - ONLY phoneDatabase
-                // NO localStorage, NO hardcoded fallback, NO complexity
-                else {
-                    console.error('❌ phoneDatabase not available!');
-                    console.error('💡 quote.js must be loaded with phoneDatabase');
-                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">Error: Phone database not loaded. Please refresh the page.</p>';
-                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">Error: Phone database not loaded. Please refresh the page.</p>';
+
+                    // Filter and render Samsung models
+                    const samsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung');
+                    console.log(`📱 Samsung phones: ${samsungPhones.length}`);
+
+                    samsungPhones.forEach(phone => {
+                        const modelName = phone.model;
+                        const storageOptions = phone.storages || [];
+
+                        // CRITICAL: Get EXACT prices from Excel import - NO CALCULATIONS!
+                        let maxPrice = 0;
+
+                        if (currentCondition === 'used') {
+                            // USED: Use exact storagePrices from Excel import
+                            if (phone.storagePrices && Object.keys(phone.storagePrices).length > 0) {
+                                const prices = Object.values(phone.storagePrices).filter(p => p > 0);
+                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+                                console.log(`  ${modelName} USED: $${maxPrice} (from Excel storagePrices)`);
+                            } else {
+                                console.warn(`  ${modelName} USED: No storagePrices in Excel import`);
+                                maxPrice = 0;
+                            }
+                        } else {
+                            // NEW: Use exact newPhonePrices from Excel import
+                            if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
+                                const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
+                                maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+                                console.log(`  ${modelName} NEW: $${maxPrice} (from Excel newPhonePrices)`);
+                            } else {
+                                console.warn(`  ${modelName} NEW: No newPhonePrices in Excel import`);
+                                maxPrice = 0;
+                            }
+                        }
+
+                        // CRITICAL: Skip phones with no price data (don't show $0 phones)
+                        if (maxPrice === 0) {
+                            console.log(`  ⚠️  Skipping ${modelName} - no ${currentCondition} price data`);
+                            return; // Skip this phone
+                        }
+
+                        const price = roundToNearest10(maxPrice);
+
+                        // Get image from phone data (already in Excel import)
+                        const imageUrl = phone.image || 'galaxy-s24-ultra.jpg';
+
+                        const model = {
+                            name: modelName,
+                            img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
+                            storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
+                        };
+                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                    });
+                    console.log(`✅ Rendered ${samsungPhones.length} Samsung phones`);
+                } else {
+                    // NO adminManager.phones - user needs to import data
+                    console.error('❌ CRITICAL: adminManager.phones not available!');
+                    console.error('💡 User must run "Clear All & Fresh Import" in admin panel');
+                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data imported. Please go to admin panel and click "Clear All & Fresh Import".</p>';
+                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data imported. Please go to admin panel and click "Clear All & Fresh Import".</p>';
                 }
+
+                // OLD REMOVED: NO phoneDatabase fallback anymore
+                // User requirement: "no fall back hardcoded value"
 
                 // Fade in with new content
                 appleGrid.style.opacity = '1';
