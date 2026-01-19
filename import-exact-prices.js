@@ -39,7 +39,7 @@ const appleUsedPrices = {
     "iPhone 16": { "128GB": 670, "256GB": 720, "512GB": 770 },
     "iPhone 16 Plus": { "128GB": 750, "256GB": 800, "512GB": 850 },
     "iPhone 16 Pro": { "128GB": 870, "256GB": 920, "512GB": 970, "1TB": 1020 },
-    "iPhone 16 Pro Max": { "256GB": 1020, "512GB": 1070, "1TB": 1120 },
+    "iPhone 16 Pro Max": { "256GB": 900, "512GB": 950, "1TB": 1000 },
     "iPhone 16E": { "128GB": 520, "256GB": 620, "512GB": 720 },
     "iPhone 17": { "256GB": 900, "512GB": 1150 },
     "iPhone 17 Pro": { "256GB": 1350, "512GB": 1550, "1TB": 1750 },
