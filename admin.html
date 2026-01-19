@@ -1437,5 +1437,64 @@
             </div>
         </div>
     </div>
+
+    <!-- MOBILE TOUCH HANDLING - Prevent scroll from triggering button clicks -->
+    <script>
+    (function() {
+        // Only apply on mobile/touch devices
+        if (!('ontouchstart' in window)) return;
+
+        console.log('📱 Mobile touch handler initialized');
+
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let touchStartTime = 0;
+        let isTouchMoving = false;
+        const SCROLL_THRESHOLD = 10; // pixels
+        const TAP_DURATION_MAX = 300; // ms
+
+        // Track touch start
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+            touchStartTime = Date.now();
+            isTouchMoving = false;
+        }, { passive: true });
+
+        // Track touch move - if moved enough, it's a scroll, not a tap
+        document.addEventListener('touchmove', function(e) {
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+
+            if (deltaY > SCROLL_THRESHOLD || deltaX > SCROLL_THRESHOLD) {
+                isTouchMoving = true;
+            }
+        }, { passive: true });
+
+        // Prevent click if it was a scroll gesture
+        document.addEventListener('click', function(e) {
+            const touchDuration = Date.now() - touchStartTime;
+
+            // If touch was moving (scroll) or took too long, prevent click on buttons
+            if (isTouchMoving || touchDuration > TAP_DURATION_MAX) {
+                const target = e.target.closest('.btn, .menu-item, .phone-card-admin, .brand-card, [onclick]');
+                if (target && isTouchMoving) {
+                    console.log('📱 Prevented scroll-triggered click on:', target.textContent?.substring(0, 30) || target.className);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }
+        }, { capture: true });
+
+        // Reset state on touch end
+        document.addEventListener('touchend', function() {
+            // Small delay before resetting to allow click event to fire
+            setTimeout(() => {
+                isTouchMoving = false;
+            }, 50);
+        }, { passive: true });
+    })();
+    </script>
 </body>
 </html>

@@ -1505,3 +1505,81 @@ input:checked + .slider:before {
         font-size: 0.75rem;
     }
 }
+
+/* ============================================ */
+/* MOBILE TOUCH HANDLING - PREVENT SCROLL CLICKS */
+/* ============================================ */
+/* Fix for accidental button selection while scrolling on mobile */
+
+@media (max-width: 768px) {
+    /* Make scrollable areas scroll-only, prevent click passthrough */
+    .admin-content,
+    .admin-sidebar,
+    .modal-body,
+    .phones-grid,
+    .price-table-container {
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Buttons require deliberate tap - prevent scroll-triggered clicks */
+    .btn,
+    .menu-item,
+    .phone-card-admin,
+    .brand-card,
+    .condition-type-btn,
+    .filter-select,
+    [onclick] {
+        /* Require touch to be held briefly before activating */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent double-tap zoom which can cause accidental clicks */
+        -ms-touch-action: manipulation;
+    }
+
+    /* Active state only on deliberate touch */
+    .btn:active,
+    .menu-item:active,
+    .phone-card-admin:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    /* Larger touch targets for mobile */
+    .btn,
+    .menu-item,
+    .filter-select {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 16px;
+    }
+
+    /* Add slight delay to button interactions to distinguish from scroll */
+    .admin-sidebar .menu-item {
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    /* Phone cards need larger touch area */
+    .phone-card-admin {
+        padding: 16px;
+        min-height: 100px;
+    }
+
+    /* Prevent text selection during scroll */
+    .admin-main {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Allow text selection in input fields */
+    .admin-main input,
+    .admin-main textarea,
+    .admin-main select {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+}
