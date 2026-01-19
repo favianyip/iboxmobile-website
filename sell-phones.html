@@ -782,9 +782,10 @@
                             if (phone.storagePrices && Object.keys(phone.storagePrices).length > 0) {
                                 const prices = Object.values(phone.storagePrices).filter(p => p > 0);
                                 maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} USED: $${maxPrice} (from Excel storagePrices)`);
+                                console.log(`  ${modelName} USED: $${maxPrice} (highest from storagePrices: ${JSON.stringify(phone.storagePrices)})`);
                             } else {
                                 console.warn(`  ${modelName} USED: No storagePrices in Excel import`);
+                                console.warn(`  Available data:`, {storages: phone.storages, storagePrices: phone.storagePrices, basePrice: phone.basePrice});
                                 maxPrice = 0;
                             }
                         } else {
@@ -792,9 +793,10 @@
                             if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
                                 const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
                                 maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} NEW: $${maxPrice} (from Excel newPhonePrices)`);
+                                console.log(`  ${modelName} NEW: $${maxPrice} (highest from newPhonePrices: ${JSON.stringify(phone.newPhonePrices)})`);
                             } else {
                                 console.warn(`  ${modelName} NEW: No newPhonePrices in Excel import`);
+                                console.warn(`  Available data:`, {storages: phone.storages, newPhonePrices: phone.newPhonePrices, basePrice: phone.basePrice});
                                 maxPrice = 0;
                             }
                         }
@@ -806,6 +808,9 @@
                         }
 
                         const price = roundToNearest10(maxPrice);
+                        if (price !== maxPrice) {
+                            console.log(`  💰 Price rounded: $${maxPrice} → $${price}`);
+                        }
 
                         // Get image from phone data (already in Excel import)
                         const imageUrl = phone.image || 'iphone-16-pro-max.jpg';
@@ -836,9 +841,10 @@
                             if (phone.storagePrices && Object.keys(phone.storagePrices).length > 0) {
                                 const prices = Object.values(phone.storagePrices).filter(p => p > 0);
                                 maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} USED: $${maxPrice} (from Excel storagePrices)`);
+                                console.log(`  ${modelName} USED: $${maxPrice} (highest from storagePrices: ${JSON.stringify(phone.storagePrices)})`);
                             } else {
                                 console.warn(`  ${modelName} USED: No storagePrices in Excel import`);
+                                console.warn(`  Available data:`, {storages: phone.storages, storagePrices: phone.storagePrices, basePrice: phone.basePrice});
                                 maxPrice = 0;
                             }
                         } else {
@@ -846,9 +852,10 @@
                             if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
                                 const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
                                 maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                                console.log(`  ${modelName} NEW: $${maxPrice} (from Excel newPhonePrices)`);
+                                console.log(`  ${modelName} NEW: $${maxPrice} (highest from newPhonePrices: ${JSON.stringify(phone.newPhonePrices)})`);
                             } else {
                                 console.warn(`  ${modelName} NEW: No newPhonePrices in Excel import`);
+                                console.warn(`  Available data:`, {storages: phone.storages, newPhonePrices: phone.newPhonePrices, basePrice: phone.basePrice});
                                 maxPrice = 0;
                             }
                         }
@@ -860,6 +867,9 @@
                         }
 
                         const price = roundToNearest10(maxPrice);
+                        if (price !== maxPrice) {
+                            console.log(`  💰 Price rounded: $${maxPrice} → $${price}`);
+                        }
 
                         // Get image from phone data (already in Excel import)
                         const imageUrl = phone.image || 'galaxy-s24-ultra.jpg';
@@ -1139,9 +1149,23 @@
             }
         });
 
-        // Initialize on page load - WAIT for all scripts to load (including deferred quote.js)
-        // Use 'load' instead of 'DOMContentLoaded' to ensure phoneDatabase is available
-        window.addEventListener('load', initPage);
+        // Initialize on page load - WAIT for adminManager to be ready
+        // CRITICAL: adminManager is created by quote.js (deferred), so we must wait for it
+        function waitForAdminManager() {
+            if (typeof adminManager !== 'undefined' && adminManager && adminManager.phones) {
+                console.log('✅ adminManager is ready, initializing page...');
+                initPage();
+            } else {
+                console.log('⏳ Waiting for adminManager...');
+                setTimeout(waitForAdminManager, 100); // Check every 100ms
+            }
+        }
+
+        // Start waiting when DOM and all resources are loaded
+        window.addEventListener('load', function() {
+            console.log('📄 Page loaded, waiting for adminManager...');
+            waitForAdminManager();
+        });
     </script>
 </body>
 </html>
