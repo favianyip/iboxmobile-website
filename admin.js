@@ -4942,17 +4942,24 @@ async function runExactPriceImport() {
         importButton.innerHTML = '⏳ Importing Exact Prices...';
         importButton.disabled = true;
 
-        // Load the exact price import script
-        const response = await fetch('import-exact-prices.js');
+        // Load the exact price import script with cache-busting
+        const cacheBuster = Date.now();
+        const response = await fetch(`import-exact-prices.js?v=${cacheBuster}`);
         if (!response.ok) {
             throw new Error(`Failed to load exact price import script: ${response.status}`);
         }
 
         const scriptText = await response.text();
-        console.log('📥 Loaded exact price import script');
+        console.log('📥 Loaded exact price import script, length:', scriptText.length);
 
         // Execute the script (this will define the importExactPrices function)
-        eval(scriptText);
+        try {
+            eval(scriptText);
+            console.log('✅ Import script executed successfully');
+        } catch (error) {
+            console.error('❌ Import script syntax error:', error);
+            throw new Error(`Import script has syntax error: ${error.message}`);
+        }
 
         // Run the import function if it exists
         if (typeof importExactPrices === 'function') {
@@ -5028,14 +5035,24 @@ async function clearAndReimport() {
         importButton.innerHTML = '⏳ Clearing & Importing...';
         importButton.disabled = true;
 
-        // Load the exact price import script
-        const response = await fetch('import-exact-prices.js');
+        // Load the exact price import script with cache-busting
+        const cacheBuster = Date.now();
+        const response = await fetch(`import-exact-prices.js?v=${cacheBuster}`);
         if (!response.ok) {
             throw new Error(`Failed to load import script: ${response.status}`);
         }
 
         const scriptText = await response.text();
-        eval(scriptText);
+        console.log('📄 Loaded import script, length:', scriptText.length);
+
+        // Check for syntax errors before eval
+        try {
+            eval(scriptText);
+            console.log('✅ Import script executed successfully');
+        } catch (error) {
+            console.error('❌ Import script syntax error:', error);
+            throw new Error(`Import script has syntax error: ${error.message}`);
+        }
 
         if (typeof importExactPrices === 'function') {
             const result = importExactPrices();
