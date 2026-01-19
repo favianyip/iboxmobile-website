@@ -155,12 +155,33 @@ function loadAdminDataForCustomerPages() {
 
     try {
         // Load phones from localStorage (same as admin panel)
-        const storedPhones = localStorage.getItem('ktmobile_phones');
+        let storedPhones = localStorage.getItem('ktmobile_phones');
 
+        // AUTO-IMPORT: If localStorage is empty, automatically import prices
         if (!storedPhones) {
-            console.error('❌ CRITICAL: No admin phone data found in localStorage!');
-            console.error('💡 SOLUTION: Go to admin panel and click "Import Exact Prices"');
-            return;
+            console.log('📦 No phone data in localStorage - attempting auto-import...');
+
+            // Check if importExactPrices function is available (from import-exact-prices.js)
+            if (typeof importExactPrices === 'function') {
+                console.log('🔄 Running importExactPrices() automatically...');
+                try {
+                    importExactPrices();
+                    storedPhones = localStorage.getItem('ktmobile_phones');
+                    console.log('✅ Auto-import successful!');
+                } catch (importError) {
+                    console.error('❌ Auto-import failed:', importError);
+                }
+            } else {
+                console.log('⚠️ importExactPrices not available - loading script dynamically...');
+                // Script will be loaded, then we retry
+            }
+
+            // If still no data after auto-import attempt
+            if (!storedPhones) {
+                console.error('❌ CRITICAL: No admin phone data found in localStorage!');
+                console.error('💡 SOLUTION: Go to admin panel and click "Import Exact Prices"');
+                return;
+            }
         }
 
         const adminPhones = JSON.parse(storedPhones);
