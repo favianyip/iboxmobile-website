@@ -3096,12 +3096,154 @@ function initBookingForm() {
 
 function setMinBookingDate() {
     const dateInput = document.getElementById('booking-date');
+    const timeSelect = document.getElementById('booking-time');
     if (!dateInput) return;
-    
-    const today = new Date();
-    const maxDate = new Date(today);
-    maxDate.setDate(maxDate.getDate() + 10); // Limit to 10 days due to price fluctuations
-    
-    dateInput.min = today.toISOString().split('T')[0];
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Find the next available weekday (Mon-Fri)
+    let minDate = new Date(today);
+
+    // If it's after 5pm (last bookable slot starts at 5pm), move to next day
+    if (now.getHours() >= 17) {
+        minDate.setDate(minDate.getDate() + 1);
+    }
+
+    // Skip weekends for min date
+    while (minDate.getDay() === 0 || minDate.getDay() === 6) {
+        minDate.setDate(minDate.getDate() + 1);
+    }
+
+    // Max date is 10 business days ahead
+    let maxDate = new Date(minDate);
+    let businessDays = 0;
+    while (businessDays < 10) {
+        maxDate.setDate(maxDate.getDate() + 1);
+        if (maxDate.getDay() !== 0 && maxDate.getDay() !== 6) {
+            businessDays++;
+        }
+    }
+
+    dateInput.min = minDate.toISOString().split('T')[0];
     dateInput.max = maxDate.toISOString().split('T')[0];
+
+    // Set default to min date
+    dateInput.value = minDate.toISOString().split('T')[0];
+
+    // Add change listener to validate weekends and update time slots
+    dateInput.addEventListener('change', function() {
+        validateBookingDate();
+        updateAvailableTimeSlots();
+    });
+
+    // Initial time slot update
+    updateAvailableTimeSlots();
+}
+
+// Validate that selected date is not a weekend
+function validateBookingDate() {
+    const dateInput = document.getElementById('booking-date');
+    if (!dateInput || !dateInput.value) return;
+
+    const selectedDate = new Date(dateInput.value + 'T00:00:00');
+    const day = selectedDate.getDay();
+
+    // If weekend selected, move to next Monday
+    if (day === 0 || day === 6) {
+        const nextMonday = new Date(selectedDate);
+        while (nextMonday.getDay() !== 1) {
+            nextMonday.setDate(nextMonday.getDate() + 1);
+        }
+        dateInput.value = nextMonday.toISOString().split('T')[0];
+        alert('⚠️ We are closed on weekends.\nYour booking has been moved to Monday.');
+    }
+}
+
+// Update available time slots based on selected date and current time
+function updateAvailableTimeSlots() {
+    const dateInput = document.getElementById('booking-date');
+    const timeSelect = document.getElementById('booking-time');
+    const timeNote = document.getElementById('time-slot-note');
+
+    if (!dateInput || !timeSelect) return;
+
+    const now = new Date();
+    const selectedDateStr = dateInput.value;
+    const todayStr = now.toISOString().split('T')[0];
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // Operating hours: 9am - 6pm (last slot at 5pm)
+    const timeSlots = [
+        { value: '09:00', label: '9:00 AM - 10:00 AM', hour: 9 },
+        { value: '10:00', label: '10:00 AM - 11:00 AM', hour: 10 },
+        { value: '11:00', label: '11:00 AM - 12:00 PM', hour: 11 },
+        { value: '12:00', label: '12:00 PM - 1:00 PM', hour: 12 },
+        { value: '13:00', label: '1:00 PM - 2:00 PM', hour: 13 },
+        { value: '14:00', label: '2:00 PM - 3:00 PM', hour: 14 },
+        { value: '15:00', label: '3:00 PM - 4:00 PM', hour: 15 },
+        { value: '16:00', label: '4:00 PM - 5:00 PM', hour: 16 },
+        { value: '17:00', label: '5:00 PM - 6:00 PM', hour: 17 }
+    ];
+
+    // Clear existing options
+    timeSelect.innerHTML = '<option value="">Select Time</option>';
+
+    let availableSlots = 0;
+    let firstAvailableSet = false;
+
+    timeSlots.forEach(slot => {
+        const option = document.createElement('option');
+        option.value = slot.value;
+        option.textContent = slot.label;
+
+        // If selected date is today, disable past time slots
+        if (selectedDateStr === todayStr) {
+            // Disable if the slot hour has passed (or if we're in that hour)
+            if (slot.hour <= currentHour) {
+                option.disabled = true;
+                option.textContent = slot.label + ' (Passed)';
+            } else {
+                availableSlots++;
+                if (!firstAvailableSet) {
+                    option.selected = true;
+                    firstAvailableSet = true;
+                }
+            }
+        } else {
+            availableSlots++;
+            if (!firstAvailableSet) {
+                option.selected = true;
+                firstAvailableSet = true;
+            }
+        }
+
+        timeSelect.appendChild(option);
+    });
+
+    // Show note if some slots are unavailable
+    if (timeNote) {
+        if (selectedDateStr === todayStr && availableSlots < timeSlots.length) {
+            if (availableSlots === 0) {
+                timeNote.textContent = '⚠️ No more slots available today. Please select another date.';
+                timeNote.style.display = 'block';
+                // Move to next business day
+                const nextDay = new Date(now);
+                nextDay.setDate(nextDay.getDate() + 1);
+                while (nextDay.getDay() === 0 || nextDay.getDay() === 6) {
+                    nextDay.setDate(nextDay.getDate() + 1);
+                }
+                dateInput.value = nextDay.toISOString().split('T')[0];
+                updateAvailableTimeSlots(); // Recurse with new date
+            } else {
+                timeNote.textContent = `ℹ️ Past time slots for today are not available.`;
+                timeNote.style.display = 'block';
+            }
+        } else {
+            timeNote.style.display = 'none';
+        }
+    }
+
+    console.log(`📅 Booking date: ${selectedDateStr}, Available slots: ${availableSlots}`);
 }
