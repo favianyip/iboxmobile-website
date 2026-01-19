@@ -1612,6 +1612,27 @@ function updateConditionButtonsFromStorage() {
         });
     }
 
+    // CRITICAL FIX: Update receipt buttons (was missing!)
+    const receiptContainer = document.getElementById('receipt-options');
+    if (receiptContainer) {
+        receiptContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const receiptOption = btn.dataset.value; // 'yes' or 'no'
+            if (modifiers.receipt && modifiers.receipt[receiptOption] !== undefined) {
+                const value = modifiers.receipt[receiptOption];
+                // Receipt can be positive (bonus for yes) or negative (deduction for no)
+                if (value >= 0) {
+                    btn.dataset.bonus = value;
+                    btn.dataset.deduction = 0;
+                    console.log(`   Receipt ${receiptOption}: +$${value}`);
+                } else {
+                    btn.dataset.bonus = 0;
+                    btn.dataset.deduction = Math.abs(value);
+                    console.log(`   Receipt ${receiptOption}: -$${Math.abs(value)}`);
+                }
+            }
+        });
+    }
+
     console.log('✅ Condition buttons updated with admin modifier values');
 }
 
@@ -2625,11 +2646,13 @@ function updateLivePriceEstimate() {
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
-        // Receipt bonus (for new phones) - Load from admin panel modifiers
-        if (quoteState.hasReceipt === 'yes') {
-            const receiptBonus = getModifierValue('receipt', 'yes');
-            price += receiptBonus;
-            console.log(`Receipt bonus: +$${receiptBonus}`);
+        // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers
+        // Apply modifier for BOTH 'yes' and 'no' cases
+        if (quoteState.hasReceipt) {
+            const receiptModifier = getModifierValue('receipt', quoteState.hasReceipt);
+            price += receiptModifier; // Can be positive (yes bonus) or negative (no deduction)
+            const sign = receiptModifier >= 0 ? '+' : '';
+            console.log(`Receipt modifier (${quoteState.hasReceipt}): ${sign}$${receiptModifier}`);
         }
     } else if (quoteState.deviceType === 'new-activated') {
         // Use NEW SEALED price - Load deduction from admin panel modifiers
@@ -2644,11 +2667,13 @@ function updateLivePriceEstimate() {
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
-        // Receipt bonus (for new phones) - Load from admin panel modifiers
-        if (quoteState.hasReceipt === 'yes') {
-            const receiptBonus = getModifierValue('receipt', 'yes');
-            price += receiptBonus;
-            console.log(`Receipt bonus: +$${receiptBonus}`);
+        // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers
+        // Apply modifier for BOTH 'yes' and 'no' cases
+        if (quoteState.hasReceipt) {
+            const receiptModifier = getModifierValue('receipt', quoteState.hasReceipt);
+            price += receiptModifier; // Can be positive (yes bonus) or negative (no deduction)
+            const sign = receiptModifier >= 0 ? '+' : '';
+            console.log(`Receipt modifier (${quoteState.hasReceipt}): ${sign}$${receiptModifier}`);
         }
     } else {
         // USED device - use ONLY exact storage-specific USED price from admin data
