@@ -1928,6 +1928,13 @@ document.addEventListener('DOMContentLoaded', function() {
             brandBtn.click();
         }
     }
+
+    // CRITICAL FIX: Initialize booking form and calendar
+    // These functions MUST be called to attach event listeners
+    console.log('🔧 Initializing booking form and calendar...');
+    initBookingForm();
+    setMinBookingDate();
+    console.log('✅ Booking form and calendar initialized successfully');
 });
 
 // selectBrand is defined at the top of the file (lines 608-676) for immediate availability
@@ -3166,6 +3173,7 @@ function initBookingForm() {
             device: {
                 brand: quoteState.brand,
                 model: quoteState.model,
+                deviceType: quoteState.deviceType || 'used', // Track if new-sealed, new-activated, or used
                 storage: quoteState.storage,
                 color: quoteState.color,
                 condition: {
@@ -3173,8 +3181,8 @@ function initBookingForm() {
                     screen: quoteState.screenCondition,
                     battery: quoteState.batteryHealth
                 },
-                issues: quoteState.issues,
-                accessories: quoteState.accessories
+                issues: quoteState.issues || [],
+                accessories: quoteState.accessories || []
             },
             quote: {
                 amount: quoteState.finalPrice,
@@ -3213,10 +3221,14 @@ function setMinBookingDate() {
     // Find the next available weekday (Mon-Fri)
     let minDate = new Date(today);
 
-    // If it's after 5pm (last bookable slot starts at 5pm), move to next day
+    // If it's after 5pm (last bookable slot starts at 5pm) or after 6pm (closing time), move to next day
+    // Also move to next day if all time slots for today have passed
     if (now.getHours() >= 17) {
         minDate.setDate(minDate.getDate() + 1);
     }
+
+    console.log(`📅 Current time: ${now.toLocaleTimeString()}, Setting min date: ${minDate.toLocaleDateString()}`);
+
 
     // Skip weekends for min date
     while (minDate.getDay() === 0 || minDate.getDay() === 6) {
@@ -3308,10 +3320,19 @@ function updateAvailableTimeSlots() {
 
         // If selected date is today, disable past time slots
         if (selectedDateStr === todayStr) {
-            // Disable if the slot hour has passed (or if we're in that hour)
-            if (slot.hour <= currentHour) {
+            // ENHANCED: More precise time blocking
+            // Block if:
+            // 1. The slot hour has already passed (slot.hour < currentHour)
+            // 2. We're currently in that hour (slot.hour === currentHour)
+            // This ensures customers cannot book slots in the past or current hour
+            const isPastSlot = slot.hour < currentHour ||
+                              (slot.hour === currentHour); // Can't book current hour slot
+
+            if (isPastSlot) {
                 option.disabled = true;
                 option.textContent = slot.label + ' (Passed)';
+                option.style.color = '#999';
+                option.style.fontStyle = 'italic';
             } else {
                 availableSlots++;
                 if (!firstAvailableSet) {
@@ -3320,6 +3341,7 @@ function updateAvailableTimeSlots() {
                 }
             }
         } else {
+            // Future date - all slots available
             availableSlots++;
             if (!firstAvailableSet) {
                 option.selected = true;

@@ -3465,6 +3465,11 @@ function renderAppointments() {
                     <div style="font-size: 0.875rem; color: var(--text-light);">
                         ${appointment.device.storage} • ${appointment.device.color}
                     </div>
+                    <div style="font-size: 0.75rem; color: var(--gold); margin-top: 0.25rem;">
+                        ${appointment.device.deviceType === 'new-sealed' ? '🆕 New (Sealed)' :
+                          appointment.device.deviceType === 'new-activated' ? '🆕 New (Activated)' :
+                          appointment.device.deviceType === 'used' ? '📱 Used' : ''}
+                    </div>
                 </td>
                 <td>
                     <strong style="color: var(--gold); font-size: 1.125rem;">
@@ -3633,6 +3638,22 @@ function viewAppointmentDetails(appointmentId) {
     const device = appointment.device || {};
     document.getElementById('modalDeviceBrand').textContent = device.brand || 'N/A';
     document.getElementById('modalDeviceModel').textContent = device.model || 'N/A';
+
+    // Display device type with proper formatting
+    let deviceTypeDisplay = 'N/A';
+    if (device.deviceType) {
+        if (device.deviceType === 'new-sealed') {
+            deviceTypeDisplay = 'New (Factory Sealed)';
+        } else if (device.deviceType === 'new-activated') {
+            deviceTypeDisplay = 'New (Activated)';
+        } else if (device.deviceType === 'used') {
+            deviceTypeDisplay = 'Used';
+        } else {
+            deviceTypeDisplay = device.deviceType;
+        }
+    }
+    document.getElementById('modalDeviceType').textContent = deviceTypeDisplay;
+
     document.getElementById('modalDeviceStorage').textContent = device.storage || 'N/A';
     document.getElementById('modalDeviceColor').textContent = device.color || 'N/A';
     
