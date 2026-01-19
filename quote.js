@@ -345,7 +345,7 @@ function loadAdminDataForCustomerPages() {
 // Helper function to get color hex values
 function getColorHex(colorName) {
     const colorMap = {
-        // Titanium colors
+        // Titanium colors (iPhone Pro models)
         'Desert Titanium': '#8B7355',
         'Natural Titanium': '#A8A8A0',
         'White Titanium': '#F5F5F0',
@@ -357,16 +357,33 @@ function getColorHex(colorName) {
         'Cosmic Orange': '#FF6B35',
         'Blue': '#007AFF',
         'Deep Blue': '#003D82',
+        'Light Blue': '#5AC8FA',
+        'Pacific Blue': '#1C3F60',
+        'Sierra Blue': '#69ABCE',
+        'Sky Blue': '#87CEEB',
         'Silver': '#C0C0C0',
         'Gold': '#FFD700',
+        'Rose Gold': '#E0BFB8',
+        'Graphite': '#4A4A4A',
+        'Space Gray': '#5C5C5C',
+        'Space Black': '#2C2C2E',
         'Black': '#000000',
+        'Jet Black': '#0A0A0A',
+        'Midnight': '#191970',
+        'Midnight Green': '#35423C',
         'White': '#FFFFFF',
+        'Starlight': '#FAF9F6',
         'Pink': '#FFB6C1',
+        'Coral': '#FF6B6B',
         'Green': '#4CD964',
+        'Alpine Green': '#576856',
         'Yellow': '#FFD60A',
         'Purple': '#BF5AF2',
+        'Deep Purple': '#6F4E7C',
         'Red': '#FF3B30',
         '(PRODUCT)RED': '#E10A0A',
+        'Teal': '#008080',
+        'Ultramarine': '#4169E1',
 
         // Samsung colors
         'Titanium Black': '#1C1C1C',
@@ -377,12 +394,32 @@ function getColorHex(colorName) {
         'Titanium Orange': '#FF9500',
         'Titanium Blue': '#0A84FF',
         'Onyx Black': '#000000',
+        'Phantom Black': '#1C1C1C',
+        'Phantom Silver': '#D1D1D6',
+        'Phantom Gray': '#8E8E93',
+        'Phantom White': '#F5F5F5',
         'Marble Gray': '#B4B4B8',
         'Cobalt Violet': '#8E7CC3',
         'Amber Yellow': '#FFD60A',
         'Jade Green': '#32D74B',
         'Sapphire Blue': '#0A84FF',
-        'Sandstone Orange': '#FF9F0A'
+        'Sandstone Orange': '#FF9F0A',
+        'Cloud Navy': '#2C3E50',
+        'Cloud White': '#F8F8F8',
+        'Lavender': '#E6E6FA',
+        'Mint': '#98FF98',
+        'Cream': '#FFFDD0',
+        'Burgundy': '#800020',
+        'Bronze': '#CD7F32',
+
+        // Generic/fallback colors
+        'Gray': '#808080',
+        'Dark Gray': '#404040',
+        'Light Gray': '#D3D3D3',
+        'Beige': '#F5F5DC',
+        'Brown': '#964B00',
+        'Navy': '#000080',
+        'Turquoise': '#40E0D0'
     };
 
     return colorMap[colorName];
@@ -2432,8 +2469,11 @@ function populateStep2() {
     colorOptions.innerHTML = '';
     model.colors.forEach(color => {
         const colorName = typeof color === 'string' ? color : color.name;
-        const colorHex = typeof color === 'string' ? '#CCCCCC' : (color.hex || '#CCCCCC');
-        
+        // CRITICAL FIX: Use getColorHex() to look up color, don't default to gray
+        const colorHex = typeof color === 'string'
+            ? (getColorHex(colorName) || '#CCCCCC')  // Look up hex for string colors
+            : (color.hex || getColorHex(colorName) || '#CCCCCC');  // Use hex or look up
+
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.dataset.value = colorName;
