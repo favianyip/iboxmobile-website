@@ -1673,16 +1673,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
+            // Strategy 5: Check adminManager.phones directly (Excel import fallback)
+            if (!foundModel && typeof adminManager !== 'undefined' && adminManager.phones) {
+                console.log('🔄 Strategy 5 - Checking adminManager.phones (Excel import)...');
+                const adminPhone = adminManager.phones.find(p =>
+                    p.brand === brandParam &&
+                    (p.model.toLowerCase() === normalizedModel.toLowerCase() ||
+                     p.model.toLowerCase().includes(normalizedModel.toLowerCase()) ||
+                     normalizedModel.toLowerCase().includes(p.model.toLowerCase()))
+                );
+                if (adminPhone) {
+                    foundModel = adminPhone.model;
+                    matchStrategy = 'adminManager.phones fallback (Excel import)';
+                    console.log('✅ Strategy 5 - Found in adminManager:', adminPhone.model);
+
+                    // Dynamically add to phoneDatabase if not present
+                    if (!phoneDatabase[brandParam][adminPhone.model]) {
+                        phoneDatabase[brandParam][adminPhone.model] = {
+                            basePrice: adminPhone.basePrice || 0,
+                            image: adminPhone.image || '',
+                            storage: {},
+                            colors: adminPhone.colors ? adminPhone.colors.map(c => ({ name: c, hex: getColorHex(c) || '#CCCCCC' })) : []
+                        };
+                        // Populate storage
+                        if (adminPhone.storages) {
+                            adminPhone.storages.forEach(s => {
+                                const price = adminPhone.storagePrices ? adminPhone.storagePrices[s] : 0;
+                                phoneDatabase[brandParam][adminPhone.model].storage[s] = price - (adminPhone.basePrice || 0);
+                            });
+                        }
+                        console.log('📦 Dynamically added to phoneDatabase:', adminPhone.model);
+                    }
+                }
+            }
+
             // Log failure details if no match found
             if (!foundModel) {
                 console.log('================================================================================');
                 console.log('❌ NO MATCH FOUND - SHOWING BRAND SELECTION');
                 console.log('================================================================================');
                 console.log('🔍 Searched for:', normalizedModel);
-                console.log('📋 Available models:');
+                console.log('📋 Available models in phoneDatabase:');
                 availableModels.forEach((model, index) => {
                     console.log(`   ${index + 1}. ${model}`);
                 });
+                if (typeof adminManager !== 'undefined' && adminManager.phones) {
+                    const brandPhones = adminManager.phones.filter(p => p.brand === brandParam);
+                    console.log('📋 Available models in adminManager.phones:');
+                    brandPhones.forEach((phone, index) => {
+                        console.log(`   ${index + 1}. ${phone.model}`);
+                    });
+                }
                 console.log('💡 TIP: Model name must match exactly (case-insensitive)');
                 console.log('💡 Common issue: Extra spaces, special characters, or typos');
                 console.log('================================================================================');
@@ -1690,6 +1731,30 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.error('❌ Brand not found in database:', brandParam);
             console.error('📋 Available brands:', Object.keys(phoneDatabase));
+
+            // Try to create brand if it exists in adminManager
+            if (typeof adminManager !== 'undefined' && adminManager.phones) {
+                const brandExists = adminManager.phones.some(p => p.brand === brandParam);
+                if (brandExists) {
+                    console.log('🔄 Creating brand in phoneDatabase from adminManager...');
+                    phoneDatabase[brandParam] = {};
+                    // Retry matching after brand creation
+                    const adminPhone = adminManager.phones.find(p =>
+                        p.brand === brandParam &&
+                        p.model.toLowerCase() === normalizedModel.toLowerCase()
+                    );
+                    if (adminPhone) {
+                        foundModel = adminPhone.model;
+                        matchStrategy = 'Brand created from adminManager';
+                        phoneDatabase[brandParam][adminPhone.model] = {
+                            basePrice: adminPhone.basePrice || 0,
+                            image: adminPhone.image || '',
+                            storage: {},
+                            colors: []
+                        };
+                    }
+                }
+            }
         }
 
         if (foundModel) {
