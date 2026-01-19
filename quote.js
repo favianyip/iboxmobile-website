@@ -8,7 +8,7 @@
 // ============================================================
 
 // CRITICAL: Version control for cache busting
-const QUOTE_JS_VERSION = '2.1.0'; // Increment this when making price-related changes
+const QUOTE_JS_VERSION = '2.2.0'; // Increment this when making price-related changes
 console.log(`📌 quote.js Version: ${QUOTE_JS_VERSION}`);
 
 // Manual cache clear function - users can call this from browser console

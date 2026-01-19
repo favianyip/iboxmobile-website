@@ -2681,10 +2681,13 @@ function savePhone() {
         });
     });
 
+    // CRITICAL FIX: Add cache busting timestamp to force browser reload
+    const imageWithCacheBust = imageUrl ? `${imageUrl}?t=${Date.now()}` : adminManager.getDefaultImage(brand);
+
     const phoneData = {
         brand,
         model,
-        image: imageUrl || adminManager.getDefaultImage(brand),
+        image: imageWithCacheBust,
         storages: checkedStorages,
         colors: colors, // Already an array from dropdown
         basePrice: basePrice, // Calculated from minimum storage price
@@ -3269,15 +3272,20 @@ async function saveHeroImage() {
             if (pathText) {
                 pathText.textContent = 'Processing: Removing background...';
             }
-            
+
             finalImagePath = await backgroundRemover.autoRemoveBackground(imagePath);
-            
+
             // Update URL input with processed image
             urlInput.value = finalImagePath;
         } catch (error) {
             console.error('Background removal failed:', error);
             // Continue with original URL
         }
+    }
+
+    // CRITICAL FIX: Add cache busting for non-base64 images
+    if (!finalImagePath.startsWith('data:') && finalImagePath.indexOf('?t=') === -1) {
+        finalImagePath = `${finalImagePath}?t=${Date.now()}`;
     }
 
     // Save settings
