@@ -274,6 +274,30 @@ function importExactPrices() {
     localStorage.setItem('ktmobile_phones', JSON.stringify(phones));
     localStorage.setItem('ktmobile_last_update', new Date().toISOString());
 
+    // =========================================================================
+    // SYNC CONDITION MODIFIERS (deductions for body, screen, battery, etc.)
+    // =========================================================================
+    const conditionModifiers = {
+        receipt: { yes: 30, no: 0 },
+        country: { local: 0, export: -50 },
+        deviceType: { 'new-sealed': 0, 'new-activated': -150 },
+        body: { A: 0, B: -20, C: -60, D: -120 },
+        screen: { A: 0, B: 0, C: -40, D: -150 },
+        battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 }
+    };
+    localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(conditionModifiers));
+    console.log('✅ Condition modifiers synced');
+
+    // =========================================================================
+    // SYNC BRAND SETTINGS
+    // =========================================================================
+    const brandSettings = {
+        Apple: { enabled: true, displayOrder: 1 },
+        Samsung: { enabled: true, displayOrder: 2 }
+    };
+    localStorage.setItem('ktmobile_brand_settings', JSON.stringify(brandSettings));
+    console.log('✅ Brand settings synced');
+
     console.log('\n' + '='.repeat(80));
     console.log('✅ EXACT PRICE IMPORT COMPLETE!');
     console.log(`📊 Updated: ${updated} phones`);
@@ -281,15 +305,18 @@ function importExactPrices() {
     console.log(`📦 Total: ${phones.length} phones in database`);
     console.log('='.repeat(80));
 
-    alert(`✅ Price Import Successful!\n\n` +
+    alert(`✅ Full Data Sync Complete!\n\n` +
           `📊 Source:\n` +
           `• Apple_USED_NEW_FULL_REVIEW.xlsx\n` +
           `• Samsung_USED_NEW_FULL_REVIEW.xlsx\n\n` +
           `📱 Updated: ${updated} phones\n` +
           `➕ Added: ${added} phones\n` +
           `📦 Total: ${phones.length} phones\n\n` +
-          `✨ USED & NEW prices loaded from Excel.\n` +
-          `✨ For NEW-only models, USED prices calculated at 65% of NEW.`);
+          `✅ Synced:\n` +
+          `• Phone prices (USED & NEW)\n` +
+          `• Storage options\n` +
+          `• Condition modifiers (body/screen/battery)\n` +
+          `• Brand settings`);
 
     // Refresh admin panel
     if (typeof renderPhones === 'function') renderPhones();
