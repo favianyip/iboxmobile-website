@@ -1472,6 +1472,7 @@ function loadConditionModifiers() {
     // Default modifiers (fallback values)
     const defaults = {
         receipt: { yes: 30, no: 0 },
+        activation: { sealed: 0, activated: -150 },  // New: Activation status for new phones
         country: { local: 0, export: -50 },
         deviceType: { 'new-sealed': 0, 'new-activated': -150 },
         body: { A: 0, B: -20, C: -60, D: -120 },
@@ -1633,6 +1634,27 @@ function updateConditionButtonsFromStorage() {
         });
     }
 
+    // NEW: Update activation status buttons (for new phones)
+    const activationContainer = document.getElementById('activation-options');
+    if (activationContainer) {
+        activationContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const activationStatus = btn.dataset.value; // 'sealed' or 'activated'
+            if (modifiers.activation && modifiers.activation[activationStatus] !== undefined) {
+                const value = modifiers.activation[activationStatus];
+                // Activation can be 0 (sealed) or negative (activated deduction)
+                if (value >= 0) {
+                    btn.dataset.bonus = value;
+                    btn.dataset.deduction = 0;
+                    console.log(`   Activation ${activationStatus}: +$${value}`);
+                } else {
+                    btn.dataset.bonus = 0;
+                    btn.dataset.deduction = Math.abs(value);
+                    console.log(`   Activation ${activationStatus}: -$${Math.abs(value)}`);
+                }
+            }
+        });
+    }
+
     console.log('✅ Condition buttons updated with admin modifier values');
 }
 
@@ -1647,6 +1669,7 @@ let quoteState = {
     storage: null,
     storageAdjustment: 0,
     color: null,
+    activationStatus: null, // 'sealed' or 'activated' (for new phones only)
     hasReceipt: null, // 'yes' or 'no'
     country: 'local',
     bodyCondition: null,
@@ -2484,9 +2507,12 @@ function populateStep2() {
         }, 100);
     }
     
+    // Activation status (new phones only)
+    initOptionButtons('activation-options', 'activationStatus');
+
     // Receipt options
     initOptionButtons('receipt-options', 'hasReceipt');
-    
+
     // Country options
     initOptionButtons('country-options', 'country');
     initOptionButtons('body-options', 'bodyCondition');
@@ -2506,6 +2532,7 @@ function populateStep2() {
 function initDeviceTypeSelection() {
     const deviceTypeContainer = document.getElementById('device-type-options');
     const usedConditionsContainer = document.getElementById('used-device-conditions');
+    const activationSection = document.getElementById('activation-section');
     const receiptSection = document.getElementById('receipt-section');
 
     if (!deviceTypeContainer) return;
@@ -2516,9 +2543,11 @@ function initDeviceTypeSelection() {
         console.log('⚙️ initDeviceTypeSelection: Initial deviceType =', quoteState.deviceType);
         if (quoteState.deviceType === 'used') {
             if (usedConditionsContainer) usedConditionsContainer.classList.add('visible');
+            if (activationSection) activationSection.style.display = 'none';
             if (receiptSection) receiptSection.style.display = 'none';
         } else {
             if (usedConditionsContainer) usedConditionsContainer.classList.remove('visible');
+            if (activationSection) activationSection.style.display = 'block';
             if (receiptSection) receiptSection.style.display = 'block';
         }
     } else {
@@ -2563,16 +2592,18 @@ function initDeviceTypeSelection() {
                 }
             }
             
-            // Show/hide receipt section (only for NEW phones - sealed/activated)
+            // Show/hide activation and receipt sections (only for NEW phones)
+            const activationSection = document.getElementById('activation-section');
             const receiptSection = document.getElementById('receipt-section');
-            if (receiptSection) {
-                if (quoteState.deviceType === 'used') {
-                    receiptSection.style.display = 'none';
-                } else {
-                    receiptSection.style.display = 'block';
-                }
+            if (quoteState.deviceType === 'used') {
+                if (activationSection) activationSection.style.display = 'none';
+                if (receiptSection) receiptSection.style.display = 'none';
+                quoteState.activationStatus = null; // Reset activation status for used devices
+            } else {
+                if (activationSection) activationSection.style.display = 'block';
+                if (receiptSection) receiptSection.style.display = 'block';
             }
-            
+
             // Update live price estimate
             updateLivePriceEstimate();
         });
@@ -2588,8 +2619,9 @@ function areRequiredFieldsSelected() {
     if (!quoteState.color) return false;
     if (!quoteState.country) return false;
     
-    // For NEW devices (sealed/activated), receipt is required
+    // For NEW devices (sealed/activated), activation status and receipt are required
     if (quoteState.deviceType !== 'used') {
+        if (!quoteState.activationStatus) return false;
         if (quoteState.hasReceipt === undefined || quoteState.hasReceipt === null) return false;
     }
     
@@ -2646,6 +2678,14 @@ function updateLivePriceEstimate() {
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
         }
 
+        // NEW: Activation status modifier (for new phones)
+        if (quoteState.activationStatus) {
+            const activationModifier = getModifierValue('activation', quoteState.activationStatus);
+            price += activationModifier; // Can be 0 (sealed) or negative (activated)
+            const sign = activationModifier >= 0 ? '+' : '';
+            console.log(`Activation status (${quoteState.activationStatus}): ${sign}$${activationModifier}`);
+        }
+
         // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers
         // Apply modifier for BOTH 'yes' and 'no' cases
         if (quoteState.hasReceipt) {
@@ -2665,6 +2705,14 @@ function updateLivePriceEstimate() {
             price = 0;
             console.error(`❌ NEW ACTIVATED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
             console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
+        }
+
+        // NEW: Activation status modifier (for new phones)
+        if (quoteState.activationStatus) {
+            const activationModifier = getModifierValue('activation', quoteState.activationStatus);
+            price += activationModifier; // Can be 0 (sealed) or negative (activated)
+            const sign = activationModifier >= 0 ? '+' : '';
+            console.log(`Activation status (${quoteState.activationStatus}): ${sign}$${activationModifier}`);
         }
 
         // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers
