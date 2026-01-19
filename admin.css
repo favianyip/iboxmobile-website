@@ -535,18 +535,21 @@ body.admin-page {
     background: var(--white);
     border-radius: 12px;
     overflow-x: auto;
+    overflow-y: visible;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     width: 100%;
     max-width: 100%;
     margin: 0;
     box-sizing: border-box;
-    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    display: block;
 }
 
 .price-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
+    min-width: 900px;
+    display: table;
 }
 
 .price-table thead {
@@ -1533,8 +1536,13 @@ input:checked + .slider:before {
         touch-action: manipulation;
     }
 
-    /* Main scrollable areas - allow vertical scroll */
-    .admin-content,
+    /* Main scrollable areas - allow vertical scroll BUT NOT restrict children */
+    .admin-content {
+        overflow-x: visible !important;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .admin-sidebar,
     .modal-body,
     .phones-grid {
@@ -1542,71 +1550,85 @@ input:checked + .slider:before {
         -webkit-overflow-scrolling: touch;
     }
 
-    /* TABLE CONTAINERS - Allow both horizontal AND vertical scrolling */
+    /* ============================================ */
+    /* CRITICAL: TABLE HORIZONTAL SCROLLING FIX */
+    /* ============================================ */
+
+    /* Table containers MUST scroll horizontally */
     .price-table-container,
     .users-table-container,
     .buy-prices-table-container,
-    .appointments-table-container,
-    #appointmentsTableBody,
-    table {
-        touch-action: pan-x pan-y;
-        -webkit-overflow-scrolling: touch;
-        overflow-x: auto !important;
-        overflow-y: auto !important;
-    }
-
-    /* Ensure table containers are properly scrollable */
-    .price-table-container,
-    .users-table-container,
-    .buy-prices-table-container {
-        position: relative;
-        width: 100%;
-        max-width: 100vw;
+    .appointments-table-container {
+        display: block !important;
+        width: 100% !important;
+        max-width: calc(100vw - 1.5rem) !important;
         overflow-x: scroll !important;
-        -webkit-overflow-scrolling: touch;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+        position: relative;
     }
 
-    /* Show scroll indicator shadow on tables */
-    .price-table-container::after,
-    .users-table-container::after,
-    .buy-prices-table-container::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 30px;
-        background: linear-gradient(to right, transparent, rgba(0,0,0,0.1));
-        pointer-events: none;
-        opacity: 0.5;
-    }
-
-    /* Appointments section scrollable wrapper */
-    #appointments-section .admin-section,
-    #buyback-prices-section,
-    #refurbish-prices-section {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    /* Tables inside containers */
+    /* Tables MUST be wider than container to enable scroll */
     .price-table,
-    .users-table,
-    table {
-        min-width: 600px; /* Ensure table is wide enough to need scrolling */
-        width: max-content;
+    .users-table {
+        min-width: 900px !important;
+        width: max-content !important;
+        display: table !important;
+        table-layout: auto !important;
+    }
+
+    /* Appointments table needs more width due to more columns */
+    .appointments-table-container .price-table {
+        min-width: 1200px !important;
+    }
+
+    /* Table cells - ensure content doesn't wrap too much */
+    .price-table th,
+    .price-table td {
+        white-space: nowrap;
+        padding: 0.75rem 1rem !important;
     }
 
     /* Scroll hint for users */
-    .price-table-container::before {
-        content: '← Swipe to see more →';
+    .price-table-container::before,
+    .appointments-table-container::before {
+        content: '👆 Swipe left/right to see all columns →';
         display: block;
         text-align: center;
-        font-size: 0.7rem;
-        color: #999;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-bottom: 1px solid #eee;
+        font-size: 0.75rem;
+        color: #666;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        border-bottom: 1px solid #f0e6cc;
+        font-weight: 500;
+    }
+
+    /* Visual indicator that more content exists */
+    .price-table-container::after,
+    .appointments-table-container::after {
+        content: '→';
+        position: absolute;
+        top: 50%;
+        right: 5px;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        color: rgba(201, 168, 76, 0.5);
+        pointer-events: none;
+        animation: pulseRight 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseRight {
+        0%, 100% { opacity: 0.3; transform: translateY(-50%) translateX(0); }
+        50% { opacity: 0.7; transform: translateY(-50%) translateX(5px); }
+    }
+
+    /* Section containers should not block child overflow */
+    #buyback-prices-section,
+    #appointments-section,
+    #refurbish-prices-section,
+    .admin-section {
+        overflow-x: visible !important;
     }
 
     /* Buttons require deliberate tap - prevent scroll-triggered clicks */
