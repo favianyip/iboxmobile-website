@@ -1466,6 +1466,29 @@
                             Use this for backup & reference. File saved as: ibox_mobile_backup_[date].xlsx
                         </p>
                     </div>
+
+                    <!-- Option 3: Cross-Device Sync -->
+                    <div class="import-option" style="padding: 1.5rem; border: 2px solid #9c27b0; border-radius: 8px; background: linear-gradient(135deg, rgba(156, 39, 176, 0.05) 0%, rgba(123, 31, 162, 0.05) 100%); grid-column: 1 / -1;">
+                        <h4 style="color: #9c27b0;">📱 Cross-Device Sync (Mobile ↔ Desktop)</h4>
+                        <p style="margin: 0.5rem 0; font-size: 0.875rem; color: var(--text-dark);">
+                            <strong>localStorage is device-specific!</strong> To sync changes between devices:<br>
+                            1. Make your changes on one device (mobile or desktop)<br>
+                            2. Export settings from that device<br>
+                            3. Import on the other device<br><br>
+                            This will sync ALL settings including condition modifiers, prices, and brands.
+                        </p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                            <button class="btn" onclick="exportSettingsForSync()" style="padding: 1rem; font-weight: 600; background: #9c27b0; border: none; color: white;">
+                                📤 Export Settings
+                            </button>
+                            <button class="btn" onclick="importSettingsForSync()" style="padding: 1rem; font-weight: 600; background: #673ab7; border: none; color: white;">
+                                📥 Import Settings
+                            </button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #9c27b0; margin-top: 0.75rem; font-weight: 600;">
+                            ✅ After importing, all your condition modifier changes will be applied!
+                        </p>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

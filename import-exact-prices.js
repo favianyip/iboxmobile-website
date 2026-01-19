@@ -276,27 +276,39 @@ function importExactPrices() {
 
     // =========================================================================
     // SYNC CONDITION MODIFIERS (deductions for body, screen, battery, etc.)
+    // IMPORTANT: Only set defaults if no existing modifiers (preserve admin changes!)
     // =========================================================================
-    const conditionModifiers = {
-        receipt: { yes: 30, no: 0 },
-        country: { local: 0, export: -50 },
-        deviceType: { 'new-sealed': 0, 'new-activated': -150 },
-        body: { A: 0, B: -20, C: -60, D: -120 },
-        screen: { A: 0, B: 0, C: -40, D: -150 },
-        battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 }
-    };
-    localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(conditionModifiers));
-    console.log('✅ Condition modifiers synced');
+    const existingModifiers = localStorage.getItem('ktmobile_condition_modifiers');
+    if (!existingModifiers) {
+        const defaultConditionModifiers = {
+            receipt: { yes: 30, no: 0 },
+            country: { local: 0, export: -50 },
+            deviceType: { 'new-sealed': 0, 'new-activated': -150 },
+            body: { A: 0, B: -20, C: -60, D: -120 },
+            screen: { A: 0, B: 0, C: -40, D: -150 },
+            battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 }
+        };
+        localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(defaultConditionModifiers));
+        console.log('✅ Condition modifiers initialized with defaults');
+    } else {
+        console.log('✅ Condition modifiers preserved (admin has custom settings)');
+    }
 
     // =========================================================================
     // SYNC BRAND SETTINGS
+    // IMPORTANT: Only set defaults if no existing settings (preserve admin changes!)
     // =========================================================================
-    const brandSettings = {
-        Apple: { enabled: true, displayOrder: 1 },
-        Samsung: { enabled: true, displayOrder: 2 }
-    };
-    localStorage.setItem('ktmobile_brand_settings', JSON.stringify(brandSettings));
-    console.log('✅ Brand settings synced');
+    const existingBrandSettings = localStorage.getItem('ktmobile_brand_settings');
+    if (!existingBrandSettings) {
+        const defaultBrandSettings = {
+            Apple: { enabled: true, displayOrder: 1 },
+            Samsung: { enabled: true, displayOrder: 2 }
+        };
+        localStorage.setItem('ktmobile_brand_settings', JSON.stringify(defaultBrandSettings));
+        console.log('✅ Brand settings initialized with defaults');
+    } else {
+        console.log('✅ Brand settings preserved (admin has custom settings)');
+    }
 
     console.log('\n' + '='.repeat(80));
     console.log('✅ EXACT PRICE IMPORT COMPLETE!');
@@ -739,6 +751,172 @@ function exportAllDataToExcel() {
           '• Brand settings');
 }
 
+// ============================================================================
+// CROSS-DEVICE SYNC - Export/Import Settings as JSON
+// This allows admin to sync settings between different devices
+// ============================================================================
+
+/**
+ * Export all settings to a JSON file for cross-device sync
+ * Admin can download this from one device and import on another
+ */
+function exportSettingsForSync() {
+    console.log('📤 Exporting settings for cross-device sync...');
+
+    const syncData = {
+        exportDate: new Date().toISOString(),
+        exportDevice: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop',
+        version: '2.0',
+        data: {
+            conditionModifiers: JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}'),
+            brandSettings: JSON.parse(localStorage.getItem('ktmobile_brand_settings') || '{}'),
+            phones: JSON.parse(localStorage.getItem('ktmobile_phones') || '[]')
+        }
+    };
+
+    // Create and download JSON file
+    const blob = new Blob([JSON.stringify(syncData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    const dateStr = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+    const filename = `ibox_sync_${dateStr}.json`;
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    console.log('✅ Settings exported for sync');
+    alert('✅ Settings Exported!\n\n' +
+          'Downloaded: ' + filename + '\n\n' +
+          '📱 To sync to another device:\n' +
+          '1. Transfer this file to the other device\n' +
+          '2. Open Admin Panel on that device\n' +
+          '3. Click "Import Settings" and select this file\n\n' +
+          'This will sync:\n' +
+          '• Condition modifiers\n' +
+          '• Brand settings\n' +
+          '• All phone prices');
+}
+
+/**
+ * Import settings from a JSON file for cross-device sync
+ * Admin can upload a file exported from another device
+ */
+function importSettingsForSync() {
+    // Create file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const syncData = JSON.parse(event.target.result);
+
+                // Validate format
+                if (!syncData.data || !syncData.version) {
+                    throw new Error('Invalid sync file format');
+                }
+
+                // Confirm import
+                const exportDate = new Date(syncData.exportDate).toLocaleString();
+                const exportDevice = syncData.exportDevice || 'Unknown';
+
+                if (!confirm(`Import settings from:\n\n` +
+                            `📅 Exported: ${exportDate}\n` +
+                            `📱 Device: ${exportDevice}\n\n` +
+                            `This will overwrite your current settings.\n` +
+                            `Continue?`)) {
+                    return;
+                }
+
+                // Import data
+                if (syncData.data.conditionModifiers) {
+                    localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(syncData.data.conditionModifiers));
+                    console.log('✅ Condition modifiers imported');
+                }
+
+                if (syncData.data.brandSettings) {
+                    localStorage.setItem('ktmobile_brand_settings', JSON.stringify(syncData.data.brandSettings));
+                    console.log('✅ Brand settings imported');
+                }
+
+                if (syncData.data.phones && syncData.data.phones.length > 0) {
+                    localStorage.setItem('ktmobile_phones', JSON.stringify(syncData.data.phones));
+                    console.log('✅ Phone data imported: ' + syncData.data.phones.length + ' phones');
+                }
+
+                localStorage.setItem('ktmobile_last_sync', new Date().toISOString());
+                localStorage.setItem('ktmobile_last_sync_source', exportDevice);
+
+                alert('✅ Settings Imported Successfully!\n\n' +
+                      'Imported from: ' + exportDevice + '\n\n' +
+                      '• Condition modifiers: ✅\n' +
+                      '• Brand settings: ✅\n' +
+                      '• Phones: ' + (syncData.data.phones ? syncData.data.phones.length : 0) + '\n\n' +
+                      'Page will reload to apply changes.');
+
+                location.reload();
+
+            } catch (error) {
+                console.error('Import error:', error);
+                alert('❌ Import Failed!\n\n' + error.message + '\n\nMake sure you selected a valid sync file.');
+            }
+        };
+
+        reader.readAsText(file);
+    };
+
+    input.click();
+}
+
+/**
+ * Update the default condition modifiers in memory (for this session)
+ * These will be used when new devices first load the page
+ */
+function publishConditionModifiersAsDefault() {
+    const currentModifiers = localStorage.getItem('ktmobile_condition_modifiers');
+    if (!currentModifiers) {
+        alert('No condition modifiers found to publish!');
+        return;
+    }
+
+    const modifiers = JSON.parse(currentModifiers);
+
+    // Show the user what they need to update in import-exact-prices.js
+    const codeSnippet = `const defaultConditionModifiers = ${JSON.stringify(modifiers, null, 4)};`;
+
+    console.log('📋 To make your condition modifiers the new default for all devices:');
+    console.log(codeSnippet);
+
+    // Copy to clipboard if possible
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(codeSnippet).then(() => {
+            alert('✅ Condition Modifiers Code Copied!\n\n' +
+                  'To make these the DEFAULT for all devices:\n\n' +
+                  '1. Open import-exact-prices.js\n' +
+                  '2. Find "defaultConditionModifiers"\n' +
+                  '3. Replace with the copied code\n' +
+                  '4. Save and deploy\n\n' +
+                  '(Code has been copied to clipboard)');
+        }).catch(() => {
+            alert('📋 Check browser console for the code to update default modifiers.');
+        });
+    } else {
+        alert('📋 Check browser console for the code to update default modifiers.\n\n' +
+              'Copy the code and update import-exact-prices.js to make these the new defaults.');
+    }
+}
+
 // Initialize version history on page load
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', function() {
@@ -756,9 +934,15 @@ if (typeof window !== 'undefined') {
     window.restoreVersion = restoreVersion;
     window.deleteVersion = deleteVersion;
     window.exportAllDataToExcel = exportAllDataToExcel;
+    // Cross-device sync functions
+    window.exportSettingsForSync = exportSettingsForSync;
+    window.importSettingsForSync = importSettingsForSync;
+    window.publishConditionModifiersAsDefault = publishConditionModifiersAsDefault;
 }
 
 console.log('✅ Clean Price Import Utility loaded');
 console.log('📝 Run importExactPrices() to import EXACT prices from Excel');
 console.log('🎨 Run updateAllPhoneColors() to update ALL phone colors to official factory colors');
+console.log('📤 Run exportSettingsForSync() to export settings for another device');
+console.log('📥 Run importSettingsForSync() to import settings from another device');
 console.log('⚠️  NO AUTO-CALCULATIONS - All prices are exact from source files');
