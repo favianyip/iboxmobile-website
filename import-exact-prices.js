@@ -286,7 +286,7 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
     }
 
     if (existingIndex >= 0) {
-        // Update existing - FORCE UPDATE COLORS with official colors
+        // Update existing - FORCE UPDATE COLORS AND BUYPRICES from Excel
         const existing = phones[existingIndex];
         phones[existingIndex] = {
             ...existing,
@@ -294,11 +294,11 @@ function updateOrAddPhone(phones, brand, model, storages, usedPrices, newPrices)
             id: existing.id,
             image: existing.image || getImagePath(brand, model),
             colors: officialColors.length > 0 ? officialColors : existing.colors || [], // Use official colors if available
-            buyPrices: existing.buyPrices || initialBuyPrices,
+            buyPrices: initialBuyPrices, // FORCE UPDATE buyPrices from Excel, don't preserve old values
             quantities: existing.quantities || initializeQuantities(storages),
             createdAt: existing.createdAt || new Date().toISOString()
         };
-        console.log(`✅ Updated: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length})`);
+        console.log(`✅ Updated: ${brand} ${model} (Used: ${Object.keys(usedPrices).length}, New: ${Object.keys(newPrices).length}, Colors: ${officialColors.length}, BuyPrices: ${Object.keys(initialBuyPrices).length})`);
         return 'updated';
     } else {
         // Add new
