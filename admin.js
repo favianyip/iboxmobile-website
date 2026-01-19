@@ -883,13 +883,20 @@ function initializeAdmin() {
         console.error('Error initializing hero image:', e);
     }
 
-    // Initialize phones from quote.js if available
-    if (typeof phoneDatabase !== 'undefined') {
+    // DISABLED: Don't auto-initialize from phoneDatabase on page load!
+    // REASON: Excel import data in localStorage is source of truth, NOT hardcoded phoneDatabase
+    // User requirement: "no hardcoded mock data is allowed must strictly follow backend prices"
+    // if (typeof phoneDatabase !== 'undefined') {
+    //     try {
+    //         if (adminManager.phones.length === 0) {
+    //             adminManager.phones = adminManager.initializePhones();
+    //             adminManager.savePhones();
+    //         } else {
+
+    // FIXED: Only migrate existing phones, don't initialize from phoneDatabase
+    if (adminManager.phones.length > 0) {
         try {
-            if (adminManager.phones.length === 0) {
-                adminManager.phones = adminManager.initializePhones();
-                adminManager.savePhones();
-            } else {
+            {
                 // Ensure buyPrices and quantities exist for existing phones
                 let needsSave = false;
                 adminManager.phones.forEach(phone => {
@@ -919,9 +926,10 @@ function initializeAdmin() {
                 }
             }
         } catch (e) {
-            console.error('Error initializing phones:', e);
+            console.error('Error migrating phone data:', e);
         }
     }
+    // End of phone migration block
 
     // Initialize sections - don't require phonesGrid to exist
     console.log('Initializing admin sections...');
@@ -1355,15 +1363,22 @@ function renderPhones() {
 
     // Start with all phones
     let phones = adminManager.phones || [];
-    
+
     console.log('Total phones:', phones.length);
-    
-    // If no phones, try to initialize
+
+    // CRITICAL FIX: If no phones in memory, reload from localStorage FIRST
+    // DO NOT call initializePhones() which falls back to hardcoded phoneDatabase!
+    // User imported data is in localStorage, not phoneDatabase
     if (phones.length === 0) {
-        console.log('No phones found, initializing...');
-        adminManager.phones = adminManager.initializePhones();
+        console.log('⚠️  No phones in memory, reloading from localStorage...');
+        adminManager.phones = adminManager.loadPhones(); // Load from localStorage, NOT initializePhones()!
         phones = adminManager.phones || [];
-        console.log('After initialization:', phones.length);
+        console.log(`✅ Reloaded ${phones.length} phones from localStorage`);
+
+        // Only if localStorage is ALSO empty, show error message
+        if (phones.length === 0) {
+            console.error('❌ No phones in localStorage! User needs to import data.');
+        }
     }
 
     // Filter by brand
@@ -1426,9 +1441,13 @@ function renderPhones() {
                 : 0;
             priceLabel = 'New Sealed';
         } else {
-            displayPrice = phone.storagePrices
-                ? Math.max(...Object.values(phone.storagePrices))
-                : (phone.basePrice || 0);
+            // USED device - use ONLY storagePrices from Excel import
+            // NO FALLBACK to basePrice - user requirement: "i rather theres error no price then given mock data inaccurately"
+            if (phone.storagePrices && Object.keys(phone.storagePrices).length > 0) {
+                displayPrice = Math.max(...Object.values(phone.storagePrices));
+            } else {
+                displayPrice = 0; // No price data - show $0 instead of hardcoded fallback
+            }
             priceLabel = 'Used';
         }
 
