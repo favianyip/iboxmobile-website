@@ -2136,6 +2136,12 @@ function showModels(brand) {
                 imageUrl = adminPhone.image;
             }
         }
+
+        // CRITICAL FIX: Add additional cache-busting at render time to force fresh image load
+        // This ensures browsers don't use cached versions when image is updated
+        if (!imageUrl.startsWith('data:') && imageUrl.indexOf('?t=') === -1) {
+            imageUrl = `${imageUrl}?t=${Date.now()}`;
+        }
         
         // Get base price from admin ONLY - NO hardcoded fallback!
         let basePrice = 0;

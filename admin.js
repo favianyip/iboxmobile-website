@@ -1479,6 +1479,13 @@ function renderPhones() {
             priceLabel = 'Used';
         }
 
+        // CRITICAL FIX: Add cache-busting to image display
+        let imageUrl = phone.image || 'images/phones/iphone-16-pro-max.jpg';
+        // If NOT base64 and doesn't already have timestamp, add one
+        if (!imageUrl.startsWith('data:') && imageUrl.indexOf('?t=') === -1) {
+            imageUrl = `${imageUrl}?t=${Date.now()}`;
+        }
+
         return `
         <div class="phone-card-admin">
             <div class="phone-card-header">
@@ -1492,7 +1499,7 @@ function renderPhones() {
                     ` : ''}
                 </div>
             </div>
-            <img src="${phone.image}" alt="${phone.model}" class="phone-card-image" onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
+            <img src="${imageUrl}" alt="${phone.model}" class="phone-card-image" onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
             <div class="phone-card-info">
                 <h4>${phone.model}</h4>
                 <p><strong>Storage:</strong> ${phone.storages.join(', ') || 'N/A'}</p>
@@ -2275,23 +2282,39 @@ function initializePhoneModal() {
     imageFileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            console.log('📷 Image file selected:', file.name, file.size, 'bytes');
+            console.log('📷 ========================================');
+            console.log('📷 IMAGE UPLOAD STARTED');
+            console.log('📷 ========================================');
+            console.log('   File name:', file.name);
+            console.log('   File size:', Math.round(file.size / 1024), 'KB');
+            console.log('   File type:', file.type);
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64Image = e.target.result;
+                const sizeKB = Math.round(base64Image.length / 1024);
+
+                console.log('✅ IMAGE CONVERTED TO BASE64');
+                console.log('   Base64 size:', sizeKB, 'KB');
+                console.log('   Base64 preview:', base64Image.substring(0, 100) + '...');
 
                 // Show preview
                 imagePreview.innerHTML = `<img src="${base64Image}" alt="Preview">`;
+                console.log('✅ Image preview displayed in modal');
 
                 // CRITICAL FIX: Auto-fill the image URL field with base64 data
                 // This ensures the image is saved when the form is submitted
                 const imageUrlInput = document.getElementById('phoneImageUrl');
                 if (imageUrlInput) {
                     imageUrlInput.value = base64Image;
-                    console.log('✅ Image data saved to form field (base64, ' + Math.round(base64Image.length / 1024) + ' KB)');
+                    console.log('✅ Image data saved to phoneImageUrl field');
+                    console.log('   Field value length:', imageUrlInput.value.length, 'characters');
+                    console.log('');
+                    console.log('📝 READY TO SAVE!');
+                    console.log('   Click "Save Phone" button to store this image to localStorage.');
+                    console.log('📷 ========================================');
                 } else {
-                    console.error('❌ phoneImageUrl field not found!');
+                    console.error('❌ CRITICAL ERROR: phoneImageUrl field not found!');
                 }
             };
             reader.onerror = function() {
@@ -2299,6 +2322,8 @@ function initializePhoneModal() {
                 alert('Error reading image file. Please try again.');
             };
             reader.readAsDataURL(file);
+        } else {
+            console.log('⚠️  No file selected');
         }
     });
 
@@ -2328,6 +2353,18 @@ function openPhoneModal(phoneId = null) {
         document.getElementById('phoneBrand').value = phone.brand;
         document.getElementById('phoneModel').value = phone.model;
         document.getElementById('phoneImageUrl').value = phone.image;
+
+        // CRITICAL FIX: Show image preview when editing
+        const imagePreview = document.getElementById('imagePreview');
+        if (imagePreview && phone.image) {
+            // Add cache-busting to preview image to force reload
+            let previewImageUrl = phone.image;
+            if (!previewImageUrl.startsWith('data:') && previewImageUrl.indexOf('?t=') === -1) {
+                previewImageUrl = `${previewImageUrl}?t=${Date.now()}`;
+            }
+            imagePreview.innerHTML = `<img src="${previewImageUrl}" alt="Current Image">`;
+            console.log('📷 Loaded existing image for editing:', phone.image.substring(0, 50) + '...');
+        }
 
         // Set selected colors in dropdown
         const colorSelect = document.getElementById('phoneColorsSelect');
