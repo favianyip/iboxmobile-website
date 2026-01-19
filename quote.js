@@ -1041,6 +1041,56 @@ const phoneDatabase = {
                 { name: 'Cream', hex: '#F5F5DC' },
                 { name: 'Lavender', hex: '#967BB6' }
             ]
+        },
+        'Galaxy A36 5G': {
+            basePrice: 214, // Calculated from NEW price (65% of $330)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '8/256GB': 0 },
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Ice Blue', hex: '#B0E0E6' },
+                { name: 'Lilac', hex: '#C8A2C8' }
+            ]
+        },
+        'Galaxy A26 5G': {
+            basePrice: 176, // Calculated from NEW price (65% of $270)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '8/256GB': 0 },
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Ice Blue', hex: '#B0E0E6' },
+                { name: 'Lilac', hex: '#C8A2C8' }
+            ]
+        },
+        'Galaxy A17 5G': {
+            basePrice: 130, // Calculated from NEW price (65% of $200)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '8/128GB': 0 },
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Ice Blue', hex: '#B0E0E6' },
+                { name: 'Lilac', hex: '#C8A2C8' }
+            ]
+        },
+        'Galaxy A17 4G': {
+            basePrice: 104, // Calculated from NEW price (65% of $160)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '8/128GB': 0 },
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Ice Blue', hex: '#B0E0E6' },
+                { name: 'Lilac', hex: '#C8A2C8' }
+            ]
+        },
+        'Galaxy S25 FE 5G': {
+            basePrice: 312, // Calculated from NEW price (65% of $480 for 128GB)
+            image: 'images/phones/galaxy-s24.jpg',
+            storage: { '128GB': 0, '256GB': 65, '512GB': 117 },
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Ice Blue', hex: '#B0E0E6' },
+                { name: 'Graphite', hex: '#54524F' }
+            ]
         }
     },
     Xiaomi: {
@@ -2267,13 +2317,13 @@ function updateLivePriceEstimate() {
             price = adminPhone.storagePrices[quoteState.storage];
             console.log(`✅ USED price from backend: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
-            // NO USED price available - show $0, DO NOT USE FALLBACK!
+            // NO USED price available - show $0
             price = 0;
-            console.error(`❌ USED ESTIMATE price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
-            console.error(`❌ adminPhone exists: ${!!adminPhone}`);
-            console.error(`❌ adminPhone.storagePrices exists: ${!!(adminPhone && adminPhone.storagePrices)}`);
-            console.error(`❌ Available storages: ${adminPhone && adminPhone.storagePrices ? Object.keys(adminPhone.storagePrices).join(', ') : 'none'}`);
-            console.error('❌ SOLUTION: Open admin.html → "Clear All & Fresh Import" to load Excel prices');
+            console.error(`❌ USED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
+            console.error(`   ℹ️  adminPhone exists: ${!!adminPhone}`);
+            console.error(`   ℹ️  adminPhone.storagePrices exists: ${!!(adminPhone && adminPhone.storagePrices)}`);
+            console.error(`   ℹ️  Available storages: ${adminPhone && adminPhone.storagePrices ? Object.keys(adminPhone.storagePrices).join(', ') : 'none'}`);
+            console.error('   📋 SOLUTION: Open admin.html → Import Prices → "Clear All & Fresh Import"');
         }
     }
 
@@ -2438,15 +2488,15 @@ function calculateQuote() {
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (Used)`, value: price, type: 'base' });
             console.log(`✅ Using USED price from backend: $${price}`);
         } else {
-            // NO USED price available - SHOW ERROR, DO NOT USE FALLBACK!
+            // NO USED price available - show error
             price = 0;
             breakdown.push({ label: `⚠️ ${quoteState.model} ${quoteState.storage} (Used) - Price Not Available`, value: 0, type: 'error' });
             console.error(`❌ USED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
-            console.error(`❌ adminPhone exists: ${!!adminPhone}`);
-            console.error(`❌ adminPhone.storagePrices exists: ${!!(adminPhone && adminPhone.storagePrices)}`);
-            console.error(`❌ Available storages: ${adminPhone && adminPhone.storagePrices ? Object.keys(adminPhone.storagePrices).join(', ') : 'none'}`);
-            console.error('❌ SOLUTION: Open admin.html → "Clear All & Fresh Import" to load Excel prices');
-            alert(`⚠️ USED Phone Pricing Not Available\n\nModel: ${quoteState.model}\nStorage: ${quoteState.storage}\n\nPlease import pricing data in the admin panel:\n\n1. Open admin.html\n2. Click "Clear All & Fresh Import"\n3. Refresh this page\n\nThis will load USED phone prices from Excel data.`);
+            console.error(`   ℹ️  adminPhone exists: ${!!adminPhone}`);
+            console.error(`   ℹ️  adminPhone.storagePrices exists: ${!!(adminPhone && adminPhone.storagePrices)}`);
+            console.error(`   ℹ️  Available storages: ${adminPhone && adminPhone.storagePrices ? Object.keys(adminPhone.storagePrices).join(', ') : 'none'}`);
+            console.error('   📋 SOLUTION: Open admin.html → Import Prices → "Clear All & Fresh Import"');
+            alert(`⚠️ USED Phone Pricing Not Available\n\nModel: ${quoteState.model}\nStorage: ${quoteState.storage}\n\nPlease import pricing data:\n\n1. Open admin.html\n2. Go to Import Prices\n3. Click "Clear All & Fresh Import"\n4. Refresh this page`);
         }
     }
 
