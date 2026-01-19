@@ -254,9 +254,12 @@ function loadAdminDataForCustomerPages() {
             const dbModel = phoneDatabase[brand][model];
 
             // Update image - ALWAYS use admin image if available
+            // CRITICAL FIX: Force cache busting to ensure browser reloads new images
             if (phone.image) {
-                dbModel.image = phone.image;
-                console.log(`   📷 Updated image for ${brand} ${model}: ${phone.image}`);
+                // Strip old timestamp if present and add fresh one
+                let cleanImagePath = phone.image.split('?')[0];
+                dbModel.image = `${cleanImagePath}?t=${Date.now()}`;
+                console.log(`   📷 Updated image for ${brand} ${model}: ${dbModel.image}`);
             }
 
             // Update basePrice

@@ -437,6 +437,36 @@
                         </div>
 
                         <div class="condition-group-admin">
+                            <h3>Activation Status Modifiers</h3>
+                            <div class="condition-modifiers-table">
+                                <table class="modifier-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Description</th>
+                                            <th>Price Modifier (SGD)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="activationModifierTable">
+                                        <tr>
+                                            <td><strong>Factory Sealed</strong></td>
+                                            <td>Never opened, original packaging intact</td>
+                                            <td><input type="number" class="modifier-input" value="0" data-condition="activation" data-grade="sealed"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('activation', 'sealed')">Save</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Activated</strong></td>
+                                            <td>Device has been opened and turned on</td>
+                                            <td><input type="number" class="modifier-input" value="-150" data-condition="activation" data-grade="activated"></td>
+                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('activation', 'activated')">Save</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="condition-group-admin">
                             <h3>Country of Purchase</h3>
                             <div class="condition-modifiers-table">
                                 <table class="modifier-table">
