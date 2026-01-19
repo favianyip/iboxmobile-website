@@ -1253,16 +1253,16 @@ window.selectBrand = function(brand) {
 };
 
 // ============================================================================
-// DISABLED: Do NOT sync localStorage to phoneDatabase
+// SYNC LOCALSTORAGE TO PHONEATABASE - CRITICAL FOR CUSTOMER PAGES
 // ============================================================================
-// REASON: We want phoneDatabase to be the SINGLE source of truth (backend prices)
-// NOT modified by localStorage. This ensures mobile and desktop show IDENTICAL prices.
+// UPDATED STRATEGY: localStorage (Excel import) is NOW the source of truth!
+// phoneDatabase has 69 hardcoded models (some old/test)
+// localStorage has 62 current models with EXACT Excel prices
+// This function syncs Excel prices to customer-facing pages
 //
-// console.log('🔄 Initializing admin data sync for customer pages...');
-// loadAdminDataForCustomerPages();  // DISABLED - causes mobile/desktop price differences
-// console.log('✅ Admin data sync completed');
-
-console.log('✅ phoneDatabase loaded with backend prices (NOT modified by localStorage)');
+console.log('🔄 Initializing admin data sync for customer pages...');
+loadAdminDataForCustomerPages();  // RE-ENABLED - syncs Excel prices to customer pages
+console.log('✅ Admin data sync completed');
 
 // Load condition modifiers from localStorage (set by admin panel)
 function loadConditionModifiers() {
