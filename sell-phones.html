@@ -477,6 +477,48 @@
     })();
     </script>
 
+    <script>
+        // CRITICAL: Define functions BEFORE HTML elements that use them
+        // These functions must be global for onclick handlers to work
+        let currentCondition = 'used';
+        let currentBrand = 'apple';
+
+        function switchCondition(condition) {
+            currentCondition = condition;
+
+            if (typeof updateToggleButtons === 'function') {
+                updateToggleButtons();
+            }
+
+            if (typeof renderModels === 'function') {
+                renderModels();
+            }
+
+            // Update URL without reload
+            try {
+                const url = new URL(window.location);
+                url.searchParams.set('type', condition);
+                window.history.pushState({}, '', url);
+            } catch (e) {
+                console.warn('Could not update URL:', e);
+            }
+        }
+
+        function showBrand(brand) {
+            currentBrand = brand;
+
+            document.querySelectorAll('.brand-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.brand-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(brand + '-models').classList.add('active');
+        }
+    </script>
+
     <!-- localStorage warning removed - now using ONLY phoneDatabase (backend prices) -->
 
     <div class="sell-page-header">
@@ -582,8 +624,8 @@
         // OLD HARDCODED DATA REMOVED - see git history if needed
         // ============================================================================
 
-        let currentCondition = 'used'; // Default to used
-        let currentBrand = 'apple'; // Default to Apple
+        // NOTE: currentCondition and currentBrand are now defined globally above
+        // (before HTML elements to support onclick handlers)
 
         // Initialize page
         function initPage() {
@@ -636,17 +678,9 @@
             }
         }
 
-        // Switch between Used/New
-        function switchCondition(condition) {
-            currentCondition = condition;
-            updateToggleButtons();
-            renderModels();
-
-            // Update URL without reload
-            const url = new URL(window.location);
-            url.searchParams.set('type', condition);
-            window.history.pushState({}, '', url);
-        }
+        // NOTE: switchCondition is now defined globally above
+        // (before HTML elements to support onclick handlers)
+        // This version adds more features
 
         // Update toggle button styles
         function updateToggleButtons() {
@@ -677,22 +711,8 @@
             }
         }
 
-        // Show brand
-        function showBrand(brand) {
-            currentBrand = brand;
-
-            // Update tab styles
-            document.querySelectorAll('.brand-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Show/hide brand sections
-            document.querySelectorAll('.brand-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(brand + '-models').classList.add('active');
-        }
+        // NOTE: showBrand is now defined globally above
+        // (before HTML elements to support onclick handlers)
 
         // Helper function to round price to nearest $10
         function roundToNearest10(price) {

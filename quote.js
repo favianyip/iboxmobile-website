@@ -2277,44 +2277,44 @@ function updateLivePriceEstimate() {
         }
     }
 
-        // Country deduction - Load from admin panel modifiers
-        if (quoteState.country === 'export') {
-            const countryDeduction = Math.abs(getModifierValue('country', 'export'));
-            price -= countryDeduction;
-            console.log(`Country deduction (export): -$${countryDeduction}`);
-        }
-
-        // Body condition - Load from admin panel modifiers
-        const bodyDeduction = Math.abs(getModifierValue('body', quoteState.bodyCondition));
-        if (bodyDeduction > 0) {
-            price -= bodyDeduction;
-            console.log(`Body condition (${quoteState.bodyCondition}): -$${bodyDeduction}`);
-        }
-
-        // Screen condition - Load from admin panel modifiers
-        const screenDeduction = Math.abs(getModifierValue('screen', quoteState.screenCondition));
-        if (screenDeduction > 0) {
-            price -= screenDeduction;
-            console.log(`Screen condition (${quoteState.screenCondition}): -$${screenDeduction}`);
-        }
-
-        // Battery health - Load from admin panel modifiers
-        const batteryDeduction = Math.abs(getModifierValue('battery', quoteState.batteryHealth));
-        if (batteryDeduction > 0) {
-            price -= batteryDeduction;
-            console.log(`Battery health (${quoteState.batteryHealth}): -$${batteryDeduction}`);
-        }
-
-        // Issues
-        quoteState.issues.forEach(issue => {
-            price -= issue.deduction;
-        });
-
-        // Accessories bonus (ONLY for USED devices)
-        quoteState.accessories.forEach(acc => {
-            price += acc.bonus;
-        });
+    // Deductions and bonuses apply to ALL device types
+    // Country deduction - Load from admin panel modifiers
+    if (quoteState.country === 'export') {
+        const countryDeduction = Math.abs(getModifierValue('country', 'export'));
+        price -= countryDeduction;
+        console.log(`Country deduction (export): -$${countryDeduction}`);
     }
+
+    // Body condition - Load from admin panel modifiers
+    const bodyDeduction = Math.abs(getModifierValue('body', quoteState.bodyCondition));
+    if (bodyDeduction > 0) {
+        price -= bodyDeduction;
+        console.log(`Body condition (${quoteState.bodyCondition}): -$${bodyDeduction}`);
+    }
+
+    // Screen condition - Load from admin panel modifiers
+    const screenDeduction = Math.abs(getModifierValue('screen', quoteState.screenCondition));
+    if (screenDeduction > 0) {
+        price -= screenDeduction;
+        console.log(`Screen condition (${quoteState.screenCondition}): -$${screenDeduction}`);
+    }
+
+    // Battery health - Load from admin panel modifiers
+    const batteryDeduction = Math.abs(getModifierValue('battery', quoteState.batteryHealth));
+    if (batteryDeduction > 0) {
+        price -= batteryDeduction;
+        console.log(`Battery health (${quoteState.batteryHealth}): -$${batteryDeduction}`);
+    }
+
+    // Issues
+    quoteState.issues.forEach(issue => {
+        price -= issue.deduction;
+    });
+
+    // Accessories bonus (ONLY for USED devices)
+    quoteState.accessories.forEach(acc => {
+        price += acc.bonus;
+    });
     
     // Ensure minimum price
     price = Math.max(50, price);
