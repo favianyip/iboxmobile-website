@@ -1364,7 +1364,13 @@ function renderPhones() {
     // Start with all phones
     let phones = adminManager.phones || [];
 
-    console.log('Total phones:', phones.length);
+    console.log('📱 renderPhones() - Total phones in memory:', phones.length);
+    console.log('🔍 Current filters:', {
+        brand: brandFilter || '(none)',
+        model: modelFilter || '(none)',
+        search: searchQuery || '(none)',
+        priceType: currentBuybackType || 'used'
+    });
 
     // CRITICAL FIX: If no phones in memory, reload from localStorage FIRST
     // DO NOT call initializePhones() which falls back to hardcoded phoneDatabase!
@@ -1381,36 +1387,58 @@ function renderPhones() {
         }
     }
 
+    const originalCount = phones.length;
+
     // Filter by brand
     if (brandFilter) {
+        const beforeFilter = phones.length;
         phones = phones.filter(p => p.brand === brandFilter);
+        console.log(`🔍 Brand filter "${brandFilter}": ${beforeFilter} → ${phones.length} phones`);
     }
 
     // Filter by model
     if (modelFilter) {
+        const beforeFilter = phones.length;
         phones = phones.filter(p => p.model === modelFilter);
+        console.log(`🔍 Model filter "${modelFilter}": ${beforeFilter} → ${phones.length} phones`);
     }
 
     // Filter by search query
     if (searchQuery) {
+        const beforeFilter = phones.length;
         const lowerQuery = searchQuery.toLowerCase();
         phones = phones.filter(p =>
             p.model.toLowerCase().includes(lowerQuery) ||
             p.brand.toLowerCase().includes(lowerQuery)
         );
+        console.log(`🔍 Search filter "${searchQuery}": ${beforeFilter} → ${phones.length} phones`);
     }
 
     // FILTER: If viewing NEW phone prices, hide phones that don't have NEW prices
     if (currentBuybackType === 'new') {
+        const beforeFilter = phones.length;
+        const phonesWithoutNewPrices = [];
+
         phones = phones.filter(p => {
             // Check if phone has at least one NEW price greater than 0
             if (p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0) {
                 const hasNonZeroPrice = Object.values(p.newPhonePrices).some(price => price > 0);
+                if (!hasNonZeroPrice) {
+                    phonesWithoutNewPrices.push(`${p.brand} ${p.model}`);
+                }
                 return hasNonZeroPrice;
             }
+            phonesWithoutNewPrices.push(`${p.brand} ${p.model}`);
             return false; // No NEW prices, hide this phone
         });
+
+        console.log(`🔍 NEW price filter: ${beforeFilter} → ${phones.length} phones`);
+        if (phonesWithoutNewPrices.length > 0) {
+            console.log('⚠️  Hidden (no NEW prices):', phonesWithoutNewPrices.join(', '));
+        }
     }
+
+    console.log(`📊 FINAL: Showing ${phones.length} of ${originalCount} total phones`);
 
     if (phones.length === 0) {
         grid.innerHTML = `
@@ -1451,6 +1479,13 @@ function renderPhones() {
             priceLabel = 'Used';
         }
 
+        // CRITICAL FIX: Add cache-busting to image display
+        let imageUrl = phone.image || 'images/phones/iphone-16-pro-max.jpg';
+        // If NOT base64 and doesn't already have timestamp, add one
+        if (!imageUrl.startsWith('data:') && imageUrl.indexOf('?t=') === -1) {
+            imageUrl = `${imageUrl}?t=${Date.now()}`;
+        }
+
         return `
         <div class="phone-card-admin">
             <div class="phone-card-header">
@@ -1464,7 +1499,7 @@ function renderPhones() {
                     ` : ''}
                 </div>
             </div>
-            <img src="${phone.image}" alt="${phone.model}" class="phone-card-image" onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
+            <img src="${imageUrl}" alt="${phone.model}" class="phone-card-image" onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
             <div class="phone-card-info">
                 <h4>${phone.model}</h4>
                 <p><strong>Storage:</strong> ${phone.storages.join(', ') || 'N/A'}</p>
@@ -1873,26 +1908,33 @@ function saveConditionModifier(conditionType, grade) {
 
 function renderPriceTable() {
     console.log('=== renderPriceTable called ===');
-    
+
     // Try both possible IDs for backward compatibility
     const tbody = document.getElementById('buybackPriceTableBody') || document.getElementById('priceTableBody');
     const brandFilter = document.getElementById('buybackPriceBrandFilter')?.value || document.getElementById('priceBrandFilter')?.value || '';
-    
+
     if (!tbody) {
         console.error('Price table body not found! Looking for: buybackPriceTableBody or priceTableBody');
         return;
     }
-    
-    // Filter to Apple and Samsung only
+
+    // REMOVED FILTER: Don't filter to Apple/Samsung only - show ALL phones
     let phones = adminManager.phones || [];
-    phones = phones.filter(p => p.brand === 'Apple' || p.brand === 'Samsung');
+    const allPhonesCount = phones.length;
+    console.log('📱 Total phones in localStorage:', allPhonesCount);
+
+    // List all brands available
+    const allBrands = [...new Set(phones.map(p => p.brand))];
+    console.log('📦 Brands in database:', allBrands.join(', '));
 
     // Filter by brand if selected
     if (brandFilter) {
+        const beforeFilter = phones.length;
         phones = phones.filter(p => p.brand === brandFilter);
+        console.log(`🔍 Brand filter "${brandFilter}": ${beforeFilter} → ${phones.length} phones`);
     }
 
-    console.log('Phones to display:', phones.length);
+    console.log('📊 Phones to display in table:', phones.length);
 
     if (phones.length === 0) {
         tbody.innerHTML = `
@@ -2240,23 +2282,39 @@ function initializePhoneModal() {
     imageFileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            console.log('📷 Image file selected:', file.name, file.size, 'bytes');
+            console.log('📷 ========================================');
+            console.log('📷 IMAGE UPLOAD STARTED');
+            console.log('📷 ========================================');
+            console.log('   File name:', file.name);
+            console.log('   File size:', Math.round(file.size / 1024), 'KB');
+            console.log('   File type:', file.type);
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64Image = e.target.result;
+                const sizeKB = Math.round(base64Image.length / 1024);
+
+                console.log('✅ IMAGE CONVERTED TO BASE64');
+                console.log('   Base64 size:', sizeKB, 'KB');
+                console.log('   Base64 preview:', base64Image.substring(0, 100) + '...');
 
                 // Show preview
                 imagePreview.innerHTML = `<img src="${base64Image}" alt="Preview">`;
+                console.log('✅ Image preview displayed in modal');
 
                 // CRITICAL FIX: Auto-fill the image URL field with base64 data
                 // This ensures the image is saved when the form is submitted
                 const imageUrlInput = document.getElementById('phoneImageUrl');
                 if (imageUrlInput) {
                     imageUrlInput.value = base64Image;
-                    console.log('✅ Image data saved to form field (base64, ' + Math.round(base64Image.length / 1024) + ' KB)');
+                    console.log('✅ Image data saved to phoneImageUrl field');
+                    console.log('   Field value length:', imageUrlInput.value.length, 'characters');
+                    console.log('');
+                    console.log('📝 READY TO SAVE!');
+                    console.log('   Click "Save Phone" button to store this image to localStorage.');
+                    console.log('📷 ========================================');
                 } else {
-                    console.error('❌ phoneImageUrl field not found!');
+                    console.error('❌ CRITICAL ERROR: phoneImageUrl field not found!');
                 }
             };
             reader.onerror = function() {
@@ -2264,6 +2322,8 @@ function initializePhoneModal() {
                 alert('Error reading image file. Please try again.');
             };
             reader.readAsDataURL(file);
+        } else {
+            console.log('⚠️  No file selected');
         }
     });
 
@@ -2293,6 +2353,18 @@ function openPhoneModal(phoneId = null) {
         document.getElementById('phoneBrand').value = phone.brand;
         document.getElementById('phoneModel').value = phone.model;
         document.getElementById('phoneImageUrl').value = phone.image;
+
+        // CRITICAL FIX: Show image preview when editing
+        const imagePreview = document.getElementById('imagePreview');
+        if (imagePreview && phone.image) {
+            // Add cache-busting to preview image to force reload
+            let previewImageUrl = phone.image;
+            if (!previewImageUrl.startsWith('data:') && previewImageUrl.indexOf('?t=') === -1) {
+                previewImageUrl = `${previewImageUrl}?t=${Date.now()}`;
+            }
+            imagePreview.innerHTML = `<img src="${previewImageUrl}" alt="Current Image">`;
+            console.log('📷 Loaded existing image for editing:', phone.image.substring(0, 50) + '...');
+        }
 
         // Set selected colors in dropdown
         const colorSelect = document.getElementById('phoneColorsSelect');
@@ -2710,31 +2782,60 @@ function savePhone() {
         phoneData.createdAt = new Date().toISOString();
     }
 
+    console.log('💾 SAVING PHONE TO LOCALSTORAGE...');
+    console.log('Phone Data:', {
+        brand: phoneData.brand,
+        model: phoneData.model,
+        storages: phoneData.storages,
+        usedPrices: phoneData.storagePrices,
+        newPrices: phoneData.newPhonePrices
+    });
+
     if (adminManager.currentEditingPhone) {
+        console.log('📝 UPDATING existing phone ID:', adminManager.currentEditingPhone);
         adminManager.updatePhone(adminManager.currentEditingPhone, phoneData);
 
         // Set a flag to indicate phone data was updated (for customer pages to detect changes)
         localStorage.setItem('ktmobile_last_update', new Date().toISOString());
 
+        // Verify save
+        const savedPhones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+        console.log('✅ SAVED! Total phones in localStorage:', savedPhones.length);
+        console.log('✅ Updated phone:', savedPhones.find(p => p.id === adminManager.currentEditingPhone));
+
         alert('Phone updated successfully! Customer pages will show the new image on next load.');
     } else {
-        adminManager.addPhone(phoneData);
+        console.log('➕ ADDING new phone...');
+        const newPhone = adminManager.addPhone(phoneData);
 
         // Set a flag to indicate phone data was updated
         localStorage.setItem('ktmobile_last_update', new Date().toISOString());
 
-        alert('Phone added successfully!');
+        // Verify save
+        const savedPhones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+        console.log('✅ SAVED! Total phones in localStorage:', savedPhones.length);
+        console.log('✅ New phone added:', newPhone);
+        console.log('🔍 Can find in localStorage?', savedPhones.some(p => p.model === phoneData.model && p.brand === phoneData.brand));
+
+        alert(`Phone added successfully!\n\nBrand: ${phoneData.brand}\nModel: ${phoneData.model}\nTotal phones: ${savedPhones.length}\n\nCheck console (F12) for detailed logs.`);
     }
 
     closePhoneModal();
-    
+
+    // Force reload from localStorage before rendering
+    console.log('🔄 Reloading phones from localStorage before render...');
+    adminManager.phones = adminManager.loadPhones();
+    console.log('📱 Loaded phones:', adminManager.phones.length);
+
     // Update model dropdown if brand filter is active
     const brandFilter = document.getElementById('brandFilter');
     if (brandFilter) {
         updateModelDropdown(brandFilter.value);
     }
-    
+
+    console.log('🖼️  Rendering phones grid...');
     renderPhones();
+    console.log('📊 Rendering price table...');
     renderPriceTable();
 }
 
