@@ -728,6 +728,22 @@ body.admin-page {
     overflow-x: auto;
 }
 
+/* Appointments table container - enable scrolling */
+.appointments-table-container {
+    background: var(--white);
+    border-radius: 12px;
+    overflow-x: auto;
+    overflow-y: visible;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+.appointments-table-container .price-table {
+    min-width: 1200px; /* Ensure table needs horizontal scroll on mobile */
+}
+
 .condition-badge {
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
@@ -1512,14 +1528,85 @@ input:checked + .slider:before {
 /* Fix for accidental button selection while scrolling on mobile */
 
 @media (max-width: 768px) {
-    /* Make scrollable areas scroll-only, prevent click passthrough */
+    /* IMPORTANT: Allow zoom on mobile admin panel */
+    html {
+        touch-action: manipulation;
+    }
+
+    /* Main scrollable areas - allow vertical scroll */
     .admin-content,
     .admin-sidebar,
     .modal-body,
-    .phones-grid,
-    .price-table-container {
+    .phones-grid {
         touch-action: pan-y;
         -webkit-overflow-scrolling: touch;
+    }
+
+    /* TABLE CONTAINERS - Allow both horizontal AND vertical scrolling */
+    .price-table-container,
+    .users-table-container,
+    .buy-prices-table-container,
+    .appointments-table-container,
+    #appointmentsTableBody,
+    table {
+        touch-action: pan-x pan-y;
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+    }
+
+    /* Ensure table containers are properly scrollable */
+    .price-table-container,
+    .users-table-container,
+    .buy-prices-table-container {
+        position: relative;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: scroll !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Show scroll indicator shadow on tables */
+    .price-table-container::after,
+    .users-table-container::after,
+    .buy-prices-table-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 30px;
+        background: linear-gradient(to right, transparent, rgba(0,0,0,0.1));
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    /* Appointments section scrollable wrapper */
+    #appointments-section .admin-section,
+    #buyback-prices-section,
+    #refurbish-prices-section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Tables inside containers */
+    .price-table,
+    .users-table,
+    table {
+        min-width: 600px; /* Ensure table is wide enough to need scrolling */
+        width: max-content;
+    }
+
+    /* Scroll hint for users */
+    .price-table-container::before {
+        content: '← Swipe to see more →';
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        color: #999;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
     }
 
     /* Buttons require deliberate tap - prevent scroll-triggered clicks */
@@ -1565,7 +1652,7 @@ input:checked + .slider:before {
         min-height: 100px;
     }
 
-    /* Prevent text selection during scroll */
+    /* Prevent text selection during scroll - but NOT in tables */
     .admin-main {
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -1573,10 +1660,13 @@ input:checked + .slider:before {
         user-select: none;
     }
 
-    /* Allow text selection in input fields */
+    /* Allow text selection in input fields and tables */
     .admin-main input,
     .admin-main textarea,
-    .admin-main select {
+    .admin-main select,
+    .admin-main table,
+    .admin-main td,
+    .admin-main th {
         -webkit-user-select: text;
         -moz-user-select: text;
         -ms-user-select: text;
