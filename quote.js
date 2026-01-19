@@ -2798,13 +2798,14 @@ function calculateQuote() {
             alert(`⚠️ NEW Phone Pricing Not Available\n\nPlease import pricing data in the admin panel:\n\n1. Open admin.html\n2. Go to Buyback Management\n3. Click "Import Prices"\n4. Click "Clear All & Fresh Import"\n\nThis will load NEW phone prices from the Excel data.`);
         }
     } else if (quoteState.deviceType === 'new-activated') {
-        // Use ONLY exact NEW SEALED price - $150 - NO CALCULATIONS
+        // Use NEW SEALED price minus activated deduction FROM ADMIN MODIFIERS (no hardcoded values)
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             const sealedPrice = adminPhone.newPhonePrices[quoteState.storage];
-            price = sealedPrice - 150;
+            const activatedDeduction = Math.abs(getModifierValue('deviceType', 'new-activated'));
+            price = sealedPrice - activatedDeduction;
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (New Sealed)`, value: sealedPrice, type: 'base' });
-            breakdown.push({ label: 'Activated Deduction', value: -150, type: 'deduction' });
-            console.log(`✅ Using NEW ACTIVATED price: $${sealedPrice} - $150 = $${price}`);
+            breakdown.push({ label: 'Activated Deduction', value: -activatedDeduction, type: 'deduction' });
+            console.log(`✅ Using NEW ACTIVATED price: $${sealedPrice} - $${activatedDeduction} = $${price}`);
         } else {
             // NO NEW price available - show error instead of calculating
             price = 0;

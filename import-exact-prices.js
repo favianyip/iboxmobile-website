@@ -533,11 +533,11 @@ function updateAllPhoneColors() {
 function saveAllConditionModifiersAndSync() {
     console.log('💾 Saving all condition modifiers...');
 
-    // Collect all modifier values from the DOM
+    // Collect ALL modifier values from the DOM - NO hardcoded defaults
     const modifiers = {
-        receipt: { yes: 30, no: 0 },
-        country: { local: 0, export: -50 },
-        deviceType: { 'new-sealed': 0, 'new-activated': -150 },
+        receipt: {},
+        country: {},
+        deviceType: {},
         body: {},
         screen: {},
         battery: {},
@@ -545,7 +545,7 @@ function saveAllConditionModifiersAndSync() {
         accessory: {}
     };
 
-    // Get all modifier inputs
+    // Get all modifier inputs from DOM and save their values
     const inputs = document.querySelectorAll('.modifier-input');
     inputs.forEach(input => {
         const condition = input.dataset.condition;
@@ -557,6 +557,8 @@ function saveAllConditionModifiersAndSync() {
             modifiers[condition][grade] = value;
         }
     });
+
+    console.log('📊 Collected modifiers from DOM:', modifiers);
 
     // Save to localStorage
     localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(modifiers));
