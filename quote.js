@@ -22,41 +22,31 @@ window.clearPriceCache = function() {
     alert('Price cache cleared! Please:\n1. Go to admin panel\n2. Click "Import Exact Prices"\n3. Refresh this page');
 };
 
-// Dynamic price loading from price_data.json
-let dynamicPrices = null;
-let directPriceLookup = null; // DIRECT PRICES - no calculations!
+// ============================================================================
+// DISABLED: OLD MOCK DATA FILES - DO NOT USE!
+// ============================================================================
+// REASON: price_data.json and direct_prices.json contain OLD MOCK DATA
+// We now use ONLY localStorage (Excel import) for pricing
+// NO fallbacks, NO mock data, NO old JSON files!
+//
+// OLD CODE DISABLED BELOW:
+// let dynamicPrices = null;
+// let directPriceLookup = null;
+// async function loadDynamicPrices() { ... }
+//
+// If prices are missing, show ERROR instead of using mock data!
+// User preference: "i rather theres error no price then given mock data inaccurately"
+// ============================================================================
+
+let dynamicPrices = null; // DISABLED - not used
+let directPriceLookup = null; // DISABLED - not used
 
 async function loadDynamicPrices() {
-    try {
-        const response = await fetch('price_data.json');
-        if (response.ok) {
-            const data = await response.json();
-            dynamicPrices = data.prices;
-            console.log('Dynamic prices loaded from price_data.json');
-            
-            // Update phoneDatabase with dynamic prices
-            if (dynamicPrices) {
-                updatePhoneDatabaseWithDynamicPrices();
-            }
-        }
-    } catch (error) {
-        console.log('Using default prices (price_data.json not found)');
-    }
-    
-    // Load direct price lookup - ACTUAL PRICES, no calculations!
-    try {
-        let response = await fetch('direct_prices.json');
-        if (!response.ok) {
-            // Try alternate location
-            response = await fetch('price-scraper/direct_prices.json');
-        }
-        if (response.ok) {
-            directPriceLookup = await response.json();
-            console.log('Direct price lookup loaded - using ACTUAL prices');
-        }
-    } catch (error) {
-        console.log('Direct prices not found, using calculated prices as fallback');
-    }
+    // DISABLED - Do NOT load old mock data files!
+    console.log('⚠️  OLD price_data.json and direct_prices.json are DISABLED');
+    console.log('✅ Using ONLY localStorage (Excel import) for all pricing');
+    console.log('💡 If prices missing → admin.html → "Clear All & Fresh Import"');
+    return; // Exit immediately - don't load old files
 }
 
 // DIRECT PRICE LOOKUP - Returns actual price, no calculation!
@@ -1673,14 +1663,17 @@ function showModels(brand) {
             }
         }
         
-        // Get base price from admin if available
-        let basePrice = model.basePrice || 0;
+        // Get base price from admin ONLY - NO hardcoded fallback!
+        let basePrice = 0;
+        let hasPriceData = false;
         if (typeof adminManager !== 'undefined' && adminManager && adminManager.phones) {
             const adminPhone = adminManager.phones.find(p => p.brand === brand && p.model === modelName);
             if (adminPhone && adminPhone.basePrice !== undefined) {
                 basePrice = adminPhone.basePrice;
+                hasPriceData = true;
             }
         }
+        // NO fallback to model.basePrice - user preference: "i rather theres error no price then given mock data inaccurately"
         
         // Create card with inline onclick (works reliably)
         const card = document.createElement('button');
@@ -1856,18 +1849,30 @@ function populateStep2() {
             if (adminPhone.storages && adminPhone.storages.length > 0) {
                 // Convert admin storagePrices to storage modifiers
                 storageObj = {};
-                const basePrice = adminPhone.basePrice !== undefined ? adminPhone.basePrice : model.basePrice;
-                
+
+                // Use ONLY admin data for basePrice - NO hardcoded fallback!
+                // If basePrice not available, use the smallest storage price as baseline
+                let basePrice = 0;
+                if (adminPhone.basePrice !== undefined) {
+                    basePrice = adminPhone.basePrice;
+                } else if (adminPhone.storagePrices) {
+                    // Use smallest storage price as baseline (usually 128GB)
+                    const storagePrices = Object.values(adminPhone.storagePrices).filter(p => p !== undefined);
+                    if (storagePrices.length > 0) {
+                        basePrice = Math.min(...storagePrices);
+                        console.log(`ℹ️  Using smallest storage price as baseline: $${basePrice}`);
+                    }
+                }
+                // NO fallback to model.basePrice!
+
                 adminPhone.storages.forEach(storage => {
                     if (adminPhone.storagePrices && adminPhone.storagePrices[storage] !== undefined) {
-                        // Calculate modifier from absolute price
+                        // Calculate modifier from absolute price using ONLY admin data
                         storageObj[storage] = adminPhone.storagePrices[storage] - basePrice;
-                    } else if (model.storage && model.storage[storage] !== undefined) {
-                        // Use original modifier if admin doesn't have this storage
-                        storageObj[storage] = model.storage[storage];
                     } else {
-                        // Default modifier
+                        // No admin price for this storage - use 0 modifier
                         storageObj[storage] = 0;
+                        console.warn(`⚠️  No admin price for ${storage}, using 0 modifier`);
                     }
                 });
             }
@@ -1894,9 +1899,10 @@ function populateStep2() {
             }
             
             // Merge admin data with database model
+            // Use ONLY admin basePrice - NO hardcoded fallback!
             model = {
                 ...model,
-                basePrice: adminPhone.basePrice !== undefined ? adminPhone.basePrice : model.basePrice,
+                basePrice: adminPhone.basePrice !== undefined ? adminPhone.basePrice : 0,
                 image: adminPhone.image || model.image,
                 storage: storageObj,
                 colors: colorsArray
@@ -2255,16 +2261,21 @@ function updateLivePriceEstimate() {
             console.log(`Receipt bonus: +$${receiptBonus}`);
         }
     } else {
-        // USED device - use exact storage-specific USED price
+        // USED device - use ONLY exact storage-specific USED price from admin data
+        // NO FALLBACKS - better to show $0 than wrong price!
         if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
             price = adminPhone.storagePrices[quoteState.storage];
+            console.log(`✅ USED price from backend: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
-            // Fallback to phoneDatabase basePrice + storage modifier
-            price = model.basePrice;
-            if (quoteState.storage && model.storage[quoteState.storage] !== undefined) {
-                price += model.storage[quoteState.storage];
-            }
+            // NO USED price available - show $0, DO NOT USE FALLBACK!
+            price = 0;
+            console.error(`❌ USED ESTIMATE price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
+            console.error(`❌ adminPhone exists: ${!!adminPhone}`);
+            console.error(`❌ adminPhone.storagePrices exists: ${!!(adminPhone && adminPhone.storagePrices)}`);
+            console.error(`❌ Available storages: ${adminPhone && adminPhone.storagePrices ? Object.keys(adminPhone.storagePrices).join(', ') : 'none'}`);
+            console.error('❌ SOLUTION: Open admin.html → "Clear All & Fresh Import" to load Excel prices');
         }
+    }
 
         // Country deduction - Load from admin panel modifiers
         if (quoteState.country === 'export') {
@@ -2421,13 +2432,21 @@ function calculateQuote() {
         }
     } else {
         // USED device - use ONLY exact storage-specific used price from admin data
+        // NO FALLBACKS - better to show error than wrong price!
         if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
             price = adminPhone.storagePrices[quoteState.storage];
             breakdown.push({ label: `${quoteState.model} ${quoteState.storage} (Used)`, value: price, type: 'base' });
+            console.log(`✅ Using USED price from backend: $${price}`);
         } else {
-            // Fallback to basePrice for USED only (for backwards compatibility)
-            price = adminPhone?.basePrice || model.basePrice;
-            breakdown.push({ label: `${quoteState.model} Base Price (Used)`, value: price, type: 'base' });
+            // NO USED price available - SHOW ERROR, DO NOT USE FALLBACK!
+            price = 0;
+            breakdown.push({ label: `⚠️ ${quoteState.model} ${quoteState.storage} (Used) - Price Not Available`, value: 0, type: 'error' });
+            console.error(`❌ USED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
+            console.error(`❌ adminPhone exists: ${!!adminPhone}`);
+            console.error(`❌ adminPhone.storagePrices exists: ${!!(adminPhone && adminPhone.storagePrices)}`);
+            console.error(`❌ Available storages: ${adminPhone && adminPhone.storagePrices ? Object.keys(adminPhone.storagePrices).join(', ') : 'none'}`);
+            console.error('❌ SOLUTION: Open admin.html → "Clear All & Fresh Import" to load Excel prices');
+            alert(`⚠️ USED Phone Pricing Not Available\n\nModel: ${quoteState.model}\nStorage: ${quoteState.storage}\n\nPlease import pricing data in the admin panel:\n\n1. Open admin.html\n2. Click "Clear All & Fresh Import"\n3. Refresh this page\n\nThis will load USED phone prices from Excel data.`);
         }
     }
 
