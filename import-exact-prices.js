@@ -1,16 +1,16 @@
 /**
- * CLEAN PRICE IMPORT - NO AUTO-CALCULATIONS
+ * EXACT PRICE IMPORT - REGENERATED FROM EXCEL FILES
  *
  * Source: Apple_USED_NEW_FULL_REVIEW.xlsx and Samsung_USED_NEW_FULL_REVIEW.xlsx
+ * Generated: 2026-01-19
  *
  * CRITICAL: This script uses EXACT prices from Excel files.
  * NO multipliers, NO calculations, NO modifications.
- *
- * Date: January 2026
  */
 
 // ============================================================================
 // APPLE PHONES - USED PRICES (from USED_HIGHEST_ALL sheet)
+// Total Models: 22
 // ============================================================================
 const appleUsedPrices = {
     "iPhone 11": { "128GB": 150, "256GB": 180, "64GB": 120 },
@@ -39,29 +39,31 @@ const appleUsedPrices = {
 
 // ============================================================================
 // APPLE PHONES - NEW PRICES (from NEW_HIGHEST_ALL sheet)
+// Total Models: 17
 // ============================================================================
 const appleNewPrices = {
-    "iPhone 14": { "128GB": 350, "256GB": 400, "512GB": 450 ,
-    "iPhone 14 Plus": { "128GB": 420, "256GB": 470, "512GB": 520 ,
-    "iPhone 14 Pro": { "128GB": 500, "1TB": 650, "256GB": 550, "512GB": 600 ,
-    "iPhone 14 Pro Max": { "128GB": 600, "1TB": 750, "256GB": 650, "512GB": 700 ,
-    "iPhone 15": { "128GB": 500, "256GB": 550, "512GB": 600 ,
-    "iPhone 15 Plus": { "128GB": 550, "256GB": 600, "512GB": 650 ,
-    "iPhone 15 Pro": { "128GB": 600, "1TB": 750, "256GB": 650, "512GB": 700 ,
-    "iPhone 15 Pro Max": { "1TB": 900, "256GB": 800, "512GB": 850 ,
-    "iPhone 16": { "128GB": 920, "256GB": 1020 ,
-    "iPhone 16 Plus": { "128GB": 1050, "256GB": 1150 ,
-    "iPhone 16 Pro": { "128GB": 870, "1TB": 1020, "256GB": 920, "512GB": 970 ,
-    "iPhone 16 Pro Max": { "1TB": 1120, "256GB": 1020, "512GB": 1070 ,
-    "iPhone 16E": { "128GB": 650, "256GB": 770, "512GB": 870 ,
-    "iPhone 17": { "256GB": 1200, "512GB": 1370 ,
-    "iPhone 17 Pro": { "1TB": 1950, "256GB": 1600, "512GB": 1750 ,
-    "iPhone 17 Pro Max": { "1TB": 2220, "256GB": 1720, "2TB": 2420, "512GB": 2000 ,
-    "iPhone Air": { "1TB": 1320, "256GB": 1000, "512GB": 1220 
+    "iPhone 14": { "128GB": 350, "256GB": 400, "512GB": 450 },
+    "iPhone 14 Plus": { "128GB": 420, "256GB": 470, "512GB": 520 },
+    "iPhone 14 Pro": { "128GB": 500, "1TB": 650, "256GB": 550, "512GB": 600 },
+    "iPhone 14 Pro Max": { "128GB": 600, "1TB": 750, "256GB": 650, "512GB": 700 },
+    "iPhone 15": { "128GB": 500, "256GB": 550, "512GB": 600 },
+    "iPhone 15 Plus": { "128GB": 550, "256GB": 600, "512GB": 650 },
+    "iPhone 15 Pro": { "128GB": 600, "1TB": 750, "256GB": 650, "512GB": 700 },
+    "iPhone 15 Pro Max": { "1TB": 900, "256GB": 800, "512GB": 850 },
+    "iPhone 16": { "128GB": 920, "256GB": 1020 },
+    "iPhone 16 Plus": { "128GB": 1050, "256GB": 1150 },
+    "iPhone 16 Pro": { "128GB": 870, "1TB": 1020, "256GB": 920, "512GB": 970 },
+    "iPhone 16 Pro Max": { "1TB": 1120, "256GB": 1020, "512GB": 1070 },
+    "iPhone 16E": { "128GB": 650, "256GB": 770, "512GB": 870 },
+    "iPhone 17": { "256GB": 1200, "512GB": 1370 },
+    "iPhone 17 Pro": { "1TB": 1950, "256GB": 1600, "512GB": 1750 },
+    "iPhone 17 Pro Max": { "1TB": 2220, "256GB": 1720, "2TB": 2420, "512GB": 2000 },
+    "iPhone Air": { "1TB": 1320, "256GB": 1000, "512GB": 1220 }
 };
 
 // ============================================================================
 // SAMSUNG PHONES - USED PRICES (from USED_HIGHEST_ALL sheet)
+// Total Models: 17
 // ============================================================================
 const samsungUsedPrices = {
     "Galaxy A55 5G": { "8/256GB": 180 },
@@ -85,6 +87,7 @@ const samsungUsedPrices = {
 
 // ============================================================================
 // SAMSUNG PHONES - NEW PRICES (from NEW_HIGHEST_ALL sheet)
+// Total Models: 20
 // ============================================================================
 const samsungNewPrices = {
     "Galaxy A17 4G": { "8/128GB": 160 },
@@ -107,8 +110,6 @@ const samsungNewPrices = {
     "Galaxy Z Flip 7 5G": { "256GB": 800, "512GB": 920 },
     "Galaxy Z Flip 7 FE 5G": { "128GB": 500, "256GB": 680 },
     "Galaxy Z Fold 7 5G": { "256GB": 1630, "512GB": 1780, "1TB": 1860 }
-};
-
 };
 
 // ============================================================================

@@ -51,8 +51,11 @@ class AdminDataManager {
                 console.log(`ℹ️  Using localStorage (Excel import) as source of truth`);
             }
 
-            // CRITICAL FIX: Ensure all phones have proper storagePrices from phoneDatabase
-            this.ensureStoragePrices(phones, db);
+            // DISABLED: Don't run ensureStoragePrices() on imported Excel data
+            // Reason: Excel import already has correct storagePrices from Excel files
+            // Running this would OVERWRITE Excel prices with hardcoded phoneDatabase prices!
+            // Only run if localStorage was initialized from phoneDatabase (not imported)
+            // this.ensureStoragePrices(phones, db);
 
             // Run migration to add missing fields
             this.migratePhoneData(phones);
