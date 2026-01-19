@@ -1172,13 +1172,13 @@
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.style.cssText += 'pointer-events: auto !important; cursor: pointer !important; z-index: 1000 !important;';
                 });
-                
+
                 // Ensure sidebar is clickable
                 const sidebar = document.querySelector('.admin-sidebar');
                 if (sidebar) {
                     sidebar.style.cssText += 'pointer-events: auto !important; z-index: 100 !important;';
                 }
-                
+
                 // Render initial section content
                 const activeSection = document.querySelector('.admin-section.active');
                 if (activeSection) {
@@ -1190,10 +1190,13 @@
                         renderPhones();
                     }
                 }
-                
+
+                // LOAD SAVED CONDITION MODIFIERS FROM LOCALSTORAGE
+                loadSavedConditionModifiers();
+
                 console.log('Applied CSS fixes to menu items');
             }, 500);
-            
+
             // Retry rendering after a longer delay
             setTimeout(function() {
                 const activeSection = document.querySelector('.admin-section.active');
@@ -1205,6 +1208,46 @@
                 }
             }, 1500);
         });
+
+        // Function to load saved condition modifiers from localStorage and populate inputs
+        function loadSavedConditionModifiers() {
+            console.log('📋 Loading saved condition modifiers from localStorage...');
+
+            const stored = localStorage.getItem('ktmobile_condition_modifiers');
+            if (!stored) {
+                console.log('⚠️ No saved condition modifiers found in localStorage');
+                return;
+            }
+
+            try {
+                const modifiers = JSON.parse(stored);
+                console.log('✅ Found saved modifiers:', modifiers);
+
+                // Populate all modifier inputs with saved values
+                const inputs = document.querySelectorAll('.modifier-input');
+                let updatedCount = 0;
+
+                inputs.forEach(input => {
+                    const condition = input.dataset.condition;
+                    const grade = input.dataset.grade;
+
+                    if (condition && grade && modifiers[condition] && modifiers[condition][grade] !== undefined) {
+                        const savedValue = modifiers[condition][grade];
+                        input.value = savedValue;
+                        updatedCount++;
+                        console.log(`   ✓ Set ${condition}.${grade} = ${savedValue}`);
+                    }
+                });
+
+                console.log(`✅ Loaded ${updatedCount} saved modifier values from localStorage`);
+
+            } catch (e) {
+                console.error('❌ Error loading saved modifiers:', e);
+            }
+        }
+
+        // Expose function globally
+        window.loadSavedConditionModifiers = loadSavedConditionModifiers;
     </script>
 
     <!-- Bulk Price Update Modal -->

@@ -1476,7 +1476,21 @@ function loadConditionModifiers() {
         deviceType: { 'new-sealed': 0, 'new-activated': -150 },
         body: { A: 0, B: -20, C: -60, D: -120 },
         screen: { A: 0, B: 0, C: -40, D: -150 },
-        battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 }
+        battery: { '91-100': 0, '86-90': -20, '81-85': -50, '80-below': -100 },
+        issue: {
+            power: -300,
+            faceid: -150,
+            display: -200,
+            touch: -180,
+            camera: -120,
+            speaker: -80,
+            wifi: -100,
+            charging: -90
+        },
+        accessory: {
+            cable: 10,
+            box: 20
+        }
     };
 
     try {
@@ -1513,6 +1527,96 @@ function getModifierValue(conditionType, grade) {
     console.log(`💰 Modifier value for ${conditionType}.${grade} = ${value}`);
     return value;
 }
+
+// Update condition buttons to show values from localStorage (admin-set modifiers)
+function updateConditionButtonsFromStorage() {
+    console.log('🔄 Updating condition buttons with admin-set modifier values...');
+
+    const modifiers = loadConditionModifiers();
+
+    // Update body condition buttons
+    const bodyContainer = document.getElementById('body-options');
+    if (bodyContainer) {
+        bodyContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const grade = btn.dataset.value;
+            if (modifiers.body && modifiers.body[grade] !== undefined) {
+                const value = Math.abs(modifiers.body[grade]);
+                btn.dataset.deduction = value;
+                console.log(`   Body ${grade}: -$${value}`);
+            }
+        });
+    }
+
+    // Update screen condition buttons
+    const screenContainer = document.getElementById('screen-options');
+    if (screenContainer) {
+        screenContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const grade = btn.dataset.value;
+            if (modifiers.screen && modifiers.screen[grade] !== undefined) {
+                const value = Math.abs(modifiers.screen[grade]);
+                btn.dataset.deduction = value;
+                console.log(`   Screen ${grade}: -$${value}`);
+            }
+        });
+    }
+
+    // Update battery health buttons
+    const batteryContainer = document.getElementById('battery-options');
+    if (batteryContainer) {
+        batteryContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const grade = btn.dataset.value;
+            if (modifiers.battery && modifiers.battery[grade] !== undefined) {
+                const value = Math.abs(modifiers.battery[grade]);
+                btn.dataset.deduction = value;
+                console.log(`   Battery ${grade}: -$${value}`);
+            }
+        });
+    }
+
+    // Update issue buttons
+    const issueContainer = document.getElementById('issue-options');
+    if (issueContainer) {
+        issueContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const issue = btn.dataset.value;
+            if (modifiers.issue && modifiers.issue[issue] !== undefined) {
+                const value = Math.abs(modifiers.issue[issue]);
+                btn.dataset.deduction = value;
+                console.log(`   Issue ${issue}: -$${value}`);
+            }
+        });
+    }
+
+    // Update accessory buttons
+    const accessoryContainer = document.getElementById('accessory-options');
+    if (accessoryContainer) {
+        accessoryContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const accessory = btn.dataset.value;
+            if (modifiers.accessory && modifiers.accessory[accessory] !== undefined) {
+                const value = modifiers.accessory[accessory]; // Can be positive bonus
+                btn.dataset.bonus = value;
+                console.log(`   Accessory ${accessory}: +$${value}`);
+            }
+        });
+    }
+
+    // Update country/export buttons
+    const countryContainer = document.getElementById('country-options');
+    if (countryContainer) {
+        countryContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const country = btn.dataset.value;
+            if (modifiers.country && modifiers.country[country] !== undefined) {
+                const value = Math.abs(modifiers.country[country]);
+                btn.dataset.deduction = value;
+                console.log(`   Country ${country}: -$${value}`);
+            }
+        });
+    }
+
+    console.log('✅ Condition buttons updated with admin modifier values');
+}
+
+// Expose function globally
+window.updateConditionButtonsFromStorage = updateConditionButtonsFromStorage;
 
 // State management
 let quoteState = {
@@ -1578,7 +1682,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Pointer events force-enabled on all interactive elements');
     }, 100);
-    
+
+    // Update condition button deductions from localStorage
+    updateConditionButtonsFromStorage();
+
     // Initialize brand selector with click handlers
     initBrandSelector();
     
