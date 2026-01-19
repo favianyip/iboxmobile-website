@@ -947,7 +947,7 @@ function createBuyDeviceCard(brand, modelName, modelData) {
 
 window.phoneAPI = phoneAPI;
 window.searchDevice = searchDevice;
-window.searchDeviceBuy = searchDeviceBuy;
+// REMOVED: window.searchDeviceBuy = searchDeviceBuy; - Function doesn't exist, causes ReferenceError
 window.navigateToProduct = navigateToProduct;
 window.phoneImages = phoneImages;
 
