@@ -501,10 +501,261 @@ function updateAllPhoneColors() {
     return { updated, skipped, total: phones.length, totalColors: sortedColors.length };
 }
 
+// ============================================================================
+// SAVE ALL CONDITION MODIFIERS & SYNC TO ALL DEVICES
+// ============================================================================
+function saveAllConditionModifiersAndSync() {
+    console.log('💾 Saving all condition modifiers...');
+
+    // Collect all modifier values from the DOM
+    const modifiers = {
+        receipt: { yes: 30, no: 0 },
+        country: { local: 0, export: -50 },
+        deviceType: { 'new-sealed': 0, 'new-activated': -150 },
+        body: {},
+        screen: {},
+        battery: {},
+        issue: {},
+        accessory: {}
+    };
+
+    // Get all modifier inputs
+    const inputs = document.querySelectorAll('.modifier-input');
+    inputs.forEach(input => {
+        const condition = input.dataset.condition;
+        const grade = input.dataset.grade;
+        const value = parseInt(input.value) || 0;
+
+        if (condition && grade) {
+            if (!modifiers[condition]) modifiers[condition] = {};
+            modifiers[condition][grade] = value;
+        }
+    });
+
+    // Save to localStorage
+    localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(modifiers));
+    localStorage.setItem('ktmobile_last_modifier_update', new Date().toISOString());
+
+    console.log('✅ Condition modifiers saved:', modifiers);
+
+    alert('✅ All Condition Modifiers Saved & Synced!\n\n' +
+          'Changes will automatically sync to:\n' +
+          '• Desktop web version\n' +
+          '• Mobile web version\n\n' +
+          'Other devices will get updated data on next page load.');
+
+    return modifiers;
+}
+
+// ============================================================================
+// VERSION HISTORY SYSTEM
+// ============================================================================
+function saveCurrentVersion() {
+    const versionName = prompt('Enter a name for this version (e.g., "Before price update"):',
+                               'Backup ' + new Date().toLocaleString());
+    if (!versionName) return;
+
+    // Get all current data
+    const versionData = {
+        id: Date.now(),
+        name: versionName,
+        timestamp: new Date().toISOString(),
+        data: {
+            phones: JSON.parse(localStorage.getItem('ktmobile_phones') || '[]'),
+            conditionModifiers: JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}'),
+            brandSettings: JSON.parse(localStorage.getItem('ktmobile_brand_settings') || '{}')
+        }
+    };
+
+    // Get existing versions
+    const versions = JSON.parse(localStorage.getItem('ktmobile_version_history') || '[]');
+
+    // Add new version at the beginning
+    versions.unshift(versionData);
+
+    // Keep only last 10 versions to save space
+    if (versions.length > 10) {
+        versions.pop();
+    }
+
+    // Save versions
+    localStorage.setItem('ktmobile_version_history', JSON.stringify(versions));
+
+    console.log('📸 Version saved:', versionName);
+    alert('✅ Version Saved!\n\n' + versionName);
+
+    // Refresh version list
+    loadVersionHistory();
+}
+
+function loadVersionHistory() {
+    const container = document.getElementById('versionHistoryList');
+    if (!container) return;
+
+    const versions = JSON.parse(localStorage.getItem('ktmobile_version_history') || '[]');
+
+    if (versions.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No saved versions yet. Click "Save Current as New Version" to create one.</p>';
+        return;
+    }
+
+    let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+
+    versions.forEach((version, index) => {
+        const date = new Date(version.timestamp).toLocaleString();
+        const phoneCount = version.data.phones ? version.data.phones.length : 0;
+
+        html += `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #ddd;">
+                <div>
+                    <strong style="color: #333;">${version.name}</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #666;">
+                        ${date} • ${phoneCount} phones
+                    </p>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-sm btn-primary" onclick="restoreVersion(${version.id})" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        🔄 Restore
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteVersion(${version.id})" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #dc3545; border: none;">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function restoreVersion(versionId) {
+    const versions = JSON.parse(localStorage.getItem('ktmobile_version_history') || '[]');
+    const version = versions.find(v => v.id === versionId);
+
+    if (!version) {
+        alert('Version not found!');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to restore "${version.name}"?\n\nThis will overwrite current data.`)) {
+        return;
+    }
+
+    // Restore data
+    if (version.data.phones) {
+        localStorage.setItem('ktmobile_phones', JSON.stringify(version.data.phones));
+    }
+    if (version.data.conditionModifiers) {
+        localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(version.data.conditionModifiers));
+    }
+    if (version.data.brandSettings) {
+        localStorage.setItem('ktmobile_brand_settings', JSON.stringify(version.data.brandSettings));
+    }
+    localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
+    console.log('🔄 Version restored:', version.name);
+    alert('✅ Version Restored!\n\n' + version.name + '\n\nPage will reload to apply changes.');
+
+    // Reload page to apply changes
+    location.reload();
+}
+
+function deleteVersion(versionId) {
+    if (!confirm('Delete this version? This cannot be undone.')) return;
+
+    let versions = JSON.parse(localStorage.getItem('ktmobile_version_history') || '[]');
+    versions = versions.filter(v => v.id !== versionId);
+    localStorage.setItem('ktmobile_version_history', JSON.stringify(versions));
+
+    loadVersionHistory();
+}
+
+// ============================================================================
+// EXPORT ALL DATA TO EXCEL (CSV FORMAT)
+// ============================================================================
+function exportAllDataToExcel() {
+    console.log('📊 Exporting all data to Excel...');
+
+    const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+    const modifiers = JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}');
+    const brandSettings = JSON.parse(localStorage.getItem('ktmobile_brand_settings') || '{}');
+
+    // Create CSV content for phones
+    let phonesCSV = 'Brand,Model,Storage,USED Price,NEW Price,Colors,Available,Display\n';
+
+    phones.forEach(phone => {
+        const storages = phone.storages || Object.keys(phone.storagePrices || {});
+        storages.forEach(storage => {
+            const usedPrice = phone.storagePrices ? (phone.storagePrices[storage] || 0) : 0;
+            const newPrice = phone.newPhonePrices ? (phone.newPhonePrices[storage] || 0) : 0;
+            const colors = (phone.colors || []).join('; ');
+
+            phonesCSV += `"${phone.brand}","${phone.model}","${storage}",${usedPrice},${newPrice},"${colors}",${phone.available !== false},${phone.display !== false}\n`;
+        });
+    });
+
+    // Create CSV content for condition modifiers
+    let modifiersCSV = '\n\n=== CONDITION MODIFIERS ===\n';
+    modifiersCSV += 'Category,Grade/Type,Value (SGD)\n';
+
+    Object.entries(modifiers).forEach(([category, grades]) => {
+        Object.entries(grades).forEach(([grade, value]) => {
+            modifiersCSV += `"${category}","${grade}",${value}\n`;
+        });
+    });
+
+    // Create CSV content for brand settings
+    let settingsCSV = '\n\n=== BRAND SETTINGS ===\n';
+    settingsCSV += 'Brand,Enabled,Display Order\n';
+
+    Object.entries(brandSettings).forEach(([brand, settings]) => {
+        settingsCSV += `"${brand}",${settings.enabled !== false},${settings.displayOrder || 0}\n`;
+    });
+
+    // Combine all CSV content
+    const fullCSV = phonesCSV + modifiersCSV + settingsCSV;
+
+    // Create and download file
+    const blob = new Blob([fullCSV], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `ibox_mobile_backup_${dateStr}.csv`);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    console.log('✅ Export complete!');
+    alert('✅ Export Complete!\n\n' +
+          'Downloaded: ibox_mobile_backup_' + dateStr + '.csv\n\n' +
+          'Contains:\n' +
+          '• ' + phones.length + ' phone models with prices\n' +
+          '• Condition modifiers\n' +
+          '• Brand settings');
+}
+
+// Initialize version history on page load
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(loadVersionHistory, 500);
+    });
+}
+
 // Export functions
 if (typeof window !== 'undefined') {
     window.importExactPrices = importExactPrices;
     window.updateAllPhoneColors = updateAllPhoneColors;
+    window.saveAllConditionModifiersAndSync = saveAllConditionModifiersAndSync;
+    window.saveCurrentVersion = saveCurrentVersion;
+    window.loadVersionHistory = loadVersionHistory;
+    window.restoreVersion = restoreVersion;
+    window.deleteVersion = deleteVersion;
+    window.exportAllDataToExcel = exportAllDataToExcel;
 }
 
 console.log('✅ Clean Price Import Utility loaded');
