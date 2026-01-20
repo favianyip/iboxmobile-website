@@ -2089,13 +2089,29 @@ function showModels(brand) {
     // Get models from database
     let modelsToDisplay = Object.keys(phoneDatabase[brand]);
     console.log('Models found in database:', modelsToDisplay.length, modelsToDisplay);
-    
-    // Filter by admin display settings if available
-    if (typeof adminManager !== 'undefined' && adminManager && adminManager.phones && adminManager.phones.length > 0) {
-        console.log('Admin manager available, filtering models');
+
+    // CRITICAL FIX: Only filter by admin settings if we have COMPLETE and RECENT data
+    // On mobile devices, localStorage may be empty/stale, so show all phoneDatabase models
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const hasAdminData = typeof adminManager !== 'undefined' && adminManager && adminManager.phones && adminManager.phones.length > 0;
+
+    // Check if admin data is complete (has most models from phoneDatabase)
+    let isAdminDataComplete = false;
+    if (hasAdminData) {
+        const adminModelCount = adminManager.phones.filter(p => p.brand === brand).length;
+        const dbModelCount = modelsToDisplay.length;
+        // Consider complete if admin has at least 50% of phoneDatabase models
+        isAdminDataComplete = adminModelCount >= (dbModelCount * 0.5);
+        console.log(`Admin data check: ${adminModelCount}/${dbModelCount} models (${Math.round(adminModelCount/dbModelCount*100)}%) - ${isAdminDataComplete ? 'COMPLETE' : 'INCOMPLETE'}`);
+    }
+
+    // Only apply admin filtering if data is complete (desktop with full localStorage)
+    // For mobile or incomplete data, show ALL phoneDatabase models
+    if (hasAdminData && isAdminDataComplete && !isMobile) {
+        console.log('Admin manager available with complete data, applying display filters');
         const adminPhones = adminManager.phones.filter(p => p.brand === brand && p.display !== false);
         console.log('Admin phones for brand:', adminPhones.map(p => p.model));
-        
+
         // Only show models that are enabled in admin panel
         modelsToDisplay = modelsToDisplay.filter(modelName => {
             // If admin has this model, check display setting
@@ -2108,7 +2124,7 @@ function showModels(brand) {
         });
         console.log('Filtered models:', modelsToDisplay.length, modelsToDisplay);
     } else {
-        console.log('Admin manager not available, showing all models');
+        console.log(`📱 Showing ALL models from phoneDatabase (Mobile: ${isMobile}, Admin complete: ${isAdminDataComplete})`);
     }
     
     if (modelsToDisplay.length === 0) {
