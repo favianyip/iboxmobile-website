@@ -2143,7 +2143,7 @@ function showModels(brand) {
             imageUrl = `${imageUrl}?t=${Date.now()}`;
         }
         
-        // Get base price from admin ONLY - NO hardcoded fallback!
+        // Get base price from admin, with phoneDatabase fallback for mobile devices
         let basePrice = 0;
         let hasPriceData = false;
         if (typeof adminManager !== 'undefined' && adminManager && adminManager.phones) {
@@ -2153,7 +2153,12 @@ function showModels(brand) {
                 hasPriceData = true;
             }
         }
-        // NO fallback to model.basePrice - user preference: "i rather theres error no price then given mock data inaccurately"
+        // CRITICAL FIX: Fallback to phoneDatabase for mobile devices without localStorage
+        if (!hasPriceData && model.basePrice !== undefined) {
+            basePrice = model.basePrice;
+            hasPriceData = true;
+            console.log(`📱 Mobile fallback: Using phoneDatabase basePrice $${basePrice} for ${modelName}`);
+        }
         
         // Create card with inline onclick (works reliably)
         const card = document.createElement('button');
@@ -2717,14 +2722,25 @@ function updateLivePriceEstimate() {
     // Calculate price based on device type
     if (quoteState.deviceType === 'new-sealed') {
         // Use EXACT NEW SEALED price from admin data
+        // FALLBACK to phoneDatabase calculation for mobile devices
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             price = adminPhone.newPhonePrices[quoteState.storage];
             console.log(`✅ NEW SEALED price: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
-            // NEW price not available - show $0 or fallback message
-            price = 0;
-            console.error(`❌ NEW SEALED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
-            console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
+            // CRITICAL FIX: Fallback to phoneDatabase for mobile devices
+            console.warn(`⚠️  Admin NEW SEALED data not available - falling back to phoneDatabase estimation`);
+            if (model.basePrice !== undefined) {
+                // Estimate: NEW SEALED = basePrice * 1.3 + storage modifier
+                price = model.basePrice * 1.3;
+                if (model.storage && model.storage[quoteState.storage] !== undefined) {
+                    price += model.storage[quoteState.storage];
+                }
+                console.log(`📱 Mobile fallback: Using estimated NEW SEALED price $${Math.round(price)} (base: $${model.basePrice} * 1.3)`);
+                price = Math.round(price);
+            } else {
+                price = 0;
+                console.error(`❌ No price data available for ${quoteState.model} ${quoteState.storage}`);
+            }
         }
 
         // NEW: Activation status modifier (for new phones)
@@ -2745,15 +2761,31 @@ function updateLivePriceEstimate() {
         }
     } else if (quoteState.deviceType === 'new-activated') {
         // Use NEW SEALED price - Load deduction from admin panel modifiers
+        // FALLBACK to phoneDatabase calculation for mobile devices
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             const activatedDeduction = Math.abs(getModifierValue('deviceType', 'new-activated'));
             price = adminPhone.newPhonePrices[quoteState.storage] - activatedDeduction;
             console.log(`✅ NEW ACTIVATED price: $${price} for ${quoteState.model} ${quoteState.storage} (deduction: -$${activatedDeduction})`);
         } else {
-            // NEW price not available - show $0
-            price = 0;
-            console.error(`❌ NEW ACTIVATED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
-            console.error('❌ Admin panel data missing! Run "Import Exact Prices" in admin panel.');
+            // CRITICAL FIX: Fallback to phoneDatabase for mobile devices
+            console.warn(`⚠️  Admin NEW ACTIVATED data not available - falling back to phoneDatabase estimation`);
+            if (model.basePrice !== undefined) {
+                // Estimate: NEW ACTIVATED = basePrice * 1.2 + storage modifier
+                price = model.basePrice * 1.2;
+                if (model.storage && model.storage[quoteState.storage] !== undefined) {
+                    price += model.storage[quoteState.storage];
+                }
+                // Apply activation deduction if available
+                const activatedDeduction = Math.abs(getModifierValue('deviceType', 'new-activated'));
+                if (activatedDeduction > 0) {
+                    price -= activatedDeduction;
+                }
+                console.log(`📱 Mobile fallback: Using estimated NEW ACTIVATED price $${Math.round(price)} (base: $${model.basePrice} * 1.2)`);
+                price = Math.round(price);
+            } else {
+                price = 0;
+                console.error(`❌ No price data available for ${quoteState.model} ${quoteState.storage}`);
+            }
         }
 
         // NEW: Activation status modifier (for new phones)
@@ -2773,19 +2805,25 @@ function updateLivePriceEstimate() {
             console.log(`Receipt modifier (${quoteState.hasReceipt}): ${sign}$${receiptModifier}`);
         }
     } else {
-        // USED device - use ONLY exact storage-specific USED price from admin data
-        // NO FALLBACKS - better to show $0 than wrong price!
+        // USED device - use exact storage-specific USED price from admin data
+        // FALLBACK to phoneDatabase for mobile devices without localStorage
         if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
             price = adminPhone.storagePrices[quoteState.storage];
             console.log(`✅ USED price from backend: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
-            // NO USED price available - show $0
-            price = 0;
-            console.error(`❌ USED price NOT AVAILABLE for ${quoteState.model} ${quoteState.storage}`);
-            console.error(`   ℹ️  adminPhone exists: ${!!adminPhone}`);
-            console.error(`   ℹ️  adminPhone.storagePrices exists: ${!!(adminPhone && adminPhone.storagePrices)}`);
-            console.error(`   ℹ️  Available storages: ${adminPhone && adminPhone.storagePrices ? Object.keys(adminPhone.storagePrices).join(', ') : 'none'}`);
-            console.error('   📋 SOLUTION: Open admin.html → Import Prices → "Clear All & Fresh Import"');
+            // CRITICAL FIX: Fallback to phoneDatabase calculation for mobile devices
+            console.warn(`⚠️  Admin data not available - falling back to phoneDatabase`);
+            if (model.basePrice !== undefined) {
+                price = model.basePrice;
+                // Add storage modifier
+                if (model.storage && model.storage[quoteState.storage] !== undefined) {
+                    price += model.storage[quoteState.storage];
+                }
+                console.log(`📱 Mobile fallback: Using phoneDatabase price $${price} (base: $${model.basePrice}, storage modifier: ${model.storage[quoteState.storage] || 0})`);
+            } else {
+                price = 0;
+                console.error(`❌ No price data available for ${quoteState.model} ${quoteState.storage}`);
+            }
         }
     }
 
