@@ -751,10 +751,20 @@
                 const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 const hasAdminData = typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0;
 
+                // Check if admin data is COMPLETE (desktop with full data)
+                let isAdminDataComplete = false;
+                if (hasAdminData && !isMobile) {
+                    const totalAdminPhones = adminManager.phones.length;
+                    // Consider complete if admin has at least 15 phones (reasonable full data)
+                    isAdminDataComplete = totalAdminPhones >= 15;
+                    console.log(`📊 Admin data: ${totalAdminPhones} phones - ${isAdminDataComplete ? 'COMPLETE (will respect display filters)' : 'INCOMPLETE (will ignore display filters)'}`);
+                }
+
                 console.log('📱 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
                 console.log('📦 adminManager available:', hasAdminData);
                 console.log('📦 phoneDatabase available:', typeof phoneDatabase !== 'undefined');
                 console.log('💰 Current condition:', currentCondition);
+                console.log('🔒 Apply display filters:', isAdminDataComplete);
 
                 // HYBRID RENDERING: Use phoneDatabase for model list, adminManager for prices
                 if (typeof phoneDatabase !== 'undefined') {
@@ -779,10 +789,15 @@
                             }
 
                             if (adminPhone) {
-                                // Check display settings - skip if hidden
-                                if (adminPhone.display === false || adminPhone.available === false) {
-                                    console.log(`  🚫 Skipping ${modelName} - hidden in admin settings`);
-                                    return;
+                                // CRITICAL: Only apply display filters if admin data is complete (desktop)
+                                // On mobile/incomplete data, show all models regardless of display setting
+                                if (isAdminDataComplete) {
+                                    if (adminPhone.display === false || adminPhone.available === false) {
+                                        console.log(`  🚫 Skipping ${modelName} - hidden in admin settings (desktop with complete data)`);
+                                        return;
+                                    }
+                                } else {
+                                    console.log(`  📱 Ignoring display filter for ${modelName} (mobile/incomplete data)`);
                                 }
 
                                 // Use admin storage options if available
@@ -873,10 +888,15 @@
                             }
 
                             if (adminPhone) {
-                                // Check display settings - skip if hidden
-                                if (adminPhone.display === false || adminPhone.available === false) {
-                                    console.log(`  🚫 Skipping ${modelName} - hidden in admin settings`);
-                                    return;
+                                // CRITICAL: Only apply display filters if admin data is complete (desktop)
+                                // On mobile/incomplete data, show all models regardless of display setting
+                                if (isAdminDataComplete) {
+                                    if (adminPhone.display === false || adminPhone.available === false) {
+                                        console.log(`  🚫 Skipping ${modelName} - hidden in admin settings (desktop with complete data)`);
+                                        return;
+                                    }
+                                } else {
+                                    console.log(`  📱 Ignoring display filter for ${modelName} (mobile/incomplete data)`);
                                 }
 
                                 // Use admin storage options if available
