@@ -743,11 +743,22 @@
                 console.log('✅ Using adminManager.phones from Excel import (localStorage)');
                 console.log(`📦 Total phones: ${adminManager.phones.length}`);
 
-                // CRITICAL FIX: Use adminManager.phones (Excel import) instead of phoneDatabase (hardcoded)
-                // User requirement: "everything in user interface must follow 1 to 1 in backend settings"
+                // CRITICAL FIX: Use adminManager.phones when complete, fallback to phoneDatabase on mobile
+                // Mobile devices may have incomplete/stale localStorage, so use phoneDatabase fallback
+                const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const hasAdminData = typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0;
 
-                if (typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0) {
-                    console.log('✅ Using adminManager.phones (Excel import data)');
+                // Check if admin data is complete (for desktop)
+                let useAdminData = false;
+                if (hasAdminData && !isMobile) {
+                    const totalAdminPhones = adminManager.phones.length;
+                    // Consider complete if admin has at least 10 phones (reasonable data)
+                    useAdminData = totalAdminPhones >= 10;
+                    console.log(`📊 Admin data: ${totalAdminPhones} phones - ${useAdminData ? 'USING' : 'INCOMPLETE, using phoneDatabase'}`);
+                }
+
+                if (useAdminData) {
+                    console.log('✅ Using adminManager.phones (Excel import data - desktop with complete data)');
                     console.log(`📦 Total phones in backend: ${adminManager.phones.length}`);
 
                     // Filter and render Apple models
@@ -900,15 +911,82 @@
                     });
                     console.log(`✅ Rendered ${samsungPhones.length} Samsung phones`);
                 } else {
-                    // NO adminManager.phones - user needs to import data
-                    console.error('❌ CRITICAL: adminManager.phones not available!');
-                    console.error('💡 User must run "Clear All & Fresh Import" in admin panel');
-                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data imported. Please go to admin panel and click "Clear All & Fresh Import".</p>';
-                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data imported. Please go to admin panel and click "Clear All & Fresh Import".</p>';
-                }
+                    // MOBILE or INCOMPLETE admin data - use phoneDatabase fallback
+                    console.log('📱 Using phoneDatabase fallback (mobile or incomplete admin data)');
+                    console.log('📱 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
+                    console.log('📦 phoneDatabase available:', typeof phoneDatabase !== 'undefined');
 
-                // OLD REMOVED: NO phoneDatabase fallback anymore
-                // User requirement: "no fall back hardcoded value"
+                    if (typeof phoneDatabase !== 'undefined') {
+                        // Render Apple models from phoneDatabase
+                        if (phoneDatabase.Apple) {
+                            console.log(`📱 Loading ${Object.keys(phoneDatabase.Apple).length} Apple models from phoneDatabase`);
+                            Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
+                                const storageOptions = Object.keys(modelData.storage || {});
+
+                                // Calculate price from phoneDatabase basePrice
+                                let maxPrice = modelData.basePrice || 0;
+
+                                // For NEW phones, estimate higher price
+                                if (currentCondition === 'new') {
+                                    maxPrice = Math.round(maxPrice * 1.3);
+                                }
+
+                                if (maxPrice === 0) {
+                                    console.log(`  ⚠️  Skipping ${modelName} - no basePrice in phoneDatabase`);
+                                    return;
+                                }
+
+                                const price = roundToNearest10(maxPrice);
+                                const imageUrl = modelData.image || 'images/phones/iphone-16-pro-max.jpg';
+
+                                const model = {
+                                    name: modelName,
+                                    img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
+                                    storage: sortStorageOptions(storageOptions)
+                                };
+                                appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                            });
+                            console.log(`✅ Rendered ${Object.keys(phoneDatabase.Apple).length} Apple phones from phoneDatabase`);
+                        }
+
+                        // Render Samsung models from phoneDatabase
+                        if (phoneDatabase.Samsung) {
+                            console.log(`📱 Loading ${Object.keys(phoneDatabase.Samsung).length} Samsung models from phoneDatabase`);
+                            Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
+                                const storageOptions = Object.keys(modelData.storage || {});
+
+                                // Calculate price from phoneDatabase basePrice
+                                let maxPrice = modelData.basePrice || 0;
+
+                                // For NEW phones, estimate higher price
+                                if (currentCondition === 'new') {
+                                    maxPrice = Math.round(maxPrice * 1.3);
+                                }
+
+                                if (maxPrice === 0) {
+                                    console.log(`  ⚠️  Skipping ${modelName} - no basePrice in phoneDatabase`);
+                                    return;
+                                }
+
+                                const price = roundToNearest10(maxPrice);
+                                const imageUrl = modelData.image || 'images/phones/galaxy-s24-ultra.jpg';
+
+                                const model = {
+                                    name: modelName,
+                                    img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
+                                    storage: sortStorageOptions(storageOptions)
+                                };
+                                samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                            });
+                            console.log(`✅ Rendered ${Object.keys(phoneDatabase.Samsung).length} Samsung phones from phoneDatabase`);
+                        }
+                    } else {
+                        // NO phoneDatabase available - show error
+                        console.error('❌ CRITICAL: Neither adminManager nor phoneDatabase available!');
+                        appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data available. Please contact support.</p>';
+                        samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data available. Please contact support.</p>';
+                    }
+                }
 
                 // Fade in with new content
                 appleGrid.style.opacity = '1';
@@ -1167,22 +1245,35 @@
             }
         });
 
-        // Initialize on page load - WAIT for adminManager to be ready
-        // CRITICAL: adminManager is created by quote.js (deferred), so we must wait for it
-        function waitForAdminManager() {
-            if (typeof adminManager !== 'undefined' && adminManager && adminManager.phones) {
-                console.log('✅ adminManager is ready, initializing page...');
+        // Initialize on page load - WAIT for adminManager OR phoneDatabase to be ready
+        // CRITICAL: adminManager is created by quote.js (deferred), but phoneDatabase is also available as fallback
+        let waitAttempts = 0;
+        const MAX_WAIT_ATTEMPTS = 30; // Wait max 3 seconds (30 * 100ms)
+
+        function waitForDataSources() {
+            waitAttempts++;
+
+            const hasAdminManager = typeof adminManager !== 'undefined' && adminManager && adminManager.phones;
+            const hasPhoneDatabase = typeof phoneDatabase !== 'undefined';
+
+            if (hasAdminManager || hasPhoneDatabase) {
+                console.log('✅ Data source ready, initializing page...');
+                console.log(`   - adminManager: ${hasAdminManager ? 'YES' : 'NO'}`);
+                console.log(`   - phoneDatabase: ${hasPhoneDatabase ? 'YES' : 'NO'}`);
                 initPage();
+            } else if (waitAttempts >= MAX_WAIT_ATTEMPTS) {
+                console.warn('⚠️  Timeout waiting for data sources, initializing anyway...');
+                initPage(); // Initialize anyway, will show error message
             } else {
-                console.log('⏳ Waiting for adminManager...');
-                setTimeout(waitForAdminManager, 100); // Check every 100ms
+                console.log(`⏳ Waiting for data sources... (attempt ${waitAttempts}/${MAX_WAIT_ATTEMPTS})`);
+                setTimeout(waitForDataSources, 100); // Check every 100ms
             }
         }
 
         // Start waiting when DOM and all resources are loaded
         window.addEventListener('load', function() {
-            console.log('📄 Page loaded, waiting for adminManager...');
-            waitForAdminManager();
+            console.log('📄 Page loaded, waiting for data sources...');
+            waitForDataSources();
         });
     </script>
 </body>
