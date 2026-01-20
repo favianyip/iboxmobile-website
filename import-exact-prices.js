@@ -962,3 +962,38 @@ console.log('🎨 Run updateAllPhoneColors() to update ALL phone colors to offic
 console.log('📤 Run exportSettingsForSync() to export settings for another device');
 console.log('📥 Run importSettingsForSync() to import settings from another device');
 console.log('⚠️  NO AUTO-CALCULATIONS - All prices are exact from source files');
+
+// ============================================================================
+// AUTO-IMPORT: Automatically import data if localStorage is empty
+// This ensures mobile web and desktop web both have data on first visit
+// ============================================================================
+(function autoImportOnPageLoad() {
+    const storedPhones = localStorage.getItem('ktmobile_phones');
+
+    if (!storedPhones || storedPhones === '[]') {
+        console.log('📦 AUTO-IMPORT: localStorage is empty, importing data automatically...');
+
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    if (!localStorage.getItem('ktmobile_phones') || localStorage.getItem('ktmobile_phones') === '[]') {
+                        console.log('🔄 AUTO-IMPORT: Running importExactPrices()...');
+                        importExactPrices();
+                    }
+                }, 100);
+            });
+        } else {
+            // DOM already ready
+            setTimeout(function() {
+                if (!localStorage.getItem('ktmobile_phones') || localStorage.getItem('ktmobile_phones') === '[]') {
+                    console.log('🔄 AUTO-IMPORT: Running importExactPrices()...');
+                    importExactPrices();
+                }
+            }, 100);
+        }
+    } else {
+        const phones = JSON.parse(storedPhones);
+        console.log(`✅ AUTO-IMPORT: Found ${phones.length} phones in localStorage`);
+    }
+})();

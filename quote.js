@@ -1612,6 +1612,19 @@ function updateConditionButtonsFromStorage() {
         });
     }
 
+    // Update receipt buttons (for NEW phones)
+    const receiptContainer = document.getElementById('receipt-options');
+    if (receiptContainer) {
+        receiptContainer.querySelectorAll('.option-btn').forEach(btn => {
+            const receipt = btn.dataset.value;
+            if (modifiers.receipt && modifiers.receipt[receipt] !== undefined) {
+                const value = modifiers.receipt[receipt]; // Can be positive bonus
+                btn.dataset.bonus = value;
+                console.log(`   Receipt ${receipt}: +$${value}`);
+            }
+        });
+    }
+
     console.log('✅ Condition buttons updated with admin modifier values');
 }
 
