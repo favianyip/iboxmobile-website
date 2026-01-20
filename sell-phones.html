@@ -743,249 +743,216 @@
                 console.log('✅ Using adminManager.phones from Excel import (localStorage)');
                 console.log(`📦 Total phones: ${adminManager.phones.length}`);
 
-                // CRITICAL FIX: Use adminManager.phones when complete, fallback to phoneDatabase on mobile
-                // Mobile devices may have incomplete/stale localStorage, so use phoneDatabase fallback
+                // CRITICAL FIX: Use HYBRID approach - adminManager prices + phoneDatabase models
+                // Priority 1: Use backend admin prices when available (USED: buyPrices, NEW: newPhonePrices)
+                // Priority 2: Use phoneDatabase basePrice (USED only)
+                // Priority 3: Skip model if no price data (NEW without backend prices)
+
                 const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 const hasAdminData = typeof adminManager !== 'undefined' && adminManager.phones && adminManager.phones.length > 0;
 
-                // Check if admin data is complete (for desktop)
-                let useAdminData = false;
-                if (hasAdminData && !isMobile) {
-                    const totalAdminPhones = adminManager.phones.length;
-                    // Consider complete if admin has at least 10 phones (reasonable data)
-                    useAdminData = totalAdminPhones >= 10;
-                    console.log(`📊 Admin data: ${totalAdminPhones} phones - ${useAdminData ? 'USING' : 'INCOMPLETE, using phoneDatabase'}`);
-                }
+                console.log('📱 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
+                console.log('📦 adminManager available:', hasAdminData);
+                console.log('📦 phoneDatabase available:', typeof phoneDatabase !== 'undefined');
+                console.log('💰 Current condition:', currentCondition);
 
-                if (useAdminData) {
-                    console.log('✅ Using adminManager.phones (Excel import data - desktop with complete data)');
-                    console.log(`📦 Total phones in backend: ${adminManager.phones.length}`);
+                // HYBRID RENDERING: Use phoneDatabase for model list, adminManager for prices
+                if (typeof phoneDatabase !== 'undefined') {
+                    console.log('✅ Using HYBRID approach (phoneDatabase models + backend prices)');
+                    console.log(`📦 phoneDatabase has ${Object.keys(phoneDatabase.Apple || {}).length} Apple + ${Object.keys(phoneDatabase.Samsung || {}).length} Samsung models`);
 
-                    // Filter and render Apple models
-                    // CRITICAL: Only show phones with display !== false AND available !== false
-                    const allApplePhones = adminManager.phones.filter(p => p.brand === 'Apple');
-                    const applePhones = allApplePhones.filter(p => p.display !== false && p.available !== false);
-                    console.log(`📱 Apple phones: ${applePhones.length} visible (${allApplePhones.length} total, ${allApplePhones.length - applePhones.length} hidden)`);
+                    // Render Apple models - HYBRID approach (phoneDatabase list + backend prices)
+                    if (phoneDatabase.Apple) {
+                        console.log(`📱 Processing ${Object.keys(phoneDatabase.Apple).length} Apple models from phoneDatabase`);
+                        let renderedCount = 0;
 
-                    applePhones.forEach(phone => {
-                        const modelName = phone.model;
-                        const storageOptions = phone.storages || [];
+                        Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
+                            // Priority 1: Check if model exists in adminManager with prices
+                            let maxPrice = 0;
+                            let storageOptions = Object.keys(modelData.storage || {});
+                            let imageUrl = modelData.image || 'images/phones/iphone-16-pro-max.jpg';
 
-                        // CRITICAL: Get EXACT prices from Excel import - NO CALCULATIONS!
-                        let maxPrice = 0;
-
-                        if (currentCondition === 'used') {
-                            // USED: Check buyPrices from backend (admin-editable, includes Excel imports)
-                            if (phone.buyPrices && Object.keys(phone.buyPrices).length > 0) {
-                                // Extract "excellent" condition prices from buyPrices
-                                const excellentPrices = [];
-                                for (const [storage, conditions] of Object.entries(phone.buyPrices)) {
-                                    if (conditions && conditions.excellent > 0) {
-                                        excellentPrices.push(conditions.excellent);
-                                    }
-                                }
-
-                                if (excellentPrices.length > 0) {
-                                    maxPrice = Math.max(...excellentPrices);
-                                    console.log(`  ✅ ${modelName} USED: $${maxPrice} (from backend buyPrices)`);
-                                } else {
-                                    maxPrice = 0;
-                                    console.log(`  ⚠️  ${modelName} USED: buyPrices exist but all prices are $0`);
-                                }
-                            } else {
-                                console.log(`  ⚠️  ${modelName} USED: No buyPrices in backend - admin needs to set prices`);
-                                maxPrice = 0;
+                            // Try to get admin data for this specific model
+                            let adminPhone = null;
+                            if (hasAdminData) {
+                                adminPhone = adminManager.phones.find(p => p.brand === 'Apple' && p.model === modelName);
                             }
-                        } else {
-                            // NEW: Check newPhonePrices from backend (admin-editable, includes Excel imports)
-                            if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
-                                const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
-                                if (prices.length > 0) {
-                                    maxPrice = Math.max(...prices);
-                                    console.log(`  ✅ ${modelName} NEW: $${maxPrice} (from backend newPhonePrices)`);
-                                } else {
-                                    maxPrice = 0;
-                                    console.log(`  ⚠️  ${modelName} NEW: newPhonePrices exist but all prices are $0`);
-                                }
-                            } else {
-                                console.log(`  ⚠️  ${modelName} NEW: No newPhonePrices in backend - admin needs to set prices`);
-                                maxPrice = 0;
-                            }
-                        }
 
-                        // CRITICAL: Skip phones with no price data (don't show $0 phones)
-                        if (maxPrice === 0) {
-                            console.log(`  ⚠️  Skipping ${modelName} - no ${currentCondition} price data`);
-                            return; // Skip this phone
-                        }
-
-                        const price = roundToNearest10(maxPrice);
-                        if (price !== maxPrice) {
-                            console.log(`  💰 Price rounded: $${maxPrice} → $${price}`);
-                        }
-
-                        // Get image from phone data (already in Excel import)
-                        const imageUrl = phone.image || 'iphone-16-pro-max.jpg';
-
-                        const model = {
-                            name: modelName,
-                            img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                            storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
-                        };
-                        appleGrid.innerHTML += createModelCard(model, 'Apple', price);
-                    });
-                    console.log(`✅ Rendered ${applePhones.length} Apple phones`);
-
-                    // Filter and render Samsung models
-                    // CRITICAL: Only show phones with display !== false AND available !== false
-                    const allSamsungPhones = adminManager.phones.filter(p => p.brand === 'Samsung');
-                    const samsungPhones = allSamsungPhones.filter(p => p.display !== false && p.available !== false);
-                    console.log(`📱 Samsung phones: ${samsungPhones.length} visible (${allSamsungPhones.length} total, ${allSamsungPhones.length - samsungPhones.length} hidden)`);
-
-                    samsungPhones.forEach(phone => {
-                        const modelName = phone.model;
-                        const storageOptions = phone.storages || [];
-
-                        // CRITICAL: Get EXACT prices from Excel import - NO CALCULATIONS!
-                        let maxPrice = 0;
-
-                        if (currentCondition === 'used') {
-                            // USED: Check buyPrices from backend (admin-editable, includes Excel imports)
-                            if (phone.buyPrices && Object.keys(phone.buyPrices).length > 0) {
-                                // Extract "excellent" condition prices from buyPrices
-                                const excellentPrices = [];
-                                for (const [storage, conditions] of Object.entries(phone.buyPrices)) {
-                                    if (conditions && conditions.excellent > 0) {
-                                        excellentPrices.push(conditions.excellent);
-                                    }
-                                }
-
-                                if (excellentPrices.length > 0) {
-                                    maxPrice = Math.max(...excellentPrices);
-                                    console.log(`  ✅ ${modelName} USED: $${maxPrice} (from backend buyPrices)`);
-                                } else {
-                                    maxPrice = 0;
-                                    console.log(`  ⚠️  ${modelName} USED: buyPrices exist but all prices are $0`);
-                                }
-                            } else {
-                                console.log(`  ⚠️  ${modelName} USED: No buyPrices in backend - admin needs to set prices`);
-                                maxPrice = 0;
-                            }
-                        } else {
-                            // NEW: Check newPhonePrices from backend (admin-editable, includes Excel imports)
-                            if (phone.newPhonePrices && Object.keys(phone.newPhonePrices).length > 0) {
-                                const prices = Object.values(phone.newPhonePrices).filter(p => p > 0);
-                                if (prices.length > 0) {
-                                    maxPrice = Math.max(...prices);
-                                    console.log(`  ✅ ${modelName} NEW: $${maxPrice} (from backend newPhonePrices)`);
-                                } else {
-                                    maxPrice = 0;
-                                    console.log(`  ⚠️  ${modelName} NEW: newPhonePrices exist but all prices are $0`);
-                                }
-                            } else {
-                                console.log(`  ⚠️  ${modelName} NEW: No newPhonePrices in backend - admin needs to set prices`);
-                                maxPrice = 0;
-                            }
-                        }
-
-                        // CRITICAL: Skip phones with no price data (don't show $0 phones)
-                        if (maxPrice === 0) {
-                            console.log(`  ⚠️  Skipping ${modelName} - no ${currentCondition} price data`);
-                            return; // Skip this phone
-                        }
-
-                        const price = roundToNearest10(maxPrice);
-                        if (price !== maxPrice) {
-                            console.log(`  💰 Price rounded: $${maxPrice} → $${price}`);
-                        }
-
-                        // Get image from phone data (already in Excel import)
-                        const imageUrl = phone.image || 'galaxy-s24-ultra.jpg';
-
-                        const model = {
-                            name: modelName,
-                            img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                            storage: sortStorageOptions(storageOptions) // Sort storage in ascending order
-                        };
-                        samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
-                    });
-                    console.log(`✅ Rendered ${samsungPhones.length} Samsung phones`);
-                } else {
-                    // MOBILE or INCOMPLETE admin data - use phoneDatabase fallback
-                    console.log('📱 Using phoneDatabase fallback (mobile or incomplete admin data)');
-                    console.log('📱 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
-                    console.log('📦 phoneDatabase available:', typeof phoneDatabase !== 'undefined');
-
-                    if (typeof phoneDatabase !== 'undefined') {
-                        // Render Apple models from phoneDatabase
-                        if (phoneDatabase.Apple) {
-                            console.log(`📱 Loading ${Object.keys(phoneDatabase.Apple).length} Apple models from phoneDatabase`);
-                            Object.entries(phoneDatabase.Apple).forEach(([modelName, modelData]) => {
-                                const storageOptions = Object.keys(modelData.storage || {});
-
-                                // Calculate price from phoneDatabase basePrice
-                                let maxPrice = modelData.basePrice || 0;
-
-                                // For NEW phones, estimate higher price
-                                if (currentCondition === 'new') {
-                                    maxPrice = Math.round(maxPrice * 1.3);
-                                }
-
-                                if (maxPrice === 0) {
-                                    console.log(`  ⚠️  Skipping ${modelName} - no basePrice in phoneDatabase`);
+                            if (adminPhone) {
+                                // Check display settings - skip if hidden
+                                if (adminPhone.display === false || adminPhone.available === false) {
+                                    console.log(`  🚫 Skipping ${modelName} - hidden in admin settings`);
                                     return;
                                 }
 
-                                const price = roundToNearest10(maxPrice);
-                                const imageUrl = modelData.image || 'images/phones/iphone-16-pro-max.jpg';
-
-                                const model = {
-                                    name: modelName,
-                                    img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                    storage: sortStorageOptions(storageOptions)
-                                };
-                                appleGrid.innerHTML += createModelCard(model, 'Apple', price);
-                            });
-                            console.log(`✅ Rendered ${Object.keys(phoneDatabase.Apple).length} Apple phones from phoneDatabase`);
-                        }
-
-                        // Render Samsung models from phoneDatabase
-                        if (phoneDatabase.Samsung) {
-                            console.log(`📱 Loading ${Object.keys(phoneDatabase.Samsung).length} Samsung models from phoneDatabase`);
-                            Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
-                                const storageOptions = Object.keys(modelData.storage || {});
-
-                                // Calculate price from phoneDatabase basePrice
-                                let maxPrice = modelData.basePrice || 0;
-
-                                // For NEW phones, estimate higher price
-                                if (currentCondition === 'new') {
-                                    maxPrice = Math.round(maxPrice * 1.3);
+                                // Use admin storage options if available
+                                if (adminPhone.storages && adminPhone.storages.length > 0) {
+                                    storageOptions = adminPhone.storages;
                                 }
 
-                                if (maxPrice === 0) {
-                                    console.log(`  ⚠️  Skipping ${modelName} - no basePrice in phoneDatabase`);
+                                // Use admin image if available
+                                if (adminPhone.image) {
+                                    imageUrl = adminPhone.image;
+                                }
+
+                                // Get price from backend based on condition
+                                if (currentCondition === 'used') {
+                                    // USED: Use buyPrices from backend (excellent condition)
+                                    if (adminPhone.buyPrices && Object.keys(adminPhone.buyPrices).length > 0) {
+                                        const excellentPrices = [];
+                                        for (const [storage, conditions] of Object.entries(adminPhone.buyPrices)) {
+                                            if (conditions && conditions.excellent > 0) {
+                                                excellentPrices.push(conditions.excellent);
+                                            }
+                                        }
+                                        if (excellentPrices.length > 0) {
+                                            maxPrice = Math.max(...excellentPrices);
+                                            console.log(`  ✅ ${modelName} USED: $${maxPrice} (backend buyPrices)`);
+                                        }
+                                    }
+                                } else {
+                                    // NEW: Use newPhonePrices from backend
+                                    if (adminPhone.newPhonePrices && Object.keys(adminPhone.newPhonePrices).length > 0) {
+                                        const prices = Object.values(adminPhone.newPhonePrices).filter(p => p > 0);
+                                        if (prices.length > 0) {
+                                            maxPrice = Math.max(...prices);
+                                            console.log(`  ✅ ${modelName} NEW: $${maxPrice} (backend newPhonePrices)`);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Priority 2: Fallback to phoneDatabase (USED only)
+                            if (maxPrice === 0) {
+                                if (currentCondition === 'used') {
+                                    // USED: Use phoneDatabase basePrice
+                                    maxPrice = modelData.basePrice || 0;
+                                    if (maxPrice > 0) {
+                                        console.log(`  📱 ${modelName} USED: $${maxPrice} (phoneDatabase fallback)`);
+                                    }
+                                } else {
+                                    // NEW: No fallback - skip if no backend price
+                                    console.log(`  ⚠️  Skipping ${modelName} NEW - no backend newPhonePrices`);
                                     return;
                                 }
+                            }
 
-                                const price = roundToNearest10(maxPrice);
-                                const imageUrl = modelData.image || 'images/phones/galaxy-s24-ultra.jpg';
+                            // Skip if still no price
+                            if (maxPrice === 0) {
+                                console.log(`  ⚠️  Skipping ${modelName} - no price data`);
+                                return;
+                            }
 
-                                const model = {
-                                    name: modelName,
-                                    img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
-                                    storage: sortStorageOptions(storageOptions)
-                                };
-                                samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
-                            });
-                            console.log(`✅ Rendered ${Object.keys(phoneDatabase.Samsung).length} Samsung phones from phoneDatabase`);
-                        }
-                    } else {
-                        // NO phoneDatabase available - show error
-                        console.error('❌ CRITICAL: Neither adminManager nor phoneDatabase available!');
-                        appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data available. Please contact support.</p>';
-                        samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data available. Please contact support.</p>';
+                            const price = roundToNearest10(maxPrice);
+                            const model = {
+                                name: modelName,
+                                img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
+                                storage: sortStorageOptions(storageOptions)
+                            };
+                            appleGrid.innerHTML += createModelCard(model, 'Apple', price);
+                            renderedCount++;
+                        });
+                        console.log(`✅ Rendered ${renderedCount} Apple phones`);
                     }
+
+                    // Render Samsung models - HYBRID approach (phoneDatabase list + backend prices)
+                    if (phoneDatabase.Samsung) {
+                        console.log(`📱 Processing ${Object.keys(phoneDatabase.Samsung).length} Samsung models from phoneDatabase`);
+                        let renderedCount = 0;
+
+                        Object.entries(phoneDatabase.Samsung).forEach(([modelName, modelData]) => {
+                            // Priority 1: Check if model exists in adminManager with prices
+                            let maxPrice = 0;
+                            let storageOptions = Object.keys(modelData.storage || {});
+                            let imageUrl = modelData.image || 'images/phones/galaxy-s24-ultra.jpg';
+
+                            // Try to get admin data for this specific model
+                            let adminPhone = null;
+                            if (hasAdminData) {
+                                adminPhone = adminManager.phones.find(p => p.brand === 'Samsung' && p.model === modelName);
+                            }
+
+                            if (adminPhone) {
+                                // Check display settings - skip if hidden
+                                if (adminPhone.display === false || adminPhone.available === false) {
+                                    console.log(`  🚫 Skipping ${modelName} - hidden in admin settings`);
+                                    return;
+                                }
+
+                                // Use admin storage options if available
+                                if (adminPhone.storages && adminPhone.storages.length > 0) {
+                                    storageOptions = adminPhone.storages;
+                                }
+
+                                // Use admin image if available
+                                if (adminPhone.image) {
+                                    imageUrl = adminPhone.image;
+                                }
+
+                                // Get price from backend based on condition
+                                if (currentCondition === 'used') {
+                                    // USED: Use buyPrices from backend (excellent condition)
+                                    if (adminPhone.buyPrices && Object.keys(adminPhone.buyPrices).length > 0) {
+                                        const excellentPrices = [];
+                                        for (const [storage, conditions] of Object.entries(adminPhone.buyPrices)) {
+                                            if (conditions && conditions.excellent > 0) {
+                                                excellentPrices.push(conditions.excellent);
+                                            }
+                                        }
+                                        if (excellentPrices.length > 0) {
+                                            maxPrice = Math.max(...excellentPrices);
+                                            console.log(`  ✅ ${modelName} USED: $${maxPrice} (backend buyPrices)`);
+                                        }
+                                    }
+                                } else {
+                                    // NEW: Use newPhonePrices from backend
+                                    if (adminPhone.newPhonePrices && Object.keys(adminPhone.newPhonePrices).length > 0) {
+                                        const prices = Object.values(adminPhone.newPhonePrices).filter(p => p > 0);
+                                        if (prices.length > 0) {
+                                            maxPrice = Math.max(...prices);
+                                            console.log(`  ✅ ${modelName} NEW: $${maxPrice} (backend newPhonePrices)`);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Priority 2: Fallback to phoneDatabase (USED only)
+                            if (maxPrice === 0) {
+                                if (currentCondition === 'used') {
+                                    // USED: Use phoneDatabase basePrice
+                                    maxPrice = modelData.basePrice || 0;
+                                    if (maxPrice > 0) {
+                                        console.log(`  📱 ${modelName} USED: $${maxPrice} (phoneDatabase fallback)`);
+                                    }
+                                } else {
+                                    // NEW: No fallback - skip if no backend price
+                                    console.log(`  ⚠️  Skipping ${modelName} NEW - no backend newPhonePrices`);
+                                    return;
+                                }
+                            }
+
+                            // Skip if still no price
+                            if (maxPrice === 0) {
+                                console.log(`  ⚠️  Skipping ${modelName} - no price data`);
+                                return;
+                            }
+
+                            const price = roundToNearest10(maxPrice);
+                            const model = {
+                                name: modelName,
+                                img: imageUrl.includes('images/phones/') ? imageUrl.replace('images/phones/', '') : imageUrl,
+                                storage: sortStorageOptions(storageOptions)
+                            };
+                            samsungGrid.innerHTML += createModelCard(model, 'Samsung', price);
+                            renderedCount++;
+                        });
+                        console.log(`✅ Rendered ${renderedCount} Samsung phones`);
+                    }
+                } else {
+                    // NO phoneDatabase available - show error
+                    console.error('❌ CRITICAL: phoneDatabase not available!');
+                    appleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data available. Please contact support.</p>';
+                    samsungGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #dc3545;">⚠️ No phone data available. Please contact support.</p>';
                 }
 
                 // Fade in with new content
