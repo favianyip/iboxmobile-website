@@ -134,15 +134,7 @@ function loadAdminDataForCustomerPages() {
     console.log('🔄 LOADING ADMIN DATA FROM LOCALSTORAGE');
     console.log('='.repeat(80));
 
-    // CRITICAL: Detect device type for debugging mobile vs desktop price issues
-    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const screenWidth = window.innerWidth;
-    console.log(`📱 Device Type: ${isMobile ? 'MOBILE' : 'DESKTOP'}`);
-    console.log(`📏 Screen Width: ${screenWidth}px`);
-    console.log(`🌐 User Agent: ${navigator.userAgent}`);
-    console.log(`🔗 Page URL: ${window.location.href}`);
-
-    // CRITICAL: Version check to detect outdated cached JavaScript
+    // Version check to detect outdated cached JavaScript
     const cachedVersion = localStorage.getItem('quote_js_version');
     if (cachedVersion && cachedVersion !== QUOTE_JS_VERSION) {
         console.warn(`⚠️  WARNING: Version mismatch!`);
@@ -2108,9 +2100,7 @@ function showModels(brand) {
     let modelsToDisplay = Object.keys(phoneDatabase[brand]);
     console.log('Models found in database:', modelsToDisplay.length, modelsToDisplay);
 
-    // CRITICAL FIX: Only filter by admin settings if we have COMPLETE and RECENT data
-    // On mobile devices, localStorage may be empty/stale, so show all phoneDatabase models
-    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // Filter by admin settings if data is available
     const hasAdminData = typeof adminManager !== 'undefined' && adminManager && adminManager.phones && adminManager.phones.length > 0;
 
     // Check if admin data is complete (has most models from phoneDatabase)
@@ -2123,9 +2113,8 @@ function showModels(brand) {
         console.log(`Admin data check: ${adminModelCount}/${dbModelCount} models (${Math.round(adminModelCount/dbModelCount*100)}%) - ${isAdminDataComplete ? 'COMPLETE' : 'INCOMPLETE'}`);
     }
 
-    // Only apply admin filtering if data is complete (desktop with full localStorage)
-    // For mobile or incomplete data, show ALL phoneDatabase models
-    if (hasAdminData && isAdminDataComplete && !isMobile) {
+    // Apply admin filtering if data is complete
+    if (hasAdminData && isAdminDataComplete) {
         console.log('Admin manager available with complete data, applying display filters');
         const adminPhones = adminManager.phones.filter(p => p.brand === brand && p.display !== false);
         console.log('Admin phones for brand:', adminPhones.map(p => p.model));
@@ -2142,7 +2131,7 @@ function showModels(brand) {
         });
         console.log('Filtered models:', modelsToDisplay.length, modelsToDisplay);
     } else {
-        console.log(`📱 Showing ALL models from phoneDatabase (Mobile: ${isMobile}, Admin complete: ${isAdminDataComplete})`);
+        console.log(`Showing ALL models from phoneDatabase (Admin complete: ${isAdminDataComplete})`);
     }
     
     if (modelsToDisplay.length === 0) {
@@ -2187,11 +2176,11 @@ function showModels(brand) {
                 hasPriceData = true;
             }
         }
-        // CRITICAL FIX: Fallback to phoneDatabase for mobile devices without localStorage
+        // Fallback to phoneDatabase if admin data not available
         if (!hasPriceData && model.basePrice !== undefined) {
             basePrice = model.basePrice;
             hasPriceData = true;
-            console.log(`📱 Mobile fallback: Using phoneDatabase basePrice $${basePrice} for ${modelName}`);
+            console.log(`Fallback: Using phoneDatabase basePrice $${basePrice} for ${modelName}`);
         }
         
         // Create card with inline onclick (works reliably)
@@ -2756,12 +2745,11 @@ function updateLivePriceEstimate() {
     // Calculate price based on device type
     if (quoteState.deviceType === 'new-sealed') {
         // Use EXACT NEW SEALED price from admin data
-        // FALLBACK to phoneDatabase calculation for mobile devices
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             price = adminPhone.newPhonePrices[quoteState.storage];
             console.log(`✅ NEW SEALED price: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
-            // CRITICAL FIX: Fallback to phoneDatabase for mobile devices
+            // Fallback to phoneDatabase estimation
             console.warn(`⚠️  Admin NEW SEALED data not available - falling back to phoneDatabase estimation`);
             if (model.basePrice !== undefined) {
                 // Estimate: NEW SEALED = basePrice * 1.3 + storage modifier
@@ -2769,7 +2757,7 @@ function updateLivePriceEstimate() {
                 if (model.storage && model.storage[quoteState.storage] !== undefined) {
                     price += model.storage[quoteState.storage];
                 }
-                console.log(`📱 Mobile fallback: Using estimated NEW SEALED price $${Math.round(price)} (base: $${model.basePrice} * 1.3)`);
+                console.log(`Fallback: Using estimated NEW SEALED price $${Math.round(price)} (base: $${model.basePrice} * 1.3)`);
                 price = Math.round(price);
             } else {
                 price = 0;
@@ -2795,13 +2783,12 @@ function updateLivePriceEstimate() {
         }
     } else if (quoteState.deviceType === 'new-activated') {
         // Use NEW SEALED price - Load deduction from admin panel modifiers
-        // FALLBACK to phoneDatabase calculation for mobile devices
         if (adminPhone && adminPhone.newPhonePrices && adminPhone.newPhonePrices[quoteState.storage]) {
             const activatedDeduction = Math.abs(getModifierValue('deviceType', 'new-activated'));
             price = adminPhone.newPhonePrices[quoteState.storage] - activatedDeduction;
             console.log(`✅ NEW ACTIVATED price: $${price} for ${quoteState.model} ${quoteState.storage} (deduction: -$${activatedDeduction})`);
         } else {
-            // CRITICAL FIX: Fallback to phoneDatabase for mobile devices
+            // Fallback to phoneDatabase estimation
             console.warn(`⚠️  Admin NEW ACTIVATED data not available - falling back to phoneDatabase estimation`);
             if (model.basePrice !== undefined) {
                 // Estimate: NEW ACTIVATED = basePrice * 1.2 + storage modifier
@@ -2814,7 +2801,7 @@ function updateLivePriceEstimate() {
                 if (activatedDeduction > 0) {
                     price -= activatedDeduction;
                 }
-                console.log(`📱 Mobile fallback: Using estimated NEW ACTIVATED price $${Math.round(price)} (base: $${model.basePrice} * 1.2)`);
+                console.log(`Fallback: Using estimated NEW ACTIVATED price $${Math.round(price)} (base: $${model.basePrice} * 1.2)`);
                 price = Math.round(price);
             } else {
                 price = 0;
@@ -2840,12 +2827,11 @@ function updateLivePriceEstimate() {
         }
     } else {
         // USED device - use exact storage-specific USED price from admin data
-        // FALLBACK to phoneDatabase for mobile devices without localStorage
         if (adminPhone && adminPhone.storagePrices && adminPhone.storagePrices[quoteState.storage]) {
             price = adminPhone.storagePrices[quoteState.storage];
             console.log(`✅ USED price from backend: $${price} for ${quoteState.model} ${quoteState.storage}`);
         } else {
-            // CRITICAL FIX: Fallback to phoneDatabase calculation for mobile devices
+            // Fallback to phoneDatabase calculation
             console.warn(`⚠️  Admin data not available - falling back to phoneDatabase`);
             if (model.basePrice !== undefined) {
                 price = model.basePrice;
