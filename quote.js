@@ -284,12 +284,21 @@ function loadAdminDataForCustomerPages() {
                 dbModel.storage = newStorage;
             }
 
-            // Update colors - Convert strings to objects with hex
+            // Update colors - Handle both string and object formats
             if (phone.colors && phone.colors.length > 0) {
-                dbModel.colors = phone.colors.map(colorName => {
+                dbModel.colors = phone.colors.map(color => {
+                    // If already an object with name and hex, use it directly
+                    if (typeof color === 'object' && color.name && color.hex) {
+                        return {
+                            name: color.name,
+                            hex: color.hex
+                        };
+                    }
+                    // If it's a string, convert to object
+                    const colorName = typeof color === 'string' ? color : (color.name || 'Black');
                     return {
                         name: colorName,
-                        hex: getColorHex(colorName) || '#CCCCCC'
+                        hex: getColorHex(colorName, brand) || '#CCCCCC'
                     };
                 });
             }
@@ -346,7 +355,8 @@ function loadAdminDataForCustomerPages() {
 }
 
 // Helper function to get color hex values
-function getColorHex(colorName) {
+// Brand parameter added for consistency with admin.js
+function getColorHex(colorName, brand) {
     const colorMap = {
         // Titanium colors (iPhone Pro models)
         'Desert Titanium': '#8B7355',
@@ -425,7 +435,8 @@ function getColorHex(colorName) {
         'Turquoise': '#40E0D0'
     };
 
-    return colorMap[colorName];
+    // Return color if found, otherwise fallback to gray
+    return colorMap[colorName] || '#CCCCCC';
 }
 
 // Load prices on page load
@@ -1905,7 +1916,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             basePrice: adminPhone.basePrice || 0,
                             image: adminPhone.image || '',
                             storage: {},
-                            colors: adminPhone.colors ? adminPhone.colors.map(c => ({ name: c, hex: getColorHex(c) || '#CCCCCC' })) : []
+                            colors: adminPhone.colors ? adminPhone.colors.map(c => {
+                                // Handle both string and object color formats
+                                if (typeof c === 'object' && c.name && c.hex) {
+                                    return { name: c.name, hex: c.hex };
+                                }
+                                const colorName = typeof c === 'string' ? c : (c.name || 'Black');
+                                return { name: colorName, hex: getColorHex(colorName, brandParam) || '#CCCCCC' };
+                            }) : []
                         };
                         // Populate storage
                         if (adminPhone.storages) {
@@ -2501,8 +2519,8 @@ function populateStep2() {
         const colorName = typeof color === 'string' ? color : color.name;
         // CRITICAL FIX: Use getColorHex() to look up color, don't default to gray
         const colorHex = typeof color === 'string'
-            ? (getColorHex(colorName) || '#CCCCCC')  // Look up hex for string colors
-            : (color.hex || getColorHex(colorName) || '#CCCCCC');  // Use hex or look up
+            ? (getColorHex(colorName, quoteState.brand) || '#CCCCCC')  // Look up hex for string colors
+            : (color.hex || getColorHex(colorName, quoteState.brand) || '#CCCCCC');  // Use hex or look up
 
         const btn = document.createElement('button');
         btn.className = 'option-btn';

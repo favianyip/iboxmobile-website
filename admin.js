@@ -2627,6 +2627,165 @@ document.addEventListener('change', function(e) {
     }
 });
 
+/**
+ * Get hex color code for common phone colors
+ * Based on official Apple and Samsung color data from Excel files
+ *
+ * @param {string} colorName - Name of the color
+ * @param {string} brand - Brand name (Apple or Samsung)
+ * @returns {string} Hex color code
+ */
+function getCommonColorHex(colorName, brand) {
+    // Comprehensive color mapping from Excel reference files
+    const colorDatabase = {
+        // Apple Official Colors (from Apple_Official_Colors_From_Your_Models_UPDATED.xlsx)
+        Apple: {
+            // iPhone 16/17 Series Colors
+            'Black': '#000000',
+            'White': '#FFFFFF',
+            'Pink': '#FFB6C1',
+            'Teal': '#008080',
+            'Ultramarine': '#4169E1',
+
+            // iPhone Pro Titanium Colors
+            'Desert Titanium': '#8B7355',
+            'Natural Titanium': '#A8A8A0',
+            'White Titanium': '#F5F5F0',
+            'Black Titanium': '#2C2C2C',
+            'Blue Titanium': '#4A6B8A',
+
+            // iPhone 17 New Colors
+            'Cosmic Orange': '#FF6B35',
+            'Deep Blue': '#003D82',
+
+            // Standard Apple Colors
+            'Space Gray': '#52514D',
+            'Space Grey': '#52514D',
+            'Space Black': '#1C1C1E',
+            'Silver': '#C0C0C0',
+            'Gold': '#FFD700',
+            'Rose Gold': '#B76E79',
+            'Midnight': '#2C2C2E',
+            'Starlight': '#F5F5DC',
+            'Blue': '#1E3A8A',
+            'Purple': '#9333EA',
+            'Deep Purple': '#5B4B8A',
+            'Red': '#DC2626',
+            '(PRODUCT)RED': '#DC2626',
+            'Product Red': '#DC2626',
+            'Green': '#059669',
+            'Alpine Green': '#576856',
+            'Midnight Green': '#4E5851',
+            'Yellow': '#EAB308',
+            'Coral': '#FF6B6B',
+            'Graphite': '#54524F',
+            'Sierra Blue': '#A7C1D9',
+            'Pacific Blue': '#2D4E5C',
+
+            // iPhone 15 Colors
+            'Black (iPhone 15)': '#3C3C3C',
+            'Blue (iPhone 15)': '#D4E4ED',
+            'Green (iPhone 15)': '#CAD6C3',
+            'Yellow (iPhone 15)': '#F6E64C',
+            'Pink (iPhone 15)': '#F9D1CF',
+
+            // iPhone 14/13 Colors
+            'Midnight (iPhone 14)': '#1C1C1E',
+            'Starlight (iPhone 14)': '#F5F5DC',
+            'Pink (iPhone 13)': '#FADDD7',
+            'Blue (iPhone 13)': '#447792',
+            'Midnight (iPhone 13)': '#3E4042',
+            'Starlight (iPhone 13)': '#FAF6F2',
+            'Red (iPhone 13)': '#BF0013',
+            'Green (iPhone 13)': '#394C38'
+        },
+
+        // Samsung Official Colors (from Samsung_ALL_Models_Official_Colors_MERGED.xlsx)
+        Samsung: {
+            // Galaxy S24 Ultra Colors
+            'Titanium Black': '#1C1C1C',
+            'Titanium Gray': '#8E8E93',
+            'Titanium Violet': '#C9B3D8',
+            'Titanium Yellow': '#FFD60A',
+            'Titanium Green': '#30D158',
+            'Titanium Orange': '#FF9500',
+            'Titanium Blue': '#0A84FF',
+
+            // Galaxy S24+ / S24 Colors
+            'Onyx Black': '#000000',
+            'Marble Gray': '#B4B4B8',
+            'Cobalt Violet': '#8E7CC3',
+            'Amber Yellow': '#FFD60A',
+            'Jade Green': '#32D74B',
+            'Sapphire Blue': '#0A84FF',
+            'Sandstone Orange': '#FF9F0A',
+
+            // Galaxy S23 Series Colors
+            'Phantom Black': '#1C1C1C',
+            'Phantom White': '#F5F5F5',
+            'Cloud Navy': '#2C3E50',
+            'Cloud White': '#F8F8F8',
+            'Lavender': '#E6E6FA',
+            'Mint': '#98FF98',
+            'Cream': '#FFFDD0',
+            'Burgundy': '#800020',
+            'Bronze': '#CD7F32',
+            'Graphite': '#383838',
+            'Icy Blue': '#B0E0E6',
+
+            // Phantom Series (older models)
+            'Phantom Silver': '#D1D1D6',
+            'Phantom Gray': '#8E8E93',
+            'Phantom Violet': '#8E7CC3',
+
+            // Standard Samsung Colors
+            'Black': '#000000',
+            'White': '#FFFFFF',
+            'Gray': '#808080',
+            'Blue': '#0A84FF',
+            'Green': '#32D74B',
+            'Purple': '#AF52DE',
+            'Pink': '#FF2D55',
+            'Red': '#FF3B30',
+            'Yellow': '#FFD60A',
+            'Orange': '#FF9F0A'
+        },
+
+        // Generic fallback colors (for any brand)
+        Generic: {
+            'Black': '#000000',
+            'White': '#FFFFFF',
+            'Gray': '#808080',
+            'Grey': '#808080',
+            'Silver': '#C0C0C0',
+            'Gold': '#FFD700',
+            'Blue': '#0A84FF',
+            'Red': '#FF3B30',
+            'Green': '#32D74B',
+            'Yellow': '#FFD60A',
+            'Orange': '#FF9F0A',
+            'Purple': '#AF52DE',
+            'Pink': '#FF2D55',
+            'Brown': '#A52A2A',
+            'Beige': '#F5F5DC'
+        }
+    };
+
+    // Try to find color in brand-specific database
+    if (colorDatabase[brand] && colorDatabase[brand][colorName]) {
+        return colorDatabase[brand][colorName];
+    }
+
+    // Try generic color database
+    if (colorDatabase.Generic[colorName]) {
+        return colorDatabase.Generic[colorName];
+    }
+
+    // Default to gray if color not found
+    console.warn(`⚠️ Color not found: ${colorName} (${brand}), using default gray`);
+    return '#CCCCCC';
+}
+
 function savePhone() {
     // Check permission
     if (!auth.hasPermission('canManagePhones')) {
@@ -2638,9 +2797,44 @@ function savePhone() {
     const model = document.getElementById('phoneModel').value;
     const imageUrl = document.getElementById('phoneImageUrl').value;
 
-    // Get colors from dropdown
+    // Get colors from dropdown with hex values
     const colorSelect = document.getElementById('phoneColorsSelect');
-    const colors = colorSelect ? Array.from(colorSelect.selectedOptions).map(opt => opt.value) : [];
+    const selectedColorNames = colorSelect ? Array.from(colorSelect.selectedOptions).map(opt => opt.value) : [];
+
+    // Convert color names to objects with hex values
+    // Load from phoneDatabase if available, otherwise use default hex mapping
+    const colors = selectedColorNames.map(colorName => {
+        // Try to find hex from phoneDatabase for this brand's models
+        let hexValue = null;
+
+        // Check if we have phoneDatabase available
+        if (typeof phoneDatabase !== 'undefined' && phoneDatabase[brand]) {
+            // Look through existing models of this brand to find the hex value
+            for (const modelName in phoneDatabase[brand]) {
+                const model = phoneDatabase[brand][modelName];
+                if (model.colors && Array.isArray(model.colors)) {
+                    const existingColor = model.colors.find(c =>
+                        (typeof c === 'object' && c.name === colorName) ||
+                        c === colorName
+                    );
+                    if (existingColor && typeof existingColor === 'object' && existingColor.hex) {
+                        hexValue = existingColor.hex;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // If no hex found in phoneDatabase, use common color mapping
+        if (!hexValue) {
+            hexValue = getCommonColorHex(colorName, brand);
+        }
+
+        return {
+            name: colorName,
+            hex: hexValue
+        };
+    });
 
     const checkedStorages = Array.from(document.querySelectorAll('.storage-checkboxes input:checked'))
         .map(cb => cb.value);
