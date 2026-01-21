@@ -129,7 +129,7 @@ function updatePhoneDatabaseWithDynamicPrices() {
 // So customer pages can access the same data as admin panel
 // ============================================================================
 
-async function loadAdminDataForCustomerPages() {
+function loadAdminDataForCustomerPages() {
     console.log('='.repeat(80));
     console.log('🔄 LOADING ADMIN DATA FROM LOCALSTORAGE');
     console.log('='.repeat(80));
@@ -160,48 +160,26 @@ async function loadAdminDataForCustomerPages() {
         // AUTO-IMPORT: If localStorage is empty, automatically import prices
         if (!storedPhones) {
             console.log('📦 No phone data in localStorage - attempting auto-import...');
-            console.log('🔄 MOBILE SYNC: Trying to load from admin-data.json...');
 
-            // STEP 1: Try loading from admin-data.json (for mobile sync)
-            if (typeof importFromAdminDataJson === 'function') {
-                try {
-                    // Call async function and wait for it
-                    const jsonLoaded = await importFromAdminDataJson();
-                    if (jsonLoaded) {
-                        storedPhones = localStorage.getItem('ktmobile_phones');
-                        console.log('✅ Auto-import from admin-data.json successful!');
-                        console.log('📱 MOBILE SYNC WORKING! Data loaded from server.');
-                    }
-                } catch (jsonError) {
-                    console.warn('⚠️ Failed to load from admin-data.json:', jsonError.message);
-                }
-            }
-
-            // STEP 2: If JSON import failed, try importExactPrices function
-            if (!storedPhones && typeof importExactPrices === 'function') {
-                console.log('🔄 Falling back to importExactPrices()...');
+            // Check if importExactPrices function is available (from import-exact-prices.js)
+            if (typeof importExactPrices === 'function') {
+                console.log('🔄 Running importExactPrices() automatically...');
                 try {
                     importExactPrices();
                     storedPhones = localStorage.getItem('ktmobile_phones');
-                    console.log('✅ Auto-import from phoneDatabase successful!');
+                    console.log('✅ Auto-import successful!');
                 } catch (importError) {
                     console.error('❌ Auto-import failed:', importError);
                 }
+            } else {
+                console.log('⚠️ importExactPrices not available - loading script dynamically...');
+                // Script will be loaded, then we retry
             }
 
-            // STEP 3: If still no data, show error and instructions
+            // If still no data after auto-import attempt
             if (!storedPhones) {
-                console.error('❌ CRITICAL: No admin phone data found!');
-                console.error('');
-                console.error('💡 SOLUTIONS:');
-                console.error('   1. Go to admin panel → click "Import Exact Prices"');
-                console.error('   2. Or upload admin-data.json to /data/ folder on server');
-                console.error('');
-                console.error('📱 FOR MOBILE SYNC:');
-                console.error('   - Desktop: Import prices in admin panel');
-                console.error('   - Download admin-data.json');
-                console.error('   - Upload to server: /data/admin-data.json');
-                console.error('   - Mobile will auto-sync! ✅');
+                console.error('❌ CRITICAL: No admin phone data found in localStorage!');
+                console.error('💡 SOLUTION: Go to admin panel and click "Import Exact Prices"');
                 return;
             }
         }
@@ -1524,11 +1502,8 @@ window.selectBrand = function(brand) {
 // This function syncs Excel prices to customer-facing pages
 //
 console.log('🔄 Initializing admin data sync for customer pages...');
-// Use async IIFE to handle the async function
-(async () => {
-    await loadAdminDataForCustomerPages();  // RE-ENABLED - syncs Excel prices to customer pages
-    console.log('✅ Admin data sync completed');
-})();
+loadAdminDataForCustomerPages();  // RE-ENABLED - syncs Excel prices to customer pages
+console.log('✅ Admin data sync completed');
 
 // Load condition modifiers from localStorage (set by admin panel)
 function loadConditionModifiers() {
