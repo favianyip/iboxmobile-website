@@ -1972,6 +1972,12 @@ function updateModifierInputStyle(input) {
  * Load condition modifiers from localStorage into input fields
  */
 function loadConditionModifierInputs() {
+    // Safety check: Only run on admin pages with full adminManager
+    if (!adminManager || typeof adminManager.loadConditionModifiers !== 'function') {
+        console.log('⏭️  Skipping condition modifier inputs (not on admin page)');
+        return;
+    }
+
     console.log('📥 Loading condition modifiers into admin panel inputs...');
 
     const modifiers = adminManager.loadConditionModifiers();
@@ -4822,9 +4828,12 @@ function saveGeneralSettings() {
 
 // Load settings when settings section is shown
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(loadGeneralSettings, 500);
-    // Load condition modifiers from localStorage into input fields
-    setTimeout(loadConditionModifierInputs, 600);
+    // Only run admin-specific initialization on admin pages
+    if (isOnAdminPage()) {
+        setTimeout(loadGeneralSettings, 500);
+        // Load condition modifiers from localStorage into input fields
+        setTimeout(loadConditionModifierInputs, 600);
+    }
 });
 
 window.loadGeneralSettings = loadGeneralSettings;
