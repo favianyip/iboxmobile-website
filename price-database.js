@@ -41,13 +41,75 @@ class PriceDatabase {
             };
 
             this.saveDatabase(initialDb);
-            console.log('✅ Price database initialized');
+            console.log('✅ Price database initialized (empty)');
+
+            // Auto-import data from hardcoded prices if available
+            this.autoImportPricesIfEmpty();
         } else {
             console.log('✅ Price database loaded:', {
                 version: existing.version,
                 phones: existing.phones?.length || 0,
                 lastUpdate: existing.lastUpdate
             });
+
+            // Check if database is empty and needs auto-import
+            if (!existing.phones || existing.phones.length === 0) {
+                console.log('⚠️ Price database is empty, attempting auto-import...');
+                this.autoImportPricesIfEmpty();
+            }
+        }
+    }
+
+    /**
+     * Auto-import prices from import-exact-prices.js if database is empty
+     * This ensures mobile users get correct prices on first visit
+     */
+    autoImportPricesIfEmpty() {
+        // Check if old localStorage has data
+        const oldStorage = localStorage.getItem('ktmobile_phones');
+        if (oldStorage) {
+            try {
+                const oldPhones = JSON.parse(oldStorage);
+                if (oldPhones && oldPhones.length > 0) {
+                    console.log(`📦 Migrating ${oldPhones.length} phones from old localStorage to new price database`);
+
+                    // Migrate to new database
+                    const db = this.loadDatabase();
+                    if (db) {
+                        db.phones = oldPhones;
+                        this.saveDatabase(db);
+                        console.log('✅ Migration complete');
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Failed to migrate old localStorage:', e);
+            }
+        }
+
+        // If importExactPrices function exists, call it
+        if (typeof importExactPrices === 'function') {
+            console.log('📥 Auto-importing hardcoded prices...');
+            try {
+                const result = importExactPrices();
+                console.log('✅ Auto-import complete:', result);
+
+                // Now migrate from localStorage to price database
+                const newOldStorage = localStorage.getItem('ktmobile_phones');
+                if (newOldStorage) {
+                    const phones = JSON.parse(newOldStorage);
+                    const db = this.loadDatabase();
+                    if (db) {
+                        db.phones = phones;
+                        this.saveDatabase(db);
+                        console.log(`✅ Migrated ${phones.length} phones to price database`);
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Auto-import failed:', e);
+            }
+        } else {
+            console.warn('⚠️ importExactPrices function not available, database will remain empty');
         }
     }
 

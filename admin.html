@@ -1097,13 +1097,14 @@
     </div>
 
     <!-- No external libraries needed - using pure JavaScript CSP-compliant CSV export -->
-    <!-- CRITICAL: Price Database System - Load FIRST before quote.js -->
+    <!-- CRITICAL: Price Database System - Load in proper sequence -->
+    <!-- Load import function FIRST, then database which may call it -->
+    <script src="import-exact-prices.js"></script>
     <script src="price-database.js"></script>
     <script src="quote.js"></script>
     <script src="auth.js"></script>
     <!-- REMOVED: master-color-database.js - File does not exist -->
     <!-- REMOVED: smart-image-mapper.js - File does not exist -->
-    <script src="import-exact-prices.js"></script>
     <!-- REMOVED: import-benchmark-prices.js - File does not exist -->
     <script src="admin.js?v=20260124-fix-image-upload"></script>
     <script>
