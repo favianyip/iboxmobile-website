@@ -8,6 +8,9 @@
     <meta http-equiv="Expires" content="0">
     <title>IBOX MOBILE SINGAPORE - BuyBack Your Used Phone at Highest Price</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Firebase Real-Time Sync - Load FIRST for cross-device data synchronization -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="firebase-sync.js"></script>
     <!-- CRITICAL: Price Database System - Load in proper sequence -->
     <!-- Load import function FIRST, then database which may call it -->
     <script src="import-exact-prices.js"></script>
