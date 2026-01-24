@@ -807,14 +807,14 @@ function loadAvailableColors() {
         'Titanium Jadegreen',
         'Titanium Pinkgold',
 
-        // Samsung Galaxy S25/S25+ (2025)
-        'Icy Blue',
+        // Samsung Galaxy S25/S25+ (2025) - NO SPACES per Samsung.com official naming
+        'Icyblue',
         'Mint',
         'Navy',
         'Silver Shadow',
-        'Coral Red',
-        'Blue Black',
-        'Pink Gold',
+        'Coralred',
+        'Blueblack',
+        'Pinkgold',
 
         // Samsung Galaxy S24 series
         'Onyx Black',
@@ -2914,9 +2914,15 @@ function getCommonColorHex(colorName, brand) {
             'Black Titanium': '#2C2C2C',
             'Blue Titanium': '#4A6B8A',
 
-            // iPhone 17 New Colors
+            // iPhone 17 New Colors (verified from Apple.com Jan 2026)
             'Cosmic Orange': '#FF6B35',
             'Deep Blue': '#003D82',
+            'Mist Blue': '#9BB7D4',
+            'Sage': '#B2BEB5',
+            'Lavender': '#E6E6FA',
+            'Cloud White': '#F5F5F7',
+            'Light Gold': '#F9D5BB',
+            'Sky Blue': '#87CEEB',
 
             // Standard Apple Colors
             'Space Gray': '#52514D',
@@ -2962,6 +2968,19 @@ function getCommonColorHex(colorName, brand) {
 
         // Samsung Official Colors (from Samsung_ALL_Models_Official_Colors_MERGED.xlsx)
         Samsung: {
+            // Galaxy S25 Ultra Colors (verified from Samsung.com Jan 2026 - NO SPACES)
+            'Titanium Silverblue': '#8B9DC3',
+            'Titanium Whitesilver': '#E8E8E8',
+            'Titanium Jetblack': '#000000',
+            'Titanium Jadegreen': '#00A878',
+            'Titanium Pinkgold': '#E6C2B8',
+
+            // Galaxy S25/S25+ Colors (verified from Samsung.com - NO SPACES)
+            'Icyblue': '#B0E0E6',
+            'Blueblack': '#1C2841',
+            'Coralred': '#FF6F61',
+            'Pinkgold': '#E6C2B8',
+
             // Galaxy S24 Ultra Colors
             'Titanium Black': '#1C1C1C',
             'Titanium Gray': '#8E8E93',

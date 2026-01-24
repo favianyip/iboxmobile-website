@@ -505,7 +505,11 @@ function getColorHex(colorName, brand) {
         'Midnight': '#191970',
         'Midnight Green': '#35423C',
         'White': '#FFFFFF',
+        'Cloud White': '#F5F5F7',
         'Starlight': '#FAF9F6',
+        'Mist Blue': '#9BB7D4',
+        'Sage': '#B2BEB5',
+        'Light Gold': '#F9D5BB',
         'Pink': '#FFB6C1',
         'Coral': '#FF6B6B',
         'Green': '#4CD964',
@@ -518,7 +522,7 @@ function getColorHex(colorName, brand) {
         'Teal': '#008080',
         'Ultramarine': '#4169E1',
 
-        // Samsung colors
+        // Samsung colors - NO SPACES (official Samsung naming)
         'Titanium Black': '#1C1C1C',
         'Titanium Gray': '#8E8E93',
         'Titanium Violet': '#C9B3D8',
@@ -526,6 +530,15 @@ function getColorHex(colorName, brand) {
         'Titanium Green': '#30D158',
         'Titanium Orange': '#FF9500',
         'Titanium Blue': '#0A84FF',
+        'Titanium Silverblue': '#8B9DC3',
+        'Titanium Whitesilver': '#E8E8E8',
+        'Titanium Jetblack': '#000000',
+        'Titanium Jadegreen': '#00A878',
+        'Titanium Pinkgold': '#E6C2B8',
+        'Icyblue': '#B0E0E6',
+        'Blueblack': '#1C2841',
+        'Coralred': '#FF6F61',
+        'Pinkgold': '#E6C2B8',
         'Onyx Black': '#000000',
         'Phantom Black': '#1C1C1C',
         'Phantom Silver': '#D1D1D6',
@@ -588,32 +601,35 @@ const phoneDatabase = {
             basePrice: 900, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/iphone-16.jpg',
             storage: { '256GB': 0, '512GB': 250 },
+            // Colors verified from Apple.com (January 2026)
             colors: [
-                { name: 'Cosmic Orange', hex: '#FF6B35' },
-                { name: 'Deep Blue', hex: '#003D82' },
-                { name: 'Silver', hex: '#C0C0C0' }
+                { name: 'Black', hex: '#000000' },
+                { name: 'White', hex: '#FFFFFF' },
+                { name: 'Mist Blue', hex: '#9BB7D4' },
+                { name: 'Sage', hex: '#B2BEB5' },
+                { name: 'Lavender', hex: '#E6E6FA' }
             ]
         },
         'iPhone Air': {
             basePrice: 850, // Excel USED price for 256GB (updated 2026-01-18)
             image: 'images/phones/iphone-16.jpg',
             storage: { '256GB': 0, '512GB': 150, '1TB': 250 },
+            // Colors verified from Apple.com (January 2026)
             colors: [
-                { name: 'Cosmic Orange', hex: '#FF6B35' },
-                { name: 'Deep Blue', hex: '#003D82' },
-                { name: 'Silver', hex: '#C0C0C0' }
+                { name: 'Space Black', hex: '#2C2C2E' },
+                { name: 'Cloud White', hex: '#F5F5F7' },
+                { name: 'Light Gold', hex: '#F9D5BB' },
+                { name: 'Sky Blue', hex: '#87CEEB' }
             ]
         },
         'iPhone 16E': {
             basePrice: 520, // Excel USED price for 128GB (updated 2026-01-18)
             image: 'images/phones/iphone-se-3rd-gen.jpg',
             storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            // Colors verified from Apple.com (January 2026) - Only 2 colors available
             colors: [
                 { name: 'Black', hex: '#000000' },
-                { name: 'White', hex: '#FFFFFF' },
-                { name: 'Pink', hex: '#FFB6C1' },
-                { name: 'Teal', hex: '#008080' },
-                { name: 'Ultramarine', hex: '#4169E1' }
+                { name: 'White', hex: '#FFFFFF' }
             ]
         },
         'iPhone 16 Pro Max': {
@@ -1122,42 +1138,45 @@ const phoneDatabase = {
             basePrice: 850, // USED price for 256GB
             image: 'images/phones/galaxy-s24-ultra.jpg',
             storage: { '256GB': 0, '512GB': 200, '1TB': 250 },
+            // Colors verified from Samsung.com (January 2026) - NO SPACES in color names
             colors: [
                 { name: 'Titanium Silverblue', hex: '#8B9DC3' },
-                { name: 'Titanium Black', hex: '#1C1C1C' },
                 { name: 'Titanium Gray', hex: '#8E8E93' },
+                { name: 'Titanium Black', hex: '#1C1C1C' },
                 { name: 'Titanium Whitesilver', hex: '#E8E8E8' },
-                { name: 'Titanium Jade Green', hex: '#00A878' },
-                { name: 'Titanium Pink Gold', hex: '#E6C2B8' },
-                { name: 'Titanium Jet Black', hex: '#000000' }
+                { name: 'Titanium Jetblack', hex: '#000000' },
+                { name: 'Titanium Jadegreen', hex: '#00A878' },
+                { name: 'Titanium Pinkgold', hex: '#E6C2B8' }
             ]
         },
         'Galaxy S25+ 5G': {
             basePrice: 750, // USED price for 256GB
             image: 'images/phones/galaxy-s24-plus.jpg',
             storage: { '256GB': 0, '512GB': 100 },
+            // Colors verified from Samsung.com (January 2026) - NO SPACES in color names
             colors: [
-                { name: 'Icy Blue', hex: '#B0E0E6' },
-                { name: 'Mint', hex: '#98FB98' },
                 { name: 'Navy', hex: '#000080' },
+                { name: 'Icyblue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
                 { name: 'Silver Shadow', hex: '#C0C0C0' },
-                { name: 'Coral Red', hex: '#FF6F61' },
-                { name: 'Blue Black', hex: '#1C2841' },
-                { name: 'Pink Gold', hex: '#E6C2B8' }
+                { name: 'Blueblack', hex: '#1C2841' },
+                { name: 'Coralred', hex: '#FF6F61' },
+                { name: 'Pinkgold', hex: '#E6C2B8' }
             ]
         },
         'Galaxy S25 5G': {
-            basePrice: 600, // USED price for 256GB
+            basePrice: 550, // USED price for 128GB (base model)
             image: 'images/phones/galaxy-s24.jpg',
-            storage: { '256GB': 0, '512GB': 100 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 150 }, // Added 128GB option
+            // Colors verified from Samsung.com (January 2026) - NO SPACES in color names
             colors: [
-                { name: 'Icy Blue', hex: '#B0E0E6' },
-                { name: 'Mint', hex: '#98FB98' },
                 { name: 'Navy', hex: '#000080' },
+                { name: 'Icyblue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
                 { name: 'Silver Shadow', hex: '#C0C0C0' },
-                { name: 'Coral Red', hex: '#FF6F61' },
-                { name: 'Blue Black', hex: '#1C2841' },
-                { name: 'Pink Gold', hex: '#E6C2B8' }
+                { name: 'Blueblack', hex: '#1C2841' },
+                { name: 'Coralred', hex: '#FF6F61' },
+                { name: 'Pinkgold', hex: '#E6C2B8' }
             ]
         },
         'Galaxy Z Fold 7 5G': {

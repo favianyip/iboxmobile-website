@@ -82,9 +82,11 @@ function initializeDatabaseFromExcelReference() {
                 '512GB': 250
             },
             colors: [
-                'Cosmic Orange',
-                'Deep Blue',
-                'Silver'
+                'Black',
+                'White',
+                'Mist Blue',
+                'Sage',
+                'Lavender'
             ],
             newPhonePrices: {
                 '256GB': 1035,
@@ -104,9 +106,10 @@ function initializeDatabaseFromExcelReference() {
                 '1TB': 250
             },
             colors: [
-                'Cosmic Orange',
-                'Deep Blue',
-                'Silver'
+                'Space Black',
+                'Cloud White',
+                'Light Gold',
+                'Sky Blue'
             ],
             newPhonePrices: {
                 '256GB': 978,
@@ -203,12 +206,13 @@ function initializeDatabaseFromExcelReference() {
                 '1TB': 200
             },
             colors: [
-                'Titanium Black',
+                'Titanium Silverblue',
                 'Titanium Gray',
+                'Titanium Black',
                 'Titanium Whitesilver',
-                'Titanium Jade Green',
-                'Titanium Pink Gold',
-                'Titanium Jet Black'
+                'Titanium Jetblack',
+                'Titanium Jadegreen',
+                'Titanium Pinkgold'
             ],
             newPhonePrices: {
                 '256GB': 1173,
@@ -228,13 +232,13 @@ function initializeDatabaseFromExcelReference() {
                 '512GB': 100
             },
             colors: [
-                'Icy Blue',
-                'Mint',
                 'Navy',
+                'Icyblue',
+                'Mint',
                 'Silver Shadow',
-                'Coral Red',
-                'Blue Black',
-                'Pink Gold'
+                'Blueblack',
+                'Coralred',
+                'Pinkgold'
             ],
             newPhonePrices: {
                 '256GB': 863,

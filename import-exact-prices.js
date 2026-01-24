@@ -1442,7 +1442,10 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            colors: [
+                { name: 'Black', hex: '#000000' },
+                { name: 'White', hex: '#FFFFFF' }
+            ],
             display: true,
             available: true
         },
@@ -1481,7 +1484,13 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            colors: [
+                { name: 'Black', hex: '#000000' },
+                { name: 'White', hex: '#FFFFFF' },
+                { name: 'Mist Blue', hex: '#9BB7D4' },
+                { name: 'Sage', hex: '#B2BEB5' },
+                { name: 'Lavender', hex: '#E6E6FA' }
+            ],
             display: true,
             available: true
         },
@@ -1530,7 +1539,11 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            colors: [
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D82' },
+                { name: 'Silver', hex: '#C0C0C0' }
+            ],
             display: true,
             available: true
         },
@@ -1589,7 +1602,11 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            colors: [
+                { name: 'Cosmic Orange', hex: '#FF6B35' },
+                { name: 'Deep Blue', hex: '#003D82' },
+                { name: 'Silver', hex: '#C0C0C0' }
+            ],
             display: true,
             available: true
         },
@@ -1638,7 +1655,12 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            colors: [
+                { name: 'Space Black', hex: '#2C2C2E' },
+                { name: 'Cloud White', hex: '#F5F5F7' },
+                { name: 'Light Gold', hex: '#F9D5BB' },
+                { name: 'Sky Blue', hex: '#87CEEB' }
+            ],
             display: true,
             available: true
         },
@@ -2656,11 +2678,16 @@ function importExactPrices() {
             brand: 'Samsung',
             model: 'Galaxy S25 5G',
             image: 'images/phones/samsung-galaxy-s25-5g.jpg',
-            storages: ["256GB", "512GB"],
-            basePrice: 600,
-            storagePrices: {"256GB": 600, "512GB": 700},
-            newPhonePrices: {"256GB": 850, "512GB": 950},
+            storages: ["128GB", "256GB", "512GB"],
+            basePrice: 550,
+            storagePrices: {"128GB": 550, "256GB": 600, "512GB": 700},
+            newPhonePrices: {"128GB": 800, "256GB": 850, "512GB": 950},
             buyPrices: {
+                "128GB": {
+                                "excellent": 550,
+                                "good": 522,
+                                "fair": 467
+                },
                 "256GB": {
                                 "excellent": 600,
                                 "good": 570,
@@ -2673,6 +2700,11 @@ function importExactPrices() {
                 }
 },
             quantities: {
+                "128GB": {
+                                "excellent": 0,
+                                "good": 0,
+                                "fair": 0
+                },
                 "256GB": {
                                 "excellent": 0,
                                 "good": 0,
@@ -2684,7 +2716,15 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Icyblue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
+                { name: 'Silver Shadow', hex: '#C0C0C0' },
+                { name: 'Blueblack', hex: '#1C2841' },
+                { name: 'Coralred', hex: '#FF6F61' },
+                { name: 'Pinkgold', hex: '#E6C2B8' }
+            ],
             display: true,
             available: true
         },
@@ -2723,7 +2763,16 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            // Colors verified from Samsung.com (January 2026) - NO SPACES in color names
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Icyblue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
+                { name: 'Silver Shadow', hex: '#C0C0C0' },
+                { name: 'Blueblack', hex: '#1C2841' },
+                { name: 'Coralred', hex: '#FF6F61' },
+                { name: 'Pinkgold', hex: '#E6C2B8' }
+            ],
             display: true,
             available: true
         },
@@ -2772,7 +2821,16 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            // Colors verified from Samsung.com (January 2026) - NO SPACES in color names
+            colors: [
+                { name: 'Titanium Silverblue', hex: '#8B9DC3' },
+                { name: 'Titanium Gray', hex: '#8E8E93' },
+                { name: 'Titanium Black', hex: '#1C1C1C' },
+                { name: 'Titanium Whitesilver', hex: '#E8E8E8' },
+                { name: 'Titanium Jetblack', hex: '#000000' },
+                { name: 'Titanium Jadegreen', hex: '#00A878' },
+                { name: 'Titanium Pinkgold', hex: '#E6C2B8' }
+            ],
             display: true,
             available: true
         },
@@ -2811,7 +2869,16 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            // Colors verified from Samsung.com (January 2026) - Same as S25/S25+ base models
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Icyblue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
+                { name: 'Silver Shadow', hex: '#C0C0C0' },
+                { name: 'Blueblack', hex: '#1C2841' },
+                { name: 'Coralred', hex: '#FF6F61' },
+                { name: 'Pinkgold', hex: '#E6C2B8' }
+            ],
             display: true,
             available: true
         },
@@ -2860,7 +2927,16 @@ function importExactPrices() {
                                 "fair": 0
                 }
 },
-            colors: [],
+            // Colors verified from Samsung.com (January 2026) - Same as S25/S25+ base models
+            colors: [
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Icyblue', hex: '#B0E0E6' },
+                { name: 'Mint', hex: '#98FB98' },
+                { name: 'Silver Shadow', hex: '#C0C0C0' },
+                { name: 'Blueblack', hex: '#1C2841' },
+                { name: 'Coralred', hex: '#FF6F61' },
+                { name: 'Pinkgold', hex: '#E6C2B8' }
+            ],
             display: true,
             available: true
         },
