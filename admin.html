@@ -1098,18 +1098,18 @@
 
     <!-- No external libraries needed - using pure JavaScript CSP-compliant CSV export -->
     <!-- Firebase Real-Time Sync - Load FIRST for cross-device data synchronization -->
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="firebase-sync.js"></script>
+    <script type="module" src="firebase-config.js?v=20260124"></script>
+    <script type="module" src="firebase-sync.js?v=20260124"></script>
     <!-- CRITICAL: Price Database System - Load in proper sequence -->
     <!-- Load import function FIRST, then database which may call it -->
-    <script src="import-exact-prices.js"></script>
-    <script src="price-database.js"></script>
-    <script src="quote.js"></script>
-    <script src="auth.js"></script>
+    <script src="import-exact-prices.js?v=20260124"></script>
+    <script src="price-database.js?v=20260124"></script>
+    <script src="quote.js?v=20260124-firebase"></script>
+    <script src="auth.js?v=20260124-firebase"></script>
     <!-- REMOVED: master-color-database.js - File does not exist -->
     <!-- REMOVED: smart-image-mapper.js - File does not exist -->
     <!-- REMOVED: import-benchmark-prices.js - File does not exist -->
-    <script src="admin.js?v=20260124-fix-image-upload"></script>
+    <script src="admin.js?v=20260124-firebase"></script>
     <script>
         // IMMEDIATE MENU NAVIGATION FIX - Runs as soon as possible
         (function() {
