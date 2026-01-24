@@ -1047,4 +1047,38 @@ body {
     .estimate-price {
         font-size: 2rem;
     }
+
+    /* Mobile-friendly color options */
+    .color-options {
+        gap: 0.75rem !important;
+    }
+
+    .color-options .option-btn {
+        min-width: 120px;
+        padding: 0.9rem 1rem;
+        font-size: 0.95rem;
+        min-height: 44px; /* iOS minimum tap target */
+        touch-action: manipulation; /* Prevent double-tap zoom */
+    }
+
+    /* Larger color swatches for mobile touch */
+    .color-swatch {
+        width: 32px !important;
+        height: 32px !important;
+        flex-shrink: 0;
+    }
+}
+
+/* Extra small screens - ensure proper wrapping */
+@media (max-width: 480px) {
+    .color-options .option-btn {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: 0;
+        justify-content: flex-start;
+    }
+
+    .color-swatch {
+        width: 28px !important;
+        height: 28px !important;
+    }
 }

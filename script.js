@@ -353,6 +353,15 @@ function loadHeroImage() {
 document.addEventListener('DOMContentLoaded', function() {
     // Load hero image settings
     loadHeroImage();
+
+    // Listen for Firebase hero image updates (real-time sync)
+    if (window.firebaseSync) {
+        window.firebaseSync.listenHeroImage((imageData) => {
+            console.log('📥 Hero image updated from cloud, reloading...');
+            loadHeroImage(); // Reload with new data
+        });
+    }
+
     // Dynamically load iPhone models from database
     loadiPhoneModels();
     initializePhoneImages();

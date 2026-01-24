@@ -1889,6 +1889,28 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('phoneDatabase available:', typeof phoneDatabase !== 'undefined', 'Brands:', phoneDatabase ? Object.keys(phoneDatabase) : 'N/A');
     console.log('window.selectBrand available:', typeof window.selectBrand !== 'undefined');
 
+    // Listen for Firebase price database updates (real-time sync)
+    if (window.firebaseSync) {
+        window.firebaseSync.listenPriceDatabase((database) => {
+            console.log('📥 Price database updated from cloud, reloading...');
+            // Reload priceDB with new data
+            if (window.priceDB && database) {
+                window.priceDB.loadDatabase(database);
+                console.log('✅ Price database reloaded with', database.phones?.length || 0, 'phones');
+            }
+        });
+
+        // Listen for condition modifier updates
+        window.firebaseSync.listenConditionModifiers((modifiers) => {
+            console.log('📥 Condition modifiers updated from cloud');
+            // The modifiers are already saved to localStorage by the listener
+            // If user is in the middle of a quote, we could recalculate
+            if (quoteState && quoteState.model) {
+                console.log('⚠️ Price modifiers changed - quote may need recalculation');
+            }
+        });
+    }
+
     // CRITICAL: Run price integrity check and display banner if issues found
     setTimeout(() => {
         displayPriceIntegrityBanner();
@@ -2547,18 +2569,19 @@ function populateStep2() {
             if (adminPhone.colors && adminPhone.colors.length > 0) {
                 colorsArray = adminPhone.colors.map(colorName => {
                     // Try to find color in original model colors
-                    const originalColor = model.colors.find(c => 
+                    const originalColor = model.colors.find(c =>
                         (typeof c === 'string' ? c : c.name) === colorName
                     );
-                    
+
                     if (originalColor) {
                         // Return original format (with hex)
-                        return typeof originalColor === 'string' 
-                            ? { name: originalColor, hex: '#CCCCCC' }
+                        return typeof originalColor === 'string'
+                            ? { name: originalColor, hex: getColorHex(originalColor, quoteState.brand) || '#CCCCCC' }
                             : originalColor;
                     } else {
-                        // Create new color object
-                        return { name: colorName, hex: '#CCCCCC' };
+                        // Create new color object using getColorHex to find proper hex value
+                        const properHex = getColorHex(colorName, quoteState.brand) || '#CCCCCC';
+                        return { name: colorName, hex: properHex };
                     }
                 });
             }

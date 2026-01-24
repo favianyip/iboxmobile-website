@@ -485,6 +485,13 @@ class AdminDataManager {
         localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(modifiers));
         console.log('💾 Saved to localStorage successfully');
 
+        // Sync to Firebase cloud
+        if (window.firebaseSync) {
+            window.firebaseSync.syncConditionModifiers(modifiers).catch(err => {
+                console.warn('Firebase sync failed, data saved locally only:', err);
+            });
+        }
+
         // Verify the save
         const verification = localStorage.getItem('ktmobile_condition_modifiers');
         console.log('🔍 Verification - localStorage contains:', verification);
@@ -637,7 +644,14 @@ class AdminDataManager {
             updatedAt: new Date().toISOString()
         };
         localStorage.setItem('ktmobile_hero_image', JSON.stringify(settings));
-        
+
+        // Sync to Firebase cloud
+        if (window.firebaseSync) {
+            window.firebaseSync.syncHeroImage(settings).catch(err => {
+                console.warn('Firebase sync failed, data saved locally only:', err);
+            });
+        }
+
         // Update main page hero image if it exists
         if (typeof updateMainPageHeroImage === 'function') {
             updateMainPageHeroImage(imagePath, removeBackground);
@@ -2055,6 +2069,13 @@ function saveAllConditionModifiersAndSync() {
 
         // Save to localStorage
         localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(modifiers));
+
+        // Sync to Firebase cloud
+        if (window.firebaseSync) {
+            window.firebaseSync.syncConditionModifiers(modifiers).catch(err => {
+                console.warn('Firebase sync failed, data saved locally only:', err);
+            });
+        }
 
         console.log('💾 Saved to localStorage:', modifiers);
         console.log(`✅ Successfully saved ${savedCount} condition modifiers`);
@@ -3951,6 +3972,15 @@ function loadAppointments() {
 function saveAppointments(appointments) {
     try {
         localStorage.setItem('ktmobile_appointments', JSON.stringify(appointments));
+
+        // Sync each appointment to Firebase cloud
+        if (window.firebaseSync && Array.isArray(appointments)) {
+            appointments.forEach(appointment => {
+                window.firebaseSync.syncAppointment(appointment).catch(err => {
+                    console.warn('Firebase appointment sync failed:', err);
+                });
+            });
+        }
     } catch (e) {
         console.error('Error saving appointments:', e);
     }
@@ -5600,6 +5630,14 @@ async function runExactPriceImport() {
             // Refresh the UI
             renderPhones();
             renderPriceTable();
+
+            // Sync to Firebase cloud
+            if (window.firebaseSync && window.priceDB) {
+                const database = window.priceDB.getAllData();
+                window.firebaseSync.syncPriceDatabase(database).catch(err => {
+                    console.warn('Firebase sync failed, data saved locally only:', err);
+                });
+            }
 
             // Close modal
             closeImportModal();

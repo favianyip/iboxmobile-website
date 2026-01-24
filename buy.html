@@ -464,6 +464,10 @@
         </div>
     </footer>
 
+    <!-- Firebase Real-Time Sync - Load FIRST for cross-device data synchronization -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="firebase-sync.js"></script>
+
     <!-- CRITICAL: Price Database System - Load in proper sequence -->
     <script src="import-exact-prices.js"></script>
     <script src="price-database.js"></script>

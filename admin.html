@@ -1097,6 +1097,9 @@
     </div>
 
     <!-- No external libraries needed - using pure JavaScript CSP-compliant CSV export -->
+    <!-- Firebase Real-Time Sync - Load FIRST for cross-device data synchronization -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="firebase-sync.js"></script>
     <!-- CRITICAL: Price Database System - Load in proper sequence -->
     <!-- Load import function FIRST, then database which may call it -->
     <script src="import-exact-prices.js"></script>
