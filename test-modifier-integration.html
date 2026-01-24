@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Condition Modifier Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 1rem;
+        }
+        .test-section {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        .status-icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.secondary {
+            background: #2196F3;
+        }
+        button.secondary:hover {
+            background: #0b7dda;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Condition Modifier Integration Test</h1>
+
+    <div class="test-section warning">
+        <h2>📋 Test Instructions</h2>
+        <p>This page tests the complete integration between admin panel condition modifiers and customer quote page.</p>
+        <ol>
+            <li><strong>Step 1:</strong> Click "Load Current Modifiers" to see what's in localStorage</li>
+            <li><strong>Step 2:</strong> Open admin panel and change a modifier value</li>
+            <li><strong>Step 3:</strong> Click "Reload Modifiers" to verify the change is reflected</li>
+            <li><strong>Step 4:</strong> Click "Test in Quote Page" to verify it works in actual quote</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🎮 Controls</h2>
+        <button onclick="loadModifiers()">🔄 Load Current Modifiers</button>
+        <button onclick="testModifierChange()" class="secondary">🧪 Test: Change Receipt Modifier</button>
+        <button onclick="clearModifiers()" class="secondary">🗑️ Clear All Modifiers</button>
+        <button onclick="window.open('admin.html#settings', '_blank')">🔧 Open Admin Panel</button>
+        <button onclick="window.open('sell-phones.html?type=new', '_blank')">📱 Test in Quote Page (NEW)</button>
+        <button onclick="window.open('sell-phones.html?type=used', '_blank')">📱 Test in Quote Page (USED)</button>
+    </div>
+
+    <div class="grid">
+        <div class="test-section" id="currentModifiers">
+            <h2>📦 Current Modifiers in localStorage</h2>
+            <p>Click "Load Current Modifiers" to view</p>
+        </div>
+
+        <div class="test-section" id="testResults">
+            <h2>✅ Test Results</h2>
+            <p>Test results will appear here</p>
+        </div>
+    </div>
+
+    <div class="test-section" id="integrationStatus">
+        <h2>🔍 Integration Status</h2>
+        <table id="statusTable">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>localStorage Available</td>
+                    <td id="status-storage">-</td>
+                    <td id="details-storage">-</td>
+                </tr>
+                <tr>
+                    <td>Modifiers Loaded</td>
+                    <td id="status-modifiers">-</td>
+                    <td id="details-modifiers">-</td>
+                </tr>
+                <tr>
+                    <td>NEW Phone Modifiers</td>
+                    <td id="status-new">-</td>
+                    <td id="details-new">-</td>
+                </tr>
+                <tr>
+                    <td>USED Phone Modifiers</td>
+                    <td id="status-used">-</td>
+                    <td id="details-used">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>📖 Expected Modifier Structure</h2>
+        <pre>{
+  "receipt": { "yes": 30, "no": 0 },
+  "country": { "local": 0, "export": -50 },
+  "deviceType": { "new-sealed": 0, "new-activated": -150 },
+  "body": { "A": 0, "B": -30, "C": -80, "D": -150 },
+  "screen": { "A": 0, "B": -20, "C": -50, "D": -200 },
+  "battery": { "91-100": 0, "86-90": -30, "81-85": -60, "80-below": -100 },
+  "issue": { "power": -300, "faceid": -150, "display": -200, "touch": -180, "camera": -120 },
+  "accessory": { "cable": 10, "box": 20 }
+}</pre>
+    </div>
+
+    <script>
+        function loadModifiers() {
+            const currentDiv = document.getElementById('currentModifiers');
+
+            try {
+                // Check localStorage availability
+                const hasStorage = typeof(Storage) !== "undefined";
+                updateStatus('storage', hasStorage, hasStorage ? 'localStorage available' : 'localStorage NOT available');
+
+                if (!hasStorage) {
+                    currentDiv.innerHTML = `
+                        <h2>📦 Current Modifiers in localStorage</h2>
+                        <div class="error">❌ localStorage is not available in this browser</div>
+                    `;
+                    return;
+                }
+
+                // Load modifiers
+                const stored = localStorage.getItem('ktmobile_condition_modifiers');
+
+                if (stored) {
+                    const modifiers = JSON.parse(stored);
+                    updateStatus('modifiers', true, `${Object.keys(modifiers).length} modifier groups found`);
+
+                    // Check NEW phone modifiers
+                    const hasNewModifiers = modifiers.receipt && modifiers.country && modifiers.deviceType;
+                    updateStatus('new', hasNewModifiers,
+                        hasNewModifiers ? 'receipt, country, deviceType present' : 'Missing some NEW modifiers');
+
+                    // Check USED phone modifiers
+                    const hasUsedModifiers = modifiers.body && modifiers.screen && modifiers.battery;
+                    updateStatus('used', hasUsedModifiers,
+                        hasUsedModifiers ? 'body, screen, battery present' : 'Missing some USED modifiers');
+
+                    currentDiv.innerHTML = `
+                        <h2>📦 Current Modifiers in localStorage</h2>
+                        <div class="success">
+                            <p><strong>✅ Modifiers loaded successfully</strong></p>
+                            <p>Modifier groups: ${Object.keys(modifiers).length}</p>
+                        </div>
+                        <h3>Current Values:</h3>
+                        <pre>${JSON.stringify(modifiers, null, 2)}</pre>
+                    `;
+                } else {
+                    updateStatus('modifiers', false, 'No modifiers found in localStorage');
+                    currentDiv.innerHTML = `
+                        <h2>📦 Current Modifiers in localStorage</h2>
+                        <div class="warning">
+                            <p><strong>⚠️ No modifiers found in localStorage</strong></p>
+                            <p>This means:</p>
+                            <ul>
+                                <li>Admin panel has not set any modifiers yet</li>
+                                <li>Quote page will use default fallback values</li>
+                            </ul>
+                            <p><strong>Action:</strong> Open admin panel and save modifier values</p>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                updateStatus('modifiers', false, 'Error: ' + e.message);
+                currentDiv.innerHTML = `
+                    <h2>📦 Current Modifiers in localStorage</h2>
+                    <div class="error">
+                        <p><strong>❌ Error loading modifiers</strong></p>
+                        <pre>${e.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStatus(component, success, details) {
+            const statusCell = document.getElementById(`status-${component}`);
+            const detailsCell = document.getElementById(`details-${component}`);
+
+            if (statusCell && detailsCell) {
+                statusCell.innerHTML = success ?
+                    '<span class="status-icon">✅</span>Pass' :
+                    '<span class="status-icon">❌</span>Fail';
+                detailsCell.textContent = details;
+            }
+        }
+
+        function testModifierChange() {
+            const resultsDiv = document.getElementById('testResults');
+
+            try {
+                // Get current modifiers
+                const stored = localStorage.getItem('ktmobile_condition_modifiers');
+                let modifiers = stored ? JSON.parse(stored) : {};
+
+                // Change receipt modifier to test value
+                const oldValue = modifiers.receipt?.yes || 30;
+                const newValue = oldValue + 10; // Increase by 10
+
+                if (!modifiers.receipt) modifiers.receipt = {};
+                modifiers.receipt.yes = newValue;
+
+                // Save back to localStorage
+                localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(modifiers));
+
+                resultsDiv.innerHTML = `
+                    <h2>✅ Test Results</h2>
+                    <div class="success">
+                        <p><strong>✅ Test modifier change successful</strong></p>
+                        <p>Changed receipt.yes from $${oldValue} to $${newValue}</p>
+                        <p><strong>Next step:</strong> Click "Load Current Modifiers" to verify</p>
+                        <p><strong>Then:</strong> Open quote page and select NEW phone with receipt to see the change</p>
+                    </div>
+                `;
+
+                // Auto-reload modifiers to show change
+                setTimeout(loadModifiers, 500);
+
+            } catch (e) {
+                resultsDiv.innerHTML = `
+                    <h2>✅ Test Results</h2>
+                    <div class="error">
+                        <p><strong>❌ Test failed</strong></p>
+                        <pre>${e.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        function clearModifiers() {
+            if (confirm('Clear all condition modifiers from localStorage? Quote page will use defaults.')) {
+                localStorage.removeItem('ktmobile_condition_modifiers');
+                document.getElementById('testResults').innerHTML = `
+                    <h2>✅ Test Results</h2>
+                    <div class="warning">
+                        <p><strong>⚠️ Modifiers cleared</strong></p>
+                        <p>localStorage has been cleared. Quote page will now use default values.</p>
+                        <p><strong>Action:</strong> Open admin panel and save modifier values to restore them</p>
+                    </div>
+                `;
+                loadModifiers();
+            }
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', loadModifiers);
+    </script>
+</body>
+</html>

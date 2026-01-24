@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Data - KT Mobile</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #4ec9b0; }
+        h2 { color: #dcdcaa; margin-top: 30px; }
+        .phone-card {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .phone-title {
+            color: #4fc1ff;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .price-row {
+            display: grid;
+            grid-template-columns: 100px 150px 150px 150px;
+            gap: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #3e3e42;
+        }
+        .price-row:last-child {
+            border-bottom: none;
+        }
+        .header-row {
+            font-weight: bold;
+            color: #dcdcaa;
+        }
+        .storage { color: #ce9178; }
+        .used-price { color: #4ec9b0; }
+        .new-price { color: #c586c0; }
+        .buy-price { color: #9cdcfe; }
+        .error { color: #f48771; }
+        .success { color: #4ec9b0; }
+        .warning { color: #dcdcaa; }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Data Check - localStorage Inspection</h1>
+
+        <div style="margin: 20px 0;">
+            <button onclick="checkData()">🔍 Check Data</button>
+            <button onclick="checkNewPrices()">📦 Check NEW Phone Prices</button>
+            <button onclick="location.href='admin.html'">← Back to Admin</button>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.style.margin = '10px 0';
+            div.style.padding = '10px';
+            div.style.borderLeft = '3px solid';
+
+            if (type === 'error') {
+                div.style.borderColor = '#f48771';
+                div.className = 'error';
+            } else if (type === 'success') {
+                div.style.borderColor = '#4ec9b0';
+                div.className = 'success';
+            } else if (type === 'warning') {
+                div.style.borderColor = '#dcdcaa';
+                div.className = 'warning';
+            }
+
+            div.textContent = message;
+            output.appendChild(div);
+        }
+
+        function checkData() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+
+            log('🔍 Checking localStorage data...', 'info');
+
+            const storedPhones = localStorage.getItem('ktmobile_phones');
+            if (!storedPhones) {
+                log('❌ ERROR: No phone data in localStorage!', 'error');
+                log('💡 Solution: Run force-clear-cache.html and reload prices', 'warning');
+                return;
+            }
+
+            let phones;
+            try {
+                phones = JSON.parse(storedPhones);
+                log(`✅ Found ${phones.length} phones in localStorage`, 'success');
+            } catch (e) {
+                log('❌ ERROR: Corrupted phone data - ' + e.message, 'error');
+                return;
+            }
+
+            // Count by brand
+            const brandCounts = {};
+            phones.forEach(p => {
+                brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1;
+            });
+
+            log('', 'info');
+            log('📊 Phone counts by brand:', 'info');
+            Object.entries(brandCounts).forEach(([brand, count]) => {
+                log(`  ${brand}: ${count} models`, 'info');
+            });
+
+            // Check for phones with NEW prices
+            const phonesWithNewPrices = phones.filter(p => {
+                return p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0;
+            });
+
+            log('', 'info');
+            log(`📦 Phones with NEW prices: ${phonesWithNewPrices.length} / ${phones.length}`, phonesWithNewPrices.length > 0 ? 'success' : 'warning');
+
+            if (phonesWithNewPrices.length === 0) {
+                log('⚠️ WARNING: No phones have NEW prices set!', 'warning');
+                log('💡 This is why "New Phone Prices" tab shows blank', 'warning');
+            }
+
+            // Show sample data
+            log('', 'info');
+            log('📱 Sample phone data (first 3 phones):', 'info');
+
+            phones.slice(0, 3).forEach(phone => {
+                const card = document.createElement('div');
+                card.className = 'phone-card';
+
+                card.innerHTML = `
+                    <div class="phone-title">${phone.brand} ${phone.model}</div>
+                    <div class="price-row header-row">
+                        <div>Storage</div>
+                        <div>Used Price</div>
+                        <div>NEW Price</div>
+                        <div>Buy Price (Exc)</div>
+                    </div>
+                    ${phone.storages.map(storage => `
+                        <div class="price-row">
+                            <div class="storage">${storage}</div>
+                            <div class="used-price">$${phone.storagePrices[storage] || 'N/A'}</div>
+                            <div class="new-price">$${phone.newPhonePrices?.[storage] || 'N/A'}</div>
+                            <div class="buy-price">$${phone.buyPrices?.[storage]?.excellent || 'N/A'}</div>
+                        </div>
+                    `).join('')}
+                `;
+
+                document.getElementById('output').appendChild(card);
+            });
+        }
+
+        function checkNewPrices() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+
+            log('📦 Checking NEW phone prices specifically...', 'info');
+
+            const storedPhones = localStorage.getItem('ktmobile_phones');
+            if (!storedPhones) {
+                log('❌ ERROR: No phone data in localStorage!', 'error');
+                return;
+            }
+
+            let phones = JSON.parse(storedPhones);
+            log(`Total phones: ${phones.length}`, 'info');
+
+            // Filter phones with NEW prices (same logic as admin.js)
+            const phonesWithNewPrices = phones.filter(p => {
+                if (p.newPhonePrices && Object.keys(p.newPhonePrices).length > 0) {
+                    const hasNonZeroPrice = Object.values(p.newPhonePrices).some(price => price > 0);
+                    return hasNonZeroPrice;
+                }
+                return false;
+            });
+
+            log(`Phones with NEW prices: ${phonesWithNewPrices.length}`, phonesWithNewPrices.length > 0 ? 'success' : 'error');
+
+            if (phonesWithNewPrices.length === 0) {
+                log('', 'info');
+                log('❌ ISSUE FOUND: Zero phones have valid NEW prices!', 'error');
+                log('', 'info');
+                log('🔍 Checking why:', 'info');
+
+                const sample = phones[0];
+                log(`Sample phone: ${sample.brand} ${sample.model}`, 'info');
+                log(`Has newPhonePrices field: ${!!sample.newPhonePrices}`, 'info');
+                log(`newPhonePrices content: ${JSON.stringify(sample.newPhonePrices, null, 2)}`, 'info');
+
+                return;
+            }
+
+            // Show all phones with NEW prices
+            log('', 'info');
+            log('📋 All phones with NEW prices:', 'success');
+
+            phonesWithNewPrices.forEach(phone => {
+                const card = document.createElement('div');
+                card.className = 'phone-card';
+
+                card.innerHTML = `
+                    <div class="phone-title">${phone.brand} ${phone.model}</div>
+                    <div class="price-row header-row">
+                        <div>Storage</div>
+                        <div>Used Price</div>
+                        <div>NEW Price</div>
+                        <div>Difference</div>
+                    </div>
+                    ${phone.storages.map(storage => {
+                        const usedPrice = phone.storagePrices[storage] || 0;
+                        const newPrice = phone.newPhonePrices[storage] || 0;
+                        const diff = newPrice - usedPrice;
+                        return `
+                            <div class="price-row">
+                                <div class="storage">${storage}</div>
+                                <div class="used-price">$${usedPrice}</div>
+                                <div class="new-price">$${newPrice}</div>
+                                <div style="color: ${diff > 0 ? '#4ec9b0' : '#f48771'}">+$${diff}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                `;
+
+                document.getElementById('output').appendChild(card);
+            });
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkData();
+        });
+    </script>
+</body>
+</html>

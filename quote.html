@@ -10,6 +10,21 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="quote.css">
     <script src="script.js" defer></script>
+    <script>
+        // Redirect to sell-phones.html if accessed directly without parameters
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasBrand = urlParams.has('brand');
+            const hasModel = urlParams.has('model');
+            const hasType = urlParams.has('type');
+
+            // If no required parameters, redirect to sell-phones.html
+            if (!hasBrand && !hasModel && !hasType) {
+                console.log('⚠️ Quote page accessed without parameters - redirecting to sell-phones.html');
+                window.location.href = 'sell-phones.html';
+            }
+        })();
+    </script>
 </head>
 <body>
     <header class="header">
@@ -592,8 +607,12 @@
         </svg>
     </a>
 
+    <!-- CRITICAL: Price Database System - Load FIRST -->
+    <script src="price-database.js"></script>
+    <script src="init-database-from-excel.js"></script>
+
     <script src="import-exact-prices.js"></script> <!-- AUTO-IMPORT: Loads prices automatically if localStorage empty -->
-    <script src="quote.js"></script>
+    <script src="quote.js?v=20260124-activation-fix"></script>
     <script src="admin.js" defer></script>
     
     <!-- Emergency click fix script -->

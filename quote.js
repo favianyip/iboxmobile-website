@@ -23,6 +23,135 @@ window.clearPriceCache = function() {
 };
 
 // ============================================================================
+// PRICE INTEGRITY VERIFICATION SYSTEM
+// ============================================================================
+// Verifies price data quality and provides alerts for issues
+window.verifyPriceIntegrity = function() {
+    console.log('🔍 Running price integrity verification...');
+
+    const stored = localStorage.getItem('ktmobile_phones');
+    const lastUpdate = localStorage.getItem('ktmobile_last_update');
+
+    const results = {
+        status: 'unknown',
+        message: '',
+        details: {},
+        timestamp: new Date().toISOString()
+    };
+
+    // Check 1: Data exists
+    if (!stored) {
+        results.status = 'error';
+        results.message = 'No price data loaded';
+        results.details.solution = 'Go to admin panel and import prices from Excel';
+        console.error('❌ CRITICAL: No price data in localStorage');
+        return results;
+    }
+
+    let phones;
+    try {
+        phones = JSON.parse(stored);
+    } catch (e) {
+        results.status = 'error';
+        results.message = 'Corrupted price data';
+        results.details.error = e.message;
+        console.error('❌ CRITICAL: Failed to parse phone data:', e);
+        return results;
+    }
+
+    // Check 2: Missing prices
+    const missingPrices = phones.filter(p => !p.basePrice || p.basePrice === 0);
+    results.details.totalPhones = phones.length;
+    results.details.missingPrices = missingPrices.length;
+    results.details.missingModels = missingPrices.map(p => `${p.brand} ${p.model}`);
+
+    if (missingPrices.length > 0) {
+        results.status = 'warning';
+        results.message = `${missingPrices.length} of ${phones.length} phones missing prices`;
+        console.warn(`⚠️  Phones with missing prices:`, results.details.missingModels);
+    }
+
+    // Check 3: Data freshness
+    if (lastUpdate) {
+        const updateDate = new Date(lastUpdate);
+        const now = new Date();
+        const hoursSinceUpdate = Math.floor((now - updateDate) / (1000 * 60 * 60));
+        const daysSinceUpdate = Math.floor(hoursSinceUpdate / 24);
+
+        results.details.lastUpdate = lastUpdate;
+        results.details.hoursSinceUpdate = hoursSinceUpdate;
+        results.details.daysSinceUpdate = daysSinceUpdate;
+
+        if (daysSinceUpdate > 7) {
+            if (results.status === 'unknown') results.status = 'warning';
+            results.message = results.message ?
+                results.message + ' AND prices are ' + daysSinceUpdate + ' days old' :
+                'Prices are ' + daysSinceUpdate + ' days old';
+            console.warn(`⚠️  Price data is ${daysSinceUpdate} days old - consider updating`);
+        } else if (results.status === 'unknown') {
+            results.status = 'ok';
+            results.message = 'All prices current and complete';
+        }
+    } else {
+        results.details.lastUpdate = 'Unknown';
+        console.warn('⚠️  No last update timestamp found');
+    }
+
+    // Check 4: Condition modifiers
+    const conditionModifiers = localStorage.getItem('ktmobile_condition_modifiers');
+    results.details.hasConditionModifiers = !!conditionModifiers;
+    if (!conditionModifiers) {
+        console.warn('⚠️  No condition modifiers found in localStorage');
+    }
+
+    // Final status
+    if (results.status === 'unknown') {
+        results.status = 'ok';
+        results.message = 'Price data loaded successfully';
+    }
+
+    console.log('✅ Price integrity check complete:', results);
+    return results;
+};
+
+// Run integrity check on page load and display banner if issues found
+function displayPriceIntegrityBanner() {
+    const results = window.verifyPriceIntegrity();
+
+    if (results.status === 'error' || results.status === 'warning') {
+        // Create warning banner at top of page
+        const banner = document.createElement('div');
+        banner.id = 'price-integrity-banner';
+        banner.style.cssText = `
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            background: ${results.status === 'error' ? '#dc3545' : '#ffc107'};
+            color: ${results.status === 'error' ? 'white' : '#000'};
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        `;
+
+        banner.innerHTML = `
+            ⚠️ ${results.message}
+            ${results.details.missingModels && results.details.missingModels.length > 0 ?
+                ` - Missing: ${results.details.missingModels.slice(0, 3).join(', ')}${results.details.missingModels.length > 3 ? '...' : ''}` :
+                ''}
+            <button onclick="document.getElementById('price-integrity-banner').remove()"
+                    style="margin-left: 1rem; padding: 0.25rem 0.75rem; background: white; border: none; border-radius: 4px; cursor: pointer;">
+                Dismiss
+            </button>
+        `;
+
+        document.body.insertBefore(banner, document.body.firstChild);
+    }
+}
+
+// ============================================================================
 // DISABLED: OLD MOCK DATA FILES - DO NOT USE!
 // ============================================================================
 // REASON: price_data.json and direct_prices.json contain OLD MOCK DATA
@@ -146,38 +275,37 @@ function loadAdminDataForCustomerPages() {
     console.log(`✅ Version verified: ${QUOTE_JS_VERSION}`);
 
     try {
-        // Load phones from localStorage (same as admin panel)
-        let storedPhones = localStorage.getItem('ktmobile_phones');
+        // CRITICAL: Load from NEW price database system FIRST
+        let adminPhones = [];
 
-        // AUTO-IMPORT: If localStorage is empty, automatically import prices
-        if (!storedPhones) {
-            console.log('📦 No phone data in localStorage - attempting auto-import...');
+        if (window.priceDB) {
+            // Use new database system (preferred method)
+            adminPhones = window.priceDB.getAllPhones();
+            console.log(`✅ Loaded ${adminPhones.length} phones from NEW price database`);
 
-            // Check if importExactPrices function is available (from import-exact-prices.js)
-            if (typeof importExactPrices === 'function') {
-                console.log('🔄 Running importExactPrices() automatically...');
-                try {
-                    importExactPrices();
-                    storedPhones = localStorage.getItem('ktmobile_phones');
-                    console.log('✅ Auto-import successful!');
-                } catch (importError) {
-                    console.error('❌ Auto-import failed:', importError);
-                }
-            } else {
-                console.log('⚠️ importExactPrices not available - loading script dynamically...');
-                // Script will be loaded, then we retry
+            // If database is empty, try to initialize
+            if (adminPhones.length === 0) {
+                console.warn('⚠️ Price database is empty');
+                console.log('💡 Run initializeDatabaseFromExcelReference() in admin panel to populate');
             }
-
-            // If still no data after auto-import attempt
-            if (!storedPhones) {
-                console.error('❌ CRITICAL: No admin phone data found in localStorage!');
-                console.error('💡 SOLUTION: Go to admin panel and click "Import Exact Prices"');
-                return;
-            }
+        } else {
+            console.warn('⚠️ NEW price database not loaded, using fallback');
         }
 
-        const adminPhones = JSON.parse(storedPhones);
-        console.log(`✅ Found ${adminPhones.length} phones in localStorage`);
+        // FALLBACK: If new system has no data, try old localStorage
+        if (adminPhones.length === 0) {
+            let storedPhones = localStorage.getItem('ktmobile_phones');
+
+            if (!storedPhones) {
+                console.error('❌ CRITICAL: No price data found!');
+                console.error('💡 SOLUTION 1: Run initializeDatabaseFromExcelReference() in admin panel');
+                console.error('💡 SOLUTION 2: Or import prices via admin UI');
+                return;
+            }
+
+            adminPhones = JSON.parse(storedPhones);
+            console.log(`✅ Found ${adminPhones.length} phones in OLD localStorage (fallback)`);
+        }
 
         // CRITICAL: Check data freshness for mobile vs desktop debugging
         const lastUpdate = localStorage.getItem('ktmobile_last_update');
@@ -489,9 +617,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 16 Pro Max': {
-            basePrice: 1035, // SellUp Verified: $1,035 (Grade A, Local, No Accessories) + $35 with Cable+Box = $1,070
+            basePrice: 1020, // Excel USED price for 256GB (updated 2026-01-22)
             image: 'images/phones/iphone-16-pro-max.jpg',
-            storage: { '256GB': 0, '512GB': 100, '1TB': 200 },
+            storage: { '256GB': 0, '512GB': 50, '1TB': 100 },
             colors: [
                 { name: 'Desert Titanium', hex: '#8B7355' },
                 { name: 'Natural Titanium', hex: '#A8A8A0' },
@@ -500,9 +628,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 16 Pro': {
-            basePrice: 1225, // SellUp: $1,225
+            basePrice: 870, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-16-pro.jpg',
-            storage: { '128GB': -100, '256GB': 0, '512GB': 100, '1TB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 },
             colors: [
                 { name: 'Desert Titanium', hex: '#8B7355' },
                 { name: 'Natural Titanium', hex: '#A8A8A0' },
@@ -535,9 +663,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 15 Pro Max': {
-            basePrice: 960, // SellUp: $960
+            basePrice: 800, // Excel USED price for 256GB (updated 2026-01-22)
             image: 'images/phones/iphone-15-pro-max.jpg',
-            storage: { '256GB': 0, '512GB': 100, '1TB': 200 },
+            storage: { '256GB': 0, '512GB': 50, '1TB': 100 },
             colors: [
                 { name: 'Natural Titanium', hex: '#A8A8A0' },
                 { name: 'Blue Titanium', hex: '#4A6B8A' },
@@ -546,9 +674,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 15 Pro': {
-            basePrice: 955, // SellUp: $955
+            basePrice: 600, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-15-pro.jpg',
-            storage: { '128GB': -100, '256GB': 0, '512GB': 100, '1TB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 },
             colors: [
                 { name: 'Natural Titanium', hex: '#A8A8A0' },
                 { name: 'Blue Titanium', hex: '#4A6B8A' },
@@ -557,9 +685,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 15 Plus': {
-            basePrice: 800, // SellUp: $800
+            basePrice: 550, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-15-plus.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
                 { name: 'Black', hex: '#3C3C3C' },
                 { name: 'Blue', hex: '#D4E4ED' },
@@ -569,9 +697,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 15': {
-            basePrice: 755, // SellUp: $755
+            basePrice: 500, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-15.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
                 { name: 'Black', hex: '#3C3C3C' },
                 { name: 'Blue', hex: '#D4E4ED' },
@@ -581,9 +709,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 14 Pro Max': {
-            basePrice: 850, // SellUp: $850
+            basePrice: 600, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-14-pro-max.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 150, '1TB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 },
             colors: [
                 { name: 'Deep Purple', hex: '#5B4B8A' },
                 { name: 'Gold', hex: '#FFD700' },
@@ -592,9 +720,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 14 Pro': {
-            basePrice: 760, // SellUp: $760
+            basePrice: 500, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-14-pro.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 150, '1TB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 },
             colors: [
                 { name: 'Deep Purple', hex: '#5B4B8A' },
                 { name: 'Gold', hex: '#FFD700' },
@@ -603,9 +731,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 14 Plus': {
-            basePrice: 640, // SellUp: $640
+            basePrice: 420, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-14-plus.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
                 { name: 'Blue', hex: '#007AFF' },
                 { name: 'Purple', hex: '#AF52DE' },
@@ -616,9 +744,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 14': {
-            basePrice: 560, // SellUp: $560
+            basePrice: 350, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-14.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
                 { name: 'Blue', hex: '#007AFF' },
                 { name: 'Purple', hex: '#AF52DE' },
@@ -629,9 +757,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 13 Pro Max': {
-            basePrice: 670, // SellUp: $670
+            basePrice: 460, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-13-pro-max.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 150, '1TB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 },
             colors: [
                 { name: 'Graphite', hex: '#54524F' },
                 { name: 'Gold', hex: '#FAE7CF' },
@@ -641,9 +769,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 13 Pro': {
-            basePrice: 580, // SellUp: $580
+            basePrice: 380, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-13-pro.jpg',
-            storage: { '128GB': 0, '256GB': 100, '512GB': 150, '1TB': 200 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 },
             colors: [
                 { name: 'Graphite', hex: '#54524F' },
                 { name: 'Gold', hex: '#FAE7CF' },
@@ -653,7 +781,7 @@ const phoneDatabase = {
             ]
         },
         'iPhone 13': {
-            basePrice: 460, // SellUp: $460
+            basePrice: 300, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-13.jpg',
             storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
@@ -666,7 +794,7 @@ const phoneDatabase = {
             ]
         },
         'iPhone 13 mini': {
-            basePrice: 485, // SellUp: $485
+            basePrice: 250, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-13-mini.jpg',
             storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
@@ -679,9 +807,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 12 Pro Max': {
-            basePrice: 500, // SellUp: $500
+            basePrice: 350, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-12-pro-max.jpg',
-            storage: { '128GB': 0, '256GB': 75, '512GB': 150 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
                 { name: 'Graphite', hex: '#54524F' },
                 { name: 'Gold', hex: '#FAE7CF' },
@@ -690,9 +818,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 12 Pro': {
-            basePrice: 440, // SellUp: $440
+            basePrice: 300, // Excel USED price for 128GB (updated 2026-01-22)
             image: 'images/phones/iphone-12-pro.jpg',
-            storage: { '128GB': 0, '256GB': 75, '512GB': 150 },
+            storage: { '128GB': 0, '256GB': 50, '512GB': 100 },
             colors: [
                 { name: 'Graphite', hex: '#54524F' },
                 { name: 'Gold', hex: '#FAE7CF' },
@@ -701,7 +829,7 @@ const phoneDatabase = {
             ]
         },
         'iPhone 12': {
-            basePrice: 340, // SellUp: $340
+            basePrice: 200, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-12-pro.jpg',
             storage: { '64GB': 0, '128GB': 50, '256GB': 100 },
             colors: [
@@ -714,9 +842,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 12 mini': {
-            basePrice: 320,
+            basePrice: 120, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-12-mini.jpg',
-            storage: { '64GB': -15, '128GB': 0, '256GB': 15 },
+            storage: { '64GB': 0, '128GB': 30, '256GB': 60 },
             colors: [
                 { name: 'Black', hex: '#000000' },
                 { name: 'White', hex: '#FFFFFF' },
@@ -727,9 +855,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 11 Pro Max': {
-            basePrice: 380, // SellUp: $380
+            basePrice: 220, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-11-pro.jpg',
-            storage: { '64GB': 0, '256GB': 50, '512GB': 100 },
+            storage: { '64GB': 0, '256GB': 30, '512GB': 60 },
             colors: [
                 { name: 'Space Gray', hex: '#535150' },
                 { name: 'Silver', hex: '#F5F5F0' },
@@ -738,9 +866,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 11 Pro': {
-            basePrice: 350, // SellUp: $350
+            basePrice: 170, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-11-pro.jpg',
-            storage: { '64GB': 0, '256GB': 50, '512GB': 100 },
+            storage: { '64GB': 0, '256GB': 40, '512GB': 70 },
             colors: [
                 { name: 'Space Gray', hex: '#535150' },
                 { name: 'Silver', hex: '#F5F5F0' },
@@ -749,9 +877,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone 11': {
-            basePrice: 272, // SellUp: $272
+            basePrice: 120, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-11.jpg',
-            storage: { '64GB': 0, '128GB': 50, '256GB': 100 },
+            storage: { '64GB': 0, '128GB': 30, '256GB': 60 },
             colors: [
                 { name: 'Black', hex: '#1F2020' },
                 { name: 'White', hex: '#F9F6EF' },
@@ -772,9 +900,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone XS Max': {
-            basePrice: 250,
+            basePrice: 120, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-xs-max.jpg',
-            storage: { '64GB': 0, '256GB': 20, '512GB': 40 },
+            storage: { '64GB': 0, '256GB': 30, '512GB': 60 },
             colors: [
                 { name: 'Gold', hex: '#FFD700' },
                 { name: 'Silver', hex: '#C0C0C0' },
@@ -782,9 +910,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone XS': {
-            basePrice: 200,
+            basePrice: 70, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-xs.jpg',
-            storage: { '64GB': 0, '256GB': 15, '512GB': 30 },
+            storage: { '64GB': 0, '256GB': 30, '512GB': 60 },
             colors: [
                 { name: 'Gold', hex: '#FFD700' },
                 { name: 'Silver', hex: '#C0C0C0' },
@@ -792,9 +920,9 @@ const phoneDatabase = {
             ]
         },
         'iPhone XR': {
-            basePrice: 150,
+            basePrice: 50, // Excel USED price for 64GB (updated 2026-01-22)
             image: 'images/phones/iphone-xr.jpg',
-            storage: { '64GB': 0, '128GB': 10, '256GB': 20 },
+            storage: { '64GB': 0, '128GB': 30, '256GB': 60 },
             colors: [
                 { name: 'Black', hex: '#1C1C1E' },
                 { name: 'White', hex: '#F5F5F0' },
@@ -980,7 +1108,7 @@ const phoneDatabase = {
             ]
         },
         'Galaxy S22 Ultra 5G': {
-            basePrice: 270, // Excel USED price for 256GB (updated 2026-01-18)
+            basePrice: 350, // Excel USED price for 256GB (updated 2026-01-22)
             image: 'images/phones/galaxy-s23-ultra.jpg',
             storage: { '256GB': 0, '512GB': 50 },
             colors: [
@@ -1085,18 +1213,18 @@ const phoneDatabase = {
                 { name: 'Lilac', hex: '#C8A2C8' }
             ]
         },
-        'Galaxy Z Fold 5': {
-            basePrice: 650, // SellUp: $650
+        'Galaxy Z Fold 5 5G': {
+            basePrice: 550, // Excel USED price for 256GB (updated 2026-01-22)
             image: 'images/phones/galaxy-z-fold5.jpg',
-            storage: { '256GB': 0, '512GB': 75, '1TB': 150 },
+            storage: { '256GB': 0, '512GB': 50, '1TB': 100 },
             colors: [
                 { name: 'Icy Blue', hex: '#B0C4DE' },
                 { name: 'Phantom Black', hex: '#1C1C1E' },
                 { name: 'Cream', hex: '#F5F5DC' }
             ]
         },
-        'Galaxy Z Flip 5': {
-            basePrice: 330, // SellUp: $330
+        'Galaxy Z Flip 5 5G': {
+            basePrice: 250, // Excel USED price for 256GB (updated 2026-01-22)
             image: 'images/phones/galaxy-z-flip5.jpg',
             storage: { '256GB': 0, '512GB': 50 },
             colors: [
@@ -1515,7 +1643,6 @@ function loadConditionModifiers() {
     // Default modifiers (fallback values)
     const defaults = {
         receipt: { yes: 30, no: 0 },
-        activation: { sealed: 0, activated: -150 },  // New: Activation status for new phones
         country: { local: 0, export: -50 },
         deviceType: { 'new-sealed': 0, 'new-activated': -150 },
         body: { A: 0, B: -20, C: -60, D: -120 },
@@ -1682,17 +1809,19 @@ function updateConditionButtonsFromStorage() {
     if (activationContainer) {
         activationContainer.querySelectorAll('.option-btn').forEach(btn => {
             const activationStatus = btn.dataset.value; // 'sealed' or 'activated'
-            if (modifiers.activation && modifiers.activation[activationStatus] !== undefined) {
-                const value = modifiers.activation[activationStatus];
+            // Map to deviceType keys: 'sealed' -> 'new-sealed', 'activated' -> 'new-activated'
+            const deviceTypeKey = activationStatus === 'sealed' ? 'new-sealed' : 'new-activated';
+            if (modifiers.deviceType && modifiers.deviceType[deviceTypeKey] !== undefined) {
+                const value = modifiers.deviceType[deviceTypeKey];
                 // Activation can be 0 (sealed) or negative (activated deduction)
                 if (value >= 0) {
                     btn.dataset.bonus = value;
                     btn.dataset.deduction = 0;
-                    console.log(`   Activation ${activationStatus}: +$${value}`);
+                    console.log(`   Activation ${activationStatus} (${deviceTypeKey}): +$${value}`);
                 } else {
                     btn.dataset.bonus = 0;
                     btn.dataset.deduction = Math.abs(value);
-                    console.log(`   Activation ${activationStatus}: -$${Math.abs(value)}`);
+                    console.log(`   Activation ${activationStatus} (${deviceTypeKey}): -$${Math.abs(value)}`);
                 }
             }
         });
@@ -1712,7 +1841,7 @@ let quoteState = {
     storage: null,
     storageAdjustment: 0,
     color: null,
-    activationStatus: null, // 'sealed' or 'activated' (for new phones only)
+    // activationStatus removed - now using deviceType ('new-sealed' or 'new-activated')
     hasReceipt: null, // 'yes' or 'no'
     country: 'local',
     bodyCondition: null,
@@ -1740,7 +1869,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('=== Quote page detected, initializing ===');
     console.log('phoneDatabase available:', typeof phoneDatabase !== 'undefined', 'Brands:', phoneDatabase ? Object.keys(phoneDatabase) : 'N/A');
     console.log('window.selectBrand available:', typeof window.selectBrand !== 'undefined');
-    
+
+    // CRITICAL: Run price integrity check and display banner if issues found
+    setTimeout(() => {
+        displayPriceIntegrityBanner();
+    }, 1000); // Delay to ensure page is fully loaded
+
     // Ensure selectBrand is available globally
     if (typeof window.selectBrand === 'undefined') {
         console.error('window.selectBrand is not defined! This will cause button clicks to fail.');
@@ -2176,11 +2310,12 @@ function showModels(brand) {
                 hasPriceData = true;
             }
         }
-        // Fallback to phoneDatabase if admin data not available
-        if (!hasPriceData && model.basePrice !== undefined) {
-            basePrice = model.basePrice;
-            hasPriceData = true;
-            console.log(`Fallback: Using phoneDatabase basePrice $${basePrice} for ${modelName}`);
+        // CRITICAL FIX: NO FALLBACK to hardcoded phoneDatabase prices
+        // Force admin to import prices from Excel - transparent pricing only!
+        if (!hasPriceData) {
+            console.warn(`⚠️ NO PRICE DATA for ${brand} ${modelName} - Admin must import from Excel`);
+            basePrice = 0; // Show $0 to indicate missing price
+            hasPriceData = false;
         }
         
         // Create card with inline onclick (works reliably)
@@ -2216,11 +2351,14 @@ function showModels(brand) {
         };
         
         card.innerHTML = `
-            <img src="${imageUrl}" alt="${modelName}" 
+            <img src="${imageUrl}" alt="${modelName}"
                  style="width: 70px; height: 90px; object-fit: contain; margin-bottom: 0.8rem; pointer-events: none;"
                  onerror="this.onerror=null; this.src='images/phones/iphone-16-pro-max.jpg';">
             <h4 style="color: #2c2c2c; font-size: 0.9rem; margin-bottom: 0.3rem; pointer-events: none;">${modelName}</h4>
-            <p style="color: #C9A84C; font-size: 0.85rem; font-weight: 600; pointer-events: none;">From $${basePrice}</p>
+            <p style="color: ${hasPriceData ? '#C9A84C' : '#dc3545'}; font-size: 0.85rem; font-weight: 600; pointer-events: none;">
+                From $${basePrice}
+                ${!hasPriceData ? '<br><span style="font-size: 0.7rem; color: #dc3545;">⚠️ Price Missing</span>' : ''}
+            </p>
         `;
         
         modelGrid.appendChild(card);
@@ -2585,7 +2723,30 @@ function populateStep2() {
     }
     
     // Activation status (new phones only)
-    initOptionButtons('activation-options', 'activationStatus');
+    // CRITICAL: Set deviceType (not activationStatus) so price calculation works correctly
+    // Map 'sealed' -> 'new-sealed', 'activated' -> 'new-activated'
+    const activationContainer = document.getElementById('activation-options');
+    if (activationContainer) {
+        activationContainer.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                activationContainer.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+
+                // Map button value to deviceType
+                const activationValue = this.dataset.value; // 'sealed' or 'activated'
+                if (activationValue === 'sealed') {
+                    quoteState.deviceType = 'new-sealed';
+                } else if (activationValue === 'activated') {
+                    quoteState.deviceType = 'new-activated';
+                }
+
+                console.log(`✅ Activation selection: ${activationValue} -> deviceType: ${quoteState.deviceType}`);
+
+                // Update live price estimate
+                updateLivePriceEstimate();
+            });
+        });
+    }
 
     // Receipt options
     initOptionButtons('receipt-options', 'hasReceipt');
@@ -2626,6 +2787,24 @@ function initDeviceTypeSelection() {
             if (usedConditionsContainer) usedConditionsContainer.classList.remove('visible');
             if (activationSection) activationSection.style.display = 'block';
             if (receiptSection) receiptSection.style.display = 'block';
+
+            // CRITICAL: Auto-select the activation button based on deviceType
+            const activationContainer = document.getElementById('activation-options');
+            if (activationContainer) {
+                if (quoteState.deviceType === 'new-sealed') {
+                    const sealedBtn = activationContainer.querySelector('[data-value="sealed"]');
+                    if (sealedBtn && !sealedBtn.classList.contains('selected')) {
+                        sealedBtn.classList.add('selected');
+                        console.log('✅ Auto-selected "Factory Sealed" activation button');
+                    }
+                } else if (quoteState.deviceType === 'new-activated') {
+                    const activatedBtn = activationContainer.querySelector('[data-value="activated"]');
+                    if (activatedBtn && !activatedBtn.classList.contains('selected')) {
+                        activatedBtn.classList.add('selected');
+                        console.log('✅ Auto-selected "Activated" activation button');
+                    }
+                }
+            }
         }
     } else {
         // No deviceType set yet - ensure used conditions are hidden by default
@@ -2675,7 +2854,7 @@ function initDeviceTypeSelection() {
             if (quoteState.deviceType === 'used') {
                 if (activationSection) activationSection.style.display = 'none';
                 if (receiptSection) receiptSection.style.display = 'none';
-                quoteState.activationStatus = null; // Reset activation status for used devices
+                // Note: deviceType is already 'used', no need to reset activationStatus (removed)
             } else {
                 if (activationSection) activationSection.style.display = 'block';
                 if (receiptSection) receiptSection.style.display = 'block';
@@ -2696,9 +2875,9 @@ function areRequiredFieldsSelected() {
     if (!quoteState.color) return false;
     if (!quoteState.country) return false;
     
-    // For NEW devices (sealed/activated), activation status and receipt are required
+    // For NEW devices (sealed/activated), receipt is required
+    // Note: deviceType already checked above (new-sealed or new-activated)
     if (quoteState.deviceType !== 'used') {
-        if (!quoteState.activationStatus) return false;
         if (quoteState.hasReceipt === undefined || quoteState.hasReceipt === null) return false;
     }
     
@@ -2765,14 +2944,6 @@ function updateLivePriceEstimate() {
             }
         }
 
-        // NEW: Activation status modifier (for new phones)
-        if (quoteState.activationStatus) {
-            const activationModifier = getModifierValue('activation', quoteState.activationStatus);
-            price += activationModifier; // Can be 0 (sealed) or negative (activated)
-            const sign = activationModifier >= 0 ? '+' : '';
-            console.log(`Activation status (${quoteState.activationStatus}): ${sign}$${activationModifier}`);
-        }
-
         // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers
         // Apply modifier for BOTH 'yes' and 'no' cases
         if (quoteState.hasReceipt) {
@@ -2807,14 +2978,6 @@ function updateLivePriceEstimate() {
                 price = 0;
                 console.error(`❌ No price data available for ${quoteState.model} ${quoteState.storage}`);
             }
-        }
-
-        // NEW: Activation status modifier (for new phones)
-        if (quoteState.activationStatus) {
-            const activationModifier = getModifierValue('activation', quoteState.activationStatus);
-            price += activationModifier; // Can be 0 (sealed) or negative (activated)
-            const sign = activationModifier >= 0 ? '+' : '';
-            console.log(`Activation status (${quoteState.activationStatus}): ${sign}$${activationModifier}`);
         }
 
         // CRITICAL FIX: Receipt modifier (for new phones) - Load from admin panel modifiers

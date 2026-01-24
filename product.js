@@ -383,11 +383,12 @@ function calculatePrice() {
             price += product.storage[productState.storage];
         }
         
-        // Add condition modifier
+        // Add condition modifier from admin settings
+        const adminModifiers = JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}');
         const conditionModifiers = {
-            'excellent': 0,
-            'good': -50,
-            'fair': -150
+            'excellent': adminModifiers.refurbCondition?.excellent || 0,
+            'good': adminModifiers.refurbCondition?.good || -50,
+            'fair': adminModifiers.refurbCondition?.fair || -150
         };
         price += conditionModifiers[productState.condition] || 0;
     }

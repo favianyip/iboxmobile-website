@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Admin Dashboard - IBOX MOBILE SINGAPORE</title>
     <link rel="stylesheet" href="styles.css?v=20260119">
     <link rel="stylesheet" href="admin.css?v=20260119-2">
@@ -15,16 +18,6 @@
                 <span class="admin-badge">Admin Panel</span>
             </div>
             <div class="admin-nav-right">
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem; padding: 0.5rem 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
-                    <span style="font-size: 0.85rem; color: #666; font-weight: 600;">Data Backup:</span>
-                    <button class="btn btn-primary btn-sm" onclick="exportAllData()" title="Export all prices, models, and settings. Save this file after every price update!" style="margin: 0; white-space: nowrap;">
-                        💾 Export (Save Prices)
-                    </button>
-                    <button class="btn btn-success btn-sm" onclick="document.getElementById('importDataFile').click()" title="Import a previously exported backup file or apple-products-prices.csv" style="margin: 0; white-space: nowrap;">
-                        📥 Import Backup/CSV
-                    </button>
-                    <input type="file" id="importDataFile" accept=".xlsx,.xls,.csv,.json" style="display: none;" onchange="importAllData(event)">
-                </div>
                 <span class="admin-user" id="adminUserName">Admin</span>
                 <button class="btn btn-secondary btn-sm" onclick="auth.logout()">Logout</button>
             </div>
@@ -62,7 +55,11 @@
                     <span>Display Settings</span>
                 </a>
                 
-                <div class="menu-section-header" style="margin-top: 2rem;">System</div>
+                <div class="menu-section-header" style="margin-top: 2rem;">Data & System</div>
+                <a href="#data-management" class="menu-item" data-section="data-management">
+                    <span>💾</span>
+                    <span>Data Management</span>
+                </a>
                 <a href="#brands" class="menu-item" data-section="brands">
                     <span>🏷️</span>
                     <span>Brand Settings</span>
@@ -106,9 +103,6 @@
                     </div>
 
                     <div class="header-actions" style="display: flex; gap: 1rem; justify-content: center;">
-                        <button class="btn btn-warning" onclick="showImportModal()" title="Import prices from bulk import or file">
-                            📥 Import Prices
-                        </button>
                         <button class="btn btn-primary" id="addPhoneBtn">
                             <span>+</span> Add New Phone Model
                         </button>
@@ -151,6 +145,18 @@
                         </button>
                         <button class="condition-type-btn" id="newPriceToggle" onclick="switchPriceConditionType('new')" style="padding: 0.75rem 2rem; border: none; background: #e9ecef; color: #666; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;">
                             📦 New Phone Prices
+                        </button>
+                    </div>
+
+                    <!-- Save All Buyback Prices Button -->
+                    <div style="margin: 1.5rem 0; padding: 1rem; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196F3; border-radius: 12px; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);">
+                        <h3 style="color: #1976d2; margin: 0 0 0.5rem 0; font-size: 1.125rem; font-weight: 700;">💾 Save All Buyback Prices</h3>
+                        <p style="margin: 0 0 1rem 0; color: #555; font-size: 0.875rem;">
+                            Save all visible price changes at once (NEW or USED based on current toggle above).
+                            All changes will be saved to localStorage and immediately reflected in the table.
+                        </p>
+                        <button class="btn btn-primary" onclick="saveAllBuybackPrices()" style="padding: 0.875rem 2rem; font-size: 1rem; background: linear-gradient(135deg, #2196F3 0%, #1976d2 100%); border: none; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3); cursor: pointer; transition: all 0.3s ease; color: white;">
+                            💾 Save All Prices
                         </button>
                     </div>
 
@@ -430,36 +436,6 @@
                                             <td>No official receipt available</td>
                                             <td><input type="number" class="modifier-input" value="0" data-condition="receipt" data-grade="no"></td>
                                             <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('receipt', 'no')">Save</button></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="condition-group-admin">
-                            <h3>Activation Status Modifiers</h3>
-                            <div class="condition-modifiers-table">
-                                <table class="modifier-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Status</th>
-                                            <th>Description</th>
-                                            <th>Price Modifier (SGD)</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="activationModifierTable">
-                                        <tr>
-                                            <td><strong>Factory Sealed</strong></td>
-                                            <td>Never opened, original packaging intact</td>
-                                            <td><input type="number" class="modifier-input" value="0" data-condition="activation" data-grade="sealed"></td>
-                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('activation', 'sealed')">Save</button></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Activated</strong></td>
-                                            <td>Device has been opened and turned on</td>
-                                            <td><input type="number" class="modifier-input" value="-150" data-condition="activation" data-grade="activated"></td>
-                                            <td><button class="btn btn-primary btn-sm" onclick="saveConditionModifier('activation', 'activated')">Save</button></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -767,6 +743,88 @@
                 </div>
             </section>
 
+            <!-- Data Management Section -->
+            <section id="data-management-section" class="admin-section">
+                <div class="section-header">
+                    <h2>💾 Data Management</h2>
+                    <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.5rem;">
+                        Manage your pricing data: Save current prices to backup and restore from previous backups.
+                    </p>
+                </div>
+
+                <div class="data-management-container" style="max-width: 800px; margin: 2rem auto;">
+
+                    <!-- Current Data Status -->
+                    <div class="data-status-card" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 2px solid #dee2e6;">
+                        <h3 style="color: var(--text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📊</span> Current Data Status
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.25rem;">Total Phone Models</div>
+                                <div id="totalPhonesCount" style="font-size: 2rem; font-weight: 700; color: var(--gold);">0</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.25rem;">Last Updated</div>
+                                <div id="lastUpdateTime" style="font-size: 1.25rem; font-weight: 600; color: var(--text-dark);">Never</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Current Data -->
+                    <div class="data-action-card" style="background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 2px solid #C9A84C;">
+                        <h3 style="color: var(--text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>💾</span> Save Current Data
+                        </h3>
+                        <p style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.875rem;">
+                            Export all your current phone models, prices, and settings to a backup file.
+                            This creates a snapshot that you can restore later.
+                        </p>
+                        <button class="btn btn-primary" onclick="saveCurrentData()" style="width: 100%; padding: 1rem; font-size: 1rem; font-weight: 600;">
+                            💾 Save Current Data to Backup
+                        </button>
+                        <p style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-light); font-style: italic;">
+                            ⚠️ Save regularly after making price changes!
+                        </p>
+                    </div>
+
+                    <!-- Load Previous Data -->
+                    <div class="data-action-card" style="background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 2px solid #28a745;">
+                        <h3 style="color: var(--text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📥</span> Load Previous Data
+                        </h3>
+                        <p style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.875rem;">
+                            Restore data from a previously saved backup file. This will replace your current data.
+                        </p>
+                        <input type="file" id="loadDataFile" accept=".json" style="display: none;" onchange="loadPreviousData(event)">
+                        <button class="btn btn-success" onclick="document.getElementById('loadDataFile').click()" style="width: 100%; padding: 1rem; font-size: 1rem; font-weight: 600;">
+                            📥 Load Previous Backup
+                        </button>
+                        <p style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-light); font-style: italic;">
+                            ⚠️ This will replace ALL current data with the backup file data.
+                        </p>
+                    </div>
+
+                    <!-- Reset to Default Excel Data -->
+                    <div class="data-action-card" style="background: #fff3cd; border-radius: 12px; padding: 2rem; border: 2px solid #ffc107;">
+                        <h3 style="color: var(--text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🔄</span> Reset to Default Prices
+                        </h3>
+                        <p style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.875rem;">
+                            Reset all phone prices to the default values from Excel reference files.
+                            This will load all 40+ models with their original prices.
+                        </p>
+                        <button class="btn btn-warning" onclick="resetToDefaultPrices()" style="width: 100%; padding: 1rem; font-size: 1rem; font-weight: 600; background: #ffc107; border: none; color: #000;">
+                            🔄 Reset to Default Excel Prices
+                        </button>
+                        <p style="margin-top: 1rem; font-size: 0.75rem; color: #856404; font-weight: 600;">
+                            ⚠️ WARNING: This will reset all custom price changes!
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
             <!-- Settings Section -->
             <section id="settings-section" class="admin-section">
                 <div class="section-header">
@@ -1041,13 +1099,11 @@
     <!-- No external libraries needed - using pure JavaScript CSP-compliant CSV export -->
     <script src="quote.js"></script>
     <script src="auth.js"></script>
-    <!-- MASTER COLOR DATABASE - Must load BEFORE import scripts -->
-    <script src="master-color-database.js"></script>
-    <!-- SMART IMAGE MAPPER - Intelligent image fallback system -->
-    <script src="smart-image-mapper.js"></script>
+    <!-- REMOVED: master-color-database.js - File does not exist -->
+    <!-- REMOVED: smart-image-mapper.js - File does not exist -->
     <script src="import-exact-prices.js"></script>
-    <script src="import-benchmark-prices.js"></script>
-    <script src="admin.js"></script>
+    <!-- REMOVED: import-benchmark-prices.js - File does not exist -->
+    <script src="admin.js?v=20260124-save-all-prices"></script>
     <script>
         // IMMEDIATE MENU NAVIGATION FIX - Runs as soon as possible
         (function() {
@@ -1484,92 +1540,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeAppointmentDetailsModal()">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Import Prices Modal -->
-    <div id="importModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2>📥 Import Prices</h2>
-                <button class="modal-close" onclick="closeImportModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="import-options">
-                    <h3>Choose Import Method:</h3>
-
-                    <!-- Option 1: Exact Price Import (NO AUTO-CALCULATIONS) -->
-                    <div class="import-option" style="margin-bottom: 2rem; padding: 1.5rem; border: 2px solid var(--gold); border-radius: 8px; background: linear-gradient(135deg, rgba(201, 168, 76, 0.05) 0%, rgba(184, 151, 59, 0.05) 100%);">
-                        <h4 style="color: var(--gold);">✨ Import Exact Prices (Recommended)</h4>
-                        <p style="margin: 0.5rem 0; font-weight: 600; color: var(--text-dark);">Apple & Samsung - EXACT prices from Excel</p>
-                        <p style="margin: 0.5rem 0; font-size: 0.875rem; color: var(--text-dark);">
-                            ✓ Apple: 22 models with USED & NEW prices<br>
-                            ✓ Samsung: 17 models with USED & NEW prices<br>
-                            ✓ NO auto-calculations - exact Excel data only
-                        </p>
-                        <button class="btn btn-warning" onclick="clearAndReimport()" style="width: 100%; margin-top: 1rem; font-weight: 600; background: #ff9800; border: none;">
-                            🧹 Clear All & Fresh Import
-                        </button>
-                        <p style="font-size: 0.75rem; color: #ff6b00; margin-top: 0.25rem; font-weight: 600;">
-                            ⚠️ Use this if prices are still incorrect - clears everything and imports fresh
-                        </p>
-                        <button class="btn btn-primary" onclick="runExactPriceImport()" style="width: 100%; margin-top: 0.75rem; font-weight: 600;">
-                            🎯 Import/Update Prices
-                        </button>
-                        <button class="btn btn-info" onclick="updateAllPhoneColors()" style="width: 100%; margin-top: 0.75rem; font-weight: 600; background: #17a2b8; border: none;">
-                            🎨 Update All Phone Colors to Official Factory Colors
-                        </button>
-                        <p style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.5rem; font-style: italic;">
-                            Source: Apple_USED_NEW_FULL_REVIEW.xlsx & Samsung_USED_NEW_FULL_REVIEW.xlsx
-                        </p>
-                    </div>
-
-                    <!-- Option 2: Export All Data to Excel -->
-                    <div class="import-option" style="padding: 1.5rem; border: 2px solid #28a745; border-radius: 8px; background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(32, 134, 55, 0.05) 100%);">
-                        <h4 style="color: #28a745;">📊 Export All Data to Excel</h4>
-                        <p style="margin: 0.5rem 0; font-size: 0.875rem; color: var(--text-dark);">
-                            Export complete backup including:<br>
-                            ✓ All phone models & brands<br>
-                            ✓ USED & NEW prices per storage<br>
-                            ✓ Colors per model<br>
-                            ✓ Condition modifiers (body/screen/battery)<br>
-                            ✓ Settings & configuration
-                        </p>
-                        <button class="btn btn-success" onclick="exportAllDataToExcel()" style="width: 100%; margin-top: 1rem; font-weight: 600; background: #28a745; border: none;">
-                            📥 Export All Data to Excel
-                        </button>
-                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
-                            Use this for backup & reference. File saved as: ibox_mobile_backup_[date].xlsx
-                        </p>
-                    </div>
-
-                    <!-- Option 3: Cross-Device Sync -->
-                    <div class="import-option" style="padding: 1.5rem; border: 2px solid #9c27b0; border-radius: 8px; background: linear-gradient(135deg, rgba(156, 39, 176, 0.05) 0%, rgba(123, 31, 162, 0.05) 100%); grid-column: 1 / -1;">
-                        <h4 style="color: #9c27b0;">📱 Cross-Device Sync (Mobile ↔ Desktop)</h4>
-                        <p style="margin: 0.5rem 0; font-size: 0.875rem; color: var(--text-dark);">
-                            <strong>localStorage is device-specific!</strong> To sync changes between devices:<br>
-                            1. Make your changes on one device (mobile or desktop)<br>
-                            2. Export settings from that device<br>
-                            3. Import on the other device<br><br>
-                            This will sync ALL settings including condition modifiers, prices, and brands.
-                        </p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                            <button class="btn" onclick="exportSettingsForSync()" style="padding: 1rem; font-weight: 600; background: #9c27b0; border: none; color: white;">
-                                📤 Export Settings
-                            </button>
-                            <button class="btn" onclick="importSettingsForSync()" style="padding: 1rem; font-weight: 600; background: #673ab7; border: none; color: white;">
-                                📥 Import Settings
-                            </button>
-                        </div>
-                        <p style="font-size: 0.75rem; color: #9c27b0; margin-top: 0.75rem; font-weight: 600;">
-                            ✅ After importing, all your condition modifier changes will be applied!
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
             </div>
         </div>
     </div>

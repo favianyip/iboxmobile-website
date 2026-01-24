@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import from Excel - KT Mobile</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .info { background: #e3f2fd; border-left: 4px solid #2196F3; }
+        .success { background: #e8f5e9; border-left: 4px solid #4CAF50; }
+        .warning { background: #fff3e0; border-left: 4px solid #FF9800; }
+        .error { background: #ffebee; border-left: 4px solid #f44336; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #d32f2f;
+        }
+        #output {
+            max-height: 500px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .file-input {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+        }
+        input[type="file"] {
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Import Phones from Excel Files</h1>
+
+        <div class="status info">
+            <strong>Instructions:</strong> Upload your Apple and Samsung Excel files to import all phone data with correct prices.
+        </div>
+
+        <div class="file-input">
+            <label><strong>📱 Apple Excel File:</strong></label><br>
+            <input type="file" id="appleFile" accept=".xlsx,.xls" />
+        </div>
+
+        <div class="file-input">
+            <label><strong>📱 Samsung Excel File:</strong></label><br>
+            <input type="file" id="samsungFile" accept=".xlsx,.xls" />
+        </div>
+
+        <div style="margin: 30px 0;">
+            <button onclick="importFromExcel()" class="danger">🚀 Import All Data</button>
+            <button onclick="location.href='admin.html'">← Back to Admin</button>
+            <button onclick="location.href='check-data.html'">🔍 Check Data</button>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            output.innerHTML += `[${time}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        async function importFromExcel() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+
+            log('🚀 Starting Excel import...');
+
+            const appleFile = document.getElementById('appleFile').files[0];
+            const samsungFile = document.getElementById('samsungFile').files[0];
+
+            if (!appleFile || !samsungFile) {
+                alert('⚠️ Please select both Apple and Samsung Excel files!');
+                return;
+            }
+
+            try {
+                // Clear existing data
+                log('🗑️  Clearing existing localStorage data...');
+                localStorage.removeItem('ktmobile_phones');
+                localStorage.removeItem('ktmobile_phones_backup');
+                log('✅ Cleared existing data');
+
+                const allPhones = [];
+
+                // Import Apple data
+                log('');
+                log('📱 Processing Apple Excel file...');
+                const applePhones = await processExcelFile(appleFile, 'Apple');
+                allPhones.push(...applePhones);
+                log(`✅ Imported ${applePhones.length} Apple models`);
+
+                // Import Samsung data
+                log('');
+                log('📱 Processing Samsung Excel file...');
+                const samsungPhones = await processExcelFile(samsungFile, 'Samsung');
+                allPhones.push(...samsungPhones);
+                log(`✅ Imported ${samsungPhones.length} Samsung models`);
+
+                // Save to localStorage
+                log('');
+                log('💾 Saving to localStorage...');
+                localStorage.setItem('ktmobile_phones', JSON.stringify(allPhones));
+                localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+                log('✅ Saved to localStorage');
+
+                // Summary
+                log('');
+                log('=' .repeat(50));
+                log('✅ IMPORT COMPLETE!');
+                log(`📦 Total phones imported: ${allPhones.length}`);
+                log(`   📱 Apple: ${applePhones.length} models`);
+                log(`   📱 Samsung: ${samsungPhones.length} models`);
+                log('=' .repeat(50));
+
+                // Verify sample
+                const iphone15ProMax = allPhones.find(p => p.model === 'iPhone 15 Pro Max');
+                if (iphone15ProMax) {
+                    log('');
+                    log('🔍 Sample verification - iPhone 15 Pro Max:');
+                    log(`   256GB USED: $${iphone15ProMax.storagePrices['256GB']}`);
+                    log(`   512GB USED: $${iphone15ProMax.storagePrices['512GB']}`);
+                    log(`   1TB USED: $${iphone15ProMax.storagePrices['1TB']}`);
+                    log(`   256GB NEW: $${iphone15ProMax.newPhonePrices['256GB']}`);
+                    log(`   512GB NEW: $${iphone15ProMax.newPhonePrices['512GB']}`);
+                    log(`   1TB NEW: $${iphone15ProMax.newPhonePrices['1TB']}`);
+                }
+
+                alert(`✅ SUCCESS!\n\nImported ${allPhones.length} phones:\n- Apple: ${applePhones.length}\n- Samsung: ${samsungPhones.length}\n\nGo to admin.html to view!`);
+
+            } catch (error) {
+                log(`❌ ERROR: ${error.message}`);
+                console.error(error);
+                alert('❌ Import failed: ' + error.message);
+            }
+        }
+
+        async function processExcelFile(file, brand) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                        log(`  📄 Sheet: ${sheetName}`);
+                        log(`  📊 Rows: ${jsonData.length}`);
+
+                        // Group by model
+                        const phonesByModel = {};
+
+                        jsonData.forEach(row => {
+                            const model = row['Model'] || row['model'];
+                            const storage = row['Storage'] || row['storage'];
+                            const usedPrice = parseFloat(row['USED'] || row['used'] || 0);
+                            const newPrice = parseFloat(row['NEW'] || row['new'] || 0);
+
+                            if (!model || !storage) {
+                                log(`  ⚠️  Skipping row - missing model or storage`);
+                                return;
+                            }
+
+                            if (!phonesByModel[model]) {
+                                phonesByModel[model] = {
+                                    storages: [],
+                                    usedPrices: {},
+                                    newPrices: {}
+                                };
+                            }
+
+                            phonesByModel[model].storages.push(storage);
+                            phonesByModel[model].usedPrices[storage] = usedPrice;
+                            if (newPrice > 0) {
+                                phonesByModel[model].newPrices[storage] = newPrice;
+                            }
+                        });
+
+                        log(`  📱 Unique models: ${Object.keys(phonesByModel).length}`);
+
+                        // Convert to phone objects
+                        const phones = [];
+
+                        Object.entries(phonesByModel).forEach(([model, data]) => {
+                            const phoneId = `${brand.toLowerCase()}-${model.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '')}`;
+
+                            // Get lowest storage price as base
+                            const basePrice = Math.min(...Object.values(data.usedPrices));
+
+                            // Calculate storage prices and buyPrices
+                            const storagePrices = {};
+                            const newPhonePrices = {};
+                            const buyPrices = {};
+                            const quantities = {};
+
+                            data.storages.forEach(storage => {
+                                const usedPrice = data.usedPrices[storage];
+
+                                storagePrices[storage] = usedPrice;
+
+                                // NEW prices
+                                if (data.newPrices[storage]) {
+                                    newPhonePrices[storage] = data.newPrices[storage];
+                                } else {
+                                    // Calculate 15% markup if not provided
+                                    newPhonePrices[storage] = Math.round(usedPrice * 1.15);
+                                }
+
+                                // Buy prices
+                                buyPrices[storage] = {
+                                    excellent: usedPrice,
+                                    good: Math.round(usedPrice * 0.95),
+                                    fair: Math.round(usedPrice * 0.85)
+                                };
+
+                                // Quantities
+                                quantities[storage] = {
+                                    excellent: 0,
+                                    good: 0,
+                                    fair: 0
+                                };
+                            });
+
+                            const phone = {
+                                id: phoneId,
+                                brand: brand,
+                                model: model,
+                                image: `images/phones/${phoneId}.jpg`,
+                                colors: [],
+                                storages: data.storages,
+                                basePrice: basePrice,
+                                storagePrices: storagePrices,
+                                newPhonePrices: newPhonePrices,
+                                buyPrices: buyPrices,
+                                quantities: quantities,
+                                display: true,
+                                available: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            };
+
+                            phones.push(phone);
+                            log(`  ✅ ${model}: ${data.storages.join(', ')}`);
+                        });
+
+                        resolve(phones);
+
+                    } catch (error) {
+                        reject(new Error(`Failed to process ${brand} file: ${error.message}`));
+                    }
+                };
+
+                reader.onerror = function() {
+                    reject(new Error(`Failed to read ${brand} file`));
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -649,7 +649,39 @@ class AdminDataManager {
 // INITIALIZE ADMIN MANAGER
 // ============================================================================
 
-const adminManager = new AdminDataManager();
+// CRITICAL FIX: Only create adminManager on admin pages
+// This prevents creating default 5 phones on customer-facing pages
+let adminManager;
+
+// Check if we're on admin page BEFORE initializing
+function isOnAdminPage() {
+    return document.querySelector('.admin-container') !== null ||
+           window.location.pathname.includes('admin.html') ||
+           window.location.href.includes('admin.html');
+}
+
+if (isOnAdminPage()) {
+    adminManager = new AdminDataManager();
+    console.log('✅ Full adminManager created for admin page');
+} else {
+    // On customer pages (sell-phones.html, quote.html), create minimal adminManager
+    // Just to expose phones array from localStorage without initializing phoneDatabase
+    adminManager = {
+        get phones() {
+            const stored = localStorage.getItem('ktmobile_phones');
+            if (stored) {
+                try {
+                    return JSON.parse(stored);
+                } catch (e) {
+                    console.error('Failed to parse phones from localStorage:', e);
+                    return [];
+                }
+            }
+            return [];
+        }
+    };
+    console.log('✅ Minimal adminManager created for customer page (read-only access to localStorage)');
+}
 
 // ============================================================================
 // GLOBAL COLOR MANAGEMENT
@@ -1486,8 +1518,13 @@ function renderPhones() {
             imageUrl = `${imageUrl}?t=${Date.now()}`;
         }
 
+        // CRITICAL FIX: Detect missing prices and add warning badge
+        const hasMissingPrice = displayPrice === 0;
+        const warningBadge = hasMissingPrice ?
+            '<span class="badge badge-warning" style="background: #dc3545; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;">⚠️ Missing Price</span>' : '';
+
         return `
-        <div class="phone-card-admin">
+        <div class="phone-card-admin" style="${hasMissingPrice ? 'border: 2px solid #dc3545; background: #fff5f5;' : ''}">
             <div class="phone-card-header">
                 <span class="brand-badge">${phone.brand}</span>
                 <div class="phone-card-actions">
@@ -1501,13 +1538,14 @@ function renderPhones() {
             </div>
             <img src="${imageUrl}" alt="${phone.model}" class="phone-card-image" onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
             <div class="phone-card-info">
-                <h4>${phone.model}</h4>
+                <h4>${phone.model}${warningBadge}</h4>
                 <p><strong>Storage:</strong> ${phone.storages.join(', ') || 'N/A'}</p>
-                <p><strong>${priceLabel} Price:</strong> Up to SGD $${Math.round(displayPrice).toLocaleString()}</p>
+                <p><strong>${priceLabel} Price:</strong> <span style="color: ${hasMissingPrice ? '#dc3545' : 'inherit'}; font-weight: ${hasMissingPrice ? 'bold' : 'normal'};">Up to SGD $${Math.round(displayPrice).toLocaleString()}${hasMissingPrice ? ' ⚠️' : ''}</span></p>
+                ${hasMissingPrice ? '<p style="color: #dc3545; font-size: 0.85rem; margin-top: 0.5rem;"><strong>⚠️ Action Required:</strong> Import prices from Excel to activate this model</p>' : ''}
                 <p><strong>Colors:</strong> ${phone.colors.length > 0 ? phone.colors.join(', ') : 'N/A'}</p>
                 <div class="display-toggle" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" ${phone.display ? 'checked' : ''} 
+                        <input type="checkbox" ${phone.display ? 'checked' : ''}
                                onchange="togglePhoneDisplay('${phone.id}', this.checked)"
                                style="width: 20px; height: 20px; cursor: pointer;">
                         <span style="font-weight: 600; color: ${phone.display ? '#10B981' : '#EF4444'};">
@@ -1906,6 +1944,77 @@ function saveConditionModifier(conditionType, grade) {
     alert('Condition modifier saved successfully!');
 }
 
+/**
+ * Save ALL condition modifiers at once and sync
+ * Collects all modifier input values and saves to localStorage
+ */
+function saveAllConditionModifiersAndSync() {
+    console.log('💾 Saving all condition modifiers...');
+
+    // Check permission
+    if (typeof auth !== 'undefined' && auth.hasPermission && !auth.hasPermission('canManagePrices')) {
+        alert('You do not have permission to update prices.');
+        return;
+    }
+
+    try {
+        // Collect all modifier inputs
+        const allInputs = document.querySelectorAll('.modifier-input');
+
+        if (allInputs.length === 0) {
+            alert('⚠️ No modifier inputs found on page. Make sure you are on the Settings tab.');
+            return;
+        }
+
+        console.log(`📝 Found ${allInputs.length} modifier inputs`);
+
+        // Build complete modifiers object
+        const modifiers = {};
+        let savedCount = 0;
+
+        allInputs.forEach(input => {
+            const conditionType = input.dataset.condition;
+            const grade = input.dataset.grade;
+            const value = parseFloat(input.value) || 0;
+
+            if (conditionType && grade) {
+                // Initialize condition type object if needed
+                if (!modifiers[conditionType]) {
+                    modifiers[conditionType] = {};
+                }
+
+                // Save value
+                modifiers[conditionType][grade] = value;
+                savedCount++;
+
+                console.log(`  ✅ ${conditionType}.${grade} = ${value}`);
+            }
+        });
+
+        // Save to localStorage
+        localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(modifiers));
+
+        console.log('💾 Saved to localStorage:', modifiers);
+        console.log(`✅ Successfully saved ${savedCount} condition modifiers`);
+
+        // Update all input styles
+        allInputs.forEach(input => {
+            updateModifierInputStyle(input);
+        });
+
+        // Show success message
+        alert(`✅ Success!\n\nSaved ${savedCount} condition modifiers to localStorage.\n\nAll changes will be immediately reflected in:\n• Customer quote page (quote.html)\n• Buyback interface (buy.html)\n• Mobile app (if synced)`);
+
+        // Log for verification
+        const verification = localStorage.getItem('ktmobile_condition_modifiers');
+        console.log('🔍 Verification - localStorage contains:', verification);
+
+    } catch (error) {
+        console.error('❌ Error saving all modifiers:', error);
+        alert('❌ Error saving modifiers: ' + error.message);
+    }
+}
+
 function renderPriceTable() {
     console.log('=== renderPriceTable called ===');
 
@@ -2116,6 +2225,95 @@ function saveSinglePrice(phoneId, storage, priceType) {
     // Show success message
     const priceTypeLabel = priceType === 'new' ? 'New' : 'Used';
     showNotification(`${priceTypeLabel} price updated for ${phone.model} ${storage}`, 'success');
+}
+
+/**
+ * Save ALL Buyback Prices (NEW or USED based on current toggle)
+ * Saves all visible prices and refreshes the table to reflect changes
+ */
+function saveAllBuybackPrices() {
+    console.log('💾 Saving all buyback prices...');
+
+    // Check permission (only if auth is available)
+    if (typeof auth !== 'undefined' && auth.hasPermission && !auth.hasPermission('canManagePrices')) {
+        alert('You do not have permission to update prices.');
+        return;
+    }
+
+    try {
+        // Collect all price inputs
+        const allPriceInputs = document.querySelectorAll('.price-input');
+
+        if (allPriceInputs.length === 0) {
+            alert('⚠️ No price inputs found. Make sure you are viewing the Buyback Base Prices table.');
+            return;
+        }
+
+        console.log(`📝 Found ${allPriceInputs.length} price inputs`);
+
+        // Group updates by phone
+        const phoneUpdates = {};
+        let updatedCount = 0;
+
+        allPriceInputs.forEach(input => {
+            const phoneId = input.dataset.phoneId;
+            const storage = input.dataset.storage;
+            const priceType = input.dataset.priceType; // 'new' or 'used'
+            const price = parseFloat(input.value) || 0;
+
+            if (!phoneId || !storage || !priceType) {
+                console.warn('Skipping input with missing data:', { phoneId, storage, priceType });
+                return;
+            }
+
+            if (!phoneUpdates[phoneId]) {
+                phoneUpdates[phoneId] = adminManager.getPhone(phoneId);
+            }
+
+            const phone = phoneUpdates[phoneId];
+            if (!phone) {
+                console.warn(`Phone not found for ID: ${phoneId}`);
+                return;
+            }
+
+            // Update based on price type
+            if (priceType === 'new') {
+                if (!phone.newPhonePrices) phone.newPhonePrices = {};
+                phone.newPhonePrices[storage] = price;
+            } else {
+                if (!phone.storagePrices) phone.storagePrices = {};
+                phone.storagePrices[storage] = price;
+            }
+
+            phone.updatedAt = new Date().toISOString();
+            updatedCount++;
+
+            console.log(`  ✅ ${phone.model} ${storage} (${priceType}): ${price}`);
+        });
+
+        // Save all updated phones to localStorage
+        Object.keys(phoneUpdates).forEach(phoneId => {
+            adminManager.updatePhone(phoneId, phoneUpdates[phoneId]);
+        });
+
+        console.log(`✅ Successfully updated ${updatedCount} prices across ${Object.keys(phoneUpdates).length} phone models`);
+
+        // Re-render the table to reflect saved changes
+        renderPriceTable();
+
+        // Show success message
+        const priceTypeLabel = currentPriceType === 'new' ? 'NEW' : 'USED';
+        alert(`✅ Success!\n\nSaved ${updatedCount} ${priceTypeLabel} buyback prices.\n\nAffected ${Object.keys(phoneUpdates).length} phone models.\n\nTable refreshed to show saved values.`);
+
+        // Show notification if available
+        if (typeof showNotification === 'function') {
+            showNotification(`Saved ${updatedCount} ${priceTypeLabel} prices successfully`, 'success');
+        }
+
+    } catch (error) {
+        console.error('❌ Error saving all prices:', error);
+        alert('❌ Error saving prices: ' + error.message);
+    }
 }
 
 /**
@@ -4209,6 +4407,8 @@ window.renderUsers = renderUsers;
 window.updateModelDropdown = updateModelDropdown;
 window.renderPhones = renderPhones;
 window.saveConditionModifier = saveConditionModifier;
+window.saveAllConditionModifiersAndSync = saveAllConditionModifiersAndSync;
+window.saveAllBuybackPrices = saveAllBuybackPrices;
 window.updateModifierInputStyle = updateModifierInputStyle;
 window.togglePhoneDisplay = togglePhoneDisplay;
 // ============================================================================
@@ -5605,5 +5805,267 @@ function switchConditionModifierType(type) {
 
     showNotification(`Switched to ${type === 'used' ? 'Used' : 'New'} Phone Condition Modifiers`, 'success');
 }
+
+// ============================================
+// DATA MANAGEMENT FUNCTIONS
+// ============================================
+
+/**
+ * Update data status display
+ */
+function updateDataStatus() {
+    const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+    const lastUpdate = localStorage.getItem('ktmobile_last_update');
+
+    const totalPhonesEl = document.getElementById('totalPhonesCount');
+    const lastUpdateEl = document.getElementById('lastUpdateTime');
+
+    if (totalPhonesEl) {
+        totalPhonesEl.textContent = phones.length;
+    }
+
+    if (lastUpdateEl && lastUpdate) {
+        const date = new Date(lastUpdate);
+        lastUpdateEl.textContent = date.toLocaleString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+}
+
+/**
+ * Save current data to backup file
+ */
+function saveCurrentData() {
+    try {
+        console.log('💾 Saving current data to backup...');
+
+        // Get all data from localStorage
+        const phones = JSON.parse(localStorage.getItem('ktmobile_phones') || '[]');
+        const brands = JSON.parse(localStorage.getItem('ktmobile_brands') || '[]');
+        const conditionModifiers = JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}');
+        const appointments = JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]');
+        const heroImage = JSON.parse(localStorage.getItem('ktmobile_hero_image') || 'null');
+        const generalSettings = JSON.parse(localStorage.getItem('ibox_general_settings') || '{}');
+
+        // Create backup object
+        const backupData = {
+            version: '2.0',
+            timestamp: new Date().toISOString(),
+            data: {
+                phones,
+                brands,
+                conditionModifiers,
+                appointments,
+                heroImage,
+                generalSettings
+            },
+            metadata: {
+                totalPhones: phones.length,
+                brands: [...new Set(phones.map(p => p.brand))],
+                exportedBy: 'IBOX Mobile Admin Panel'
+            }
+        };
+
+        // Create filename with timestamp
+        const dateStr = new Date().toISOString().split('T')[0];
+        const timeStr = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
+        const filename = `ibox-backup-${dateStr}-${timeStr}.json`;
+
+        // Create download
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log('✅ Backup saved:', filename);
+        alert(`✅ Data Backup Saved Successfully!\n\n` +
+              `📦 File: ${filename}\n` +
+              `📱 Total Phones: ${phones.length}\n` +
+              `📅 Appointments: ${appointments.length}\n\n` +
+              `💾 File saved to Downloads folder`);
+
+        showNotification('✓ Backup saved successfully!', 'success');
+
+    } catch (error) {
+        console.error('❌ Save backup error:', error);
+        alert('❌ Error saving backup: ' + error.message);
+    }
+}
+
+/**
+ * Load previous data from backup file
+ */
+function loadPreviousData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const backupData = JSON.parse(e.target.result);
+
+            if (!backupData.version || !backupData.data) {
+                throw new Error('Invalid backup file format');
+            }
+
+            // Confirm before loading
+            const confirmed = confirm(
+                `⚠️ RESTORE FROM BACKUP\n\n` +
+                `This will REPLACE all current data with:\n\n` +
+                `📱 ${backupData.data.phones?.length || 0} phone models\n` +
+                `📅 ${backupData.data.appointments?.length || 0} appointments\n` +
+                `🏷️ ${backupData.data.brands?.length || 0} brands\n\n` +
+                `Backup Date: ${new Date(backupData.timestamp).toLocaleString()}\n\n` +
+                `Continue with restore?`
+            );
+
+            if (!confirmed) {
+                event.target.value = ''; // Reset file input
+                return;
+            }
+
+            // Import all data to localStorage
+            if (backupData.data.phones) {
+                localStorage.setItem('ktmobile_phones', JSON.stringify(backupData.data.phones));
+            }
+            if (backupData.data.brands) {
+                localStorage.setItem('ktmobile_brands', JSON.stringify(backupData.data.brands));
+            }
+            if (backupData.data.conditionModifiers) {
+                localStorage.setItem('ktmobile_condition_modifiers', JSON.stringify(backupData.data.conditionModifiers));
+            }
+            if (backupData.data.heroImage) {
+                localStorage.setItem('ktmobile_hero_image', JSON.stringify(backupData.data.heroImage));
+            }
+            if (backupData.data.appointments) {
+                localStorage.setItem('ktmobile_appointments', JSON.stringify(backupData.data.appointments));
+            }
+            if (backupData.data.generalSettings) {
+                localStorage.setItem('ibox_general_settings', JSON.stringify(backupData.data.generalSettings));
+            }
+
+            // Update timestamp
+            localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
+            alert(`✅ DATA RESTORED SUCCESSFULLY!\n\n` +
+                  `📱 Restored ${backupData.data.phones?.length || 0} phone models\n` +
+                  `📅 Restored ${backupData.data.appointments?.length || 0} appointments\n\n` +
+                  `🔄 Reloading page to apply changes...`);
+
+            console.log('✅ Data restored from backup');
+            setTimeout(() => location.reload(), 1500);
+
+        } catch (error) {
+            console.error('❌ Load backup error:', error);
+            alert('❌ Error loading backup: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+/**
+ * Reset to default prices from Excel data (phoneDatabase)
+ */
+function resetToDefaultPrices() {
+    const confirmed = confirm(
+        `⚠️ RESET TO DEFAULT PRICES\n\n` +
+        `This will:\n` +
+        `1. DELETE all current phone data\n` +
+        `2. Load all 40+ models from Excel reference data\n` +
+        `3. Reset all prices to default values\n` +
+        `4. Set all phones to display=true\n\n` +
+        `⚠️ This cannot be undone!\n\n` +
+        `Continue?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+        console.log('🔄 Resetting to default prices...');
+
+        // Clear existing data
+        localStorage.removeItem('ktmobile_phones');
+        localStorage.removeItem('ktmobile_phones_backup');
+        console.log('✅ Cleared existing phone data');
+
+        // Load import script and run it
+        const scriptUrl = `import-exact-prices.js?v=${Date.now()}`;
+
+        fetch(scriptUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to load import script: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(scriptText => {
+                // Execute the script
+                eval(scriptText);
+
+                if (typeof importExactPrices !== 'function') {
+                    throw new Error('importExactPrices function not found in script');
+                }
+
+                // Run the import
+                const result = importExactPrices();
+
+                // Update timestamp
+                localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
+                // Reload admin manager
+                adminManager.phones = adminManager.loadPhones();
+
+                // Refresh UI
+                renderPhones();
+                renderPriceTable();
+                updateDataStatus();
+
+                alert(`✅ RESET TO DEFAULT PRICES SUCCESSFUL!\n\n` +
+                      `📦 Total Phones: ${result.total}\n` +
+                      `➕ Added: ${result.added}\n` +
+                      `✏️ Updated: ${result.updated}\n\n` +
+                      `✨ All prices loaded from Excel reference data\n` +
+                      `✨ All phones set to display=true`);
+
+                console.log('✅ Reset to default prices complete');
+
+            })
+            .catch(error => {
+                console.error('❌ Reset failed:', error);
+                alert('❌ Error resetting to default prices: ' + error.message);
+            });
+
+    } catch (error) {
+        console.error('❌ Reset to default prices failed:', error);
+        alert('❌ Error: ' + error.message);
+    }
+}
+
+// Make functions globally available
+window.updateDataStatus = updateDataStatus;
+window.saveCurrentData = saveCurrentData;
+window.loadPreviousData = loadPreviousData;
+window.resetToDefaultPrices = resetToDefaultPrices;
+
+// Update data status when data management section is viewed
+document.addEventListener('DOMContentLoaded', function() {
+    // Update status every time we switch to data management section
+    const dataManagementLink = document.querySelector('[data-section="data-management"]');
+    if (dataManagementLink) {
+        dataManagementLink.addEventListener('click', updateDataStatus);
+    }
+
+    // Initial update
+    setTimeout(updateDataStatus, 500);
+});
 
 window.switchConditionModifierType = switchConditionModifierType;

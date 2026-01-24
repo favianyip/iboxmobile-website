@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Clear Cache - KT Mobile Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .info { background: #e3f2fd; border-left: 4px solid #2196F3; }
+        .success { background: #e8f5e9; border-left: 4px solid #4CAF50; }
+        .warning { background: #fff3e0; border-left: 4px solid #FF9800; }
+        .error { background: #ffebee; border-left: 4px solid #f44336; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #d32f2f;
+        }
+        #output {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Force Clear Cache & Reset Prices</h1>
+
+        <div class="status info">
+            <strong>Purpose:</strong> This tool completely clears all cached data and reloads fresh prices from Excel reference data.
+        </div>
+
+        <div class="status warning">
+            <strong>⚠️ Warning:</strong> This will delete ALL current phone data and pricing customizations!
+        </div>
+
+        <h2>Step-by-step Instructions:</h2>
+        <ol>
+            <li>Click "1. Clear ALL Cache" below</li>
+            <li>Click "2. Hard Refresh Browser" (or press Ctrl+Shift+R)</li>
+            <li>Click "3. Reload Default Prices"</li>
+            <li>Go back to admin panel and verify prices</li>
+        </ol>
+
+        <div style="margin: 30px 0;">
+            <button onclick="clearAllCache()">1️⃣ Clear ALL Cache</button>
+            <button onclick="hardRefresh()">2️⃣ Hard Refresh Browser</button>
+            <button onclick="reloadDefaultPrices()" class="danger">3️⃣ Reload Default Prices</button>
+        </div>
+
+        <div id="output"></div>
+
+        <div style="margin-top: 30px;">
+            <a href="admin.html" style="color: #2196F3;">← Back to Admin Panel</a>
+        </div>
+    </div>
+
+    <script src="quote.js"></script>
+    <script src="import-exact-prices.js"></script>
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+
+            const time = new Date().toLocaleTimeString();
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+
+            entry.innerHTML = `<span style="color: #666;">[${time}]</span> ${icon} ${message}`;
+            output.appendChild(entry);
+            output.scrollTop = output.scrollHeight;
+
+            console.log(message);
+        }
+
+        function clearAllCache() {
+            log('Starting cache clearing process...', 'info');
+
+            try {
+                // List all localStorage keys before clearing
+                const keys = Object.keys(localStorage);
+                log(`Found ${keys.length} items in localStorage`, 'info');
+
+                keys.forEach(key => {
+                    log(`  - Removing: ${key}`, 'info');
+                });
+
+                // Clear localStorage
+                localStorage.clear();
+                log('✅ localStorage cleared', 'success');
+
+                // Clear sessionStorage
+                sessionStorage.clear();
+                log('✅ sessionStorage cleared', 'success');
+
+                // Verify it's empty
+                const remaining = Object.keys(localStorage).length;
+                if (remaining === 0) {
+                    log(`✅ Verification: localStorage is completely empty`, 'success');
+                } else {
+                    log(`⚠️ Warning: ${remaining} items still in localStorage`, 'warning');
+                }
+
+                log('', 'info');
+                log('📋 Next: Click "2. Hard Refresh Browser" or press Ctrl+Shift+R', 'info');
+
+            } catch (error) {
+                log(`❌ Error clearing cache: ${error.message}`, 'error');
+            }
+        }
+
+        function hardRefresh() {
+            log('Hard refreshing page...', 'info');
+            log('⚠️ If page doesn\'t refresh, press Ctrl+Shift+R manually', 'warning');
+
+            setTimeout(() => {
+                location.reload(true);
+            }, 1000);
+        }
+
+        function reloadDefaultPrices() {
+            log('Starting default price reload...', 'info');
+
+            try {
+                // Check if phoneDatabase is loaded
+                if (typeof phoneDatabase === 'undefined') {
+                    log('❌ ERROR: phoneDatabase not loaded. Make sure quote.js is included.', 'error');
+                    return;
+                }
+
+                log(`✅ phoneDatabase loaded with ${Object.keys(phoneDatabase).length} brands`, 'success');
+
+                // Check if import function exists
+                if (typeof importExactPrices !== 'function') {
+                    log('❌ ERROR: importExactPrices function not found', 'error');
+                    return;
+                }
+
+                log('Running importExactPrices()...', 'info');
+
+                // Run the import
+                const result = importExactPrices();
+
+                if (result.error) {
+                    log(`❌ Import failed: ${result.error}`, 'error');
+                    return;
+                }
+
+                log(`✅ Import successful!`, 'success');
+                log(`  - Added: ${result.added} phones`, 'success');
+                log(`  - Updated: ${result.updated} phones`, 'success');
+                log(`  - Total: ${result.total} phones`, 'success');
+
+                // Update timestamp
+                localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
+                // Verify a sample phone
+                const storedPhones = localStorage.getItem('ktmobile_phones');
+                if (storedPhones) {
+                    const phones = JSON.parse(storedPhones);
+                    const iphone15ProMax = phones.find(p => p.model === 'iPhone 15 Pro Max');
+
+                    if (iphone15ProMax) {
+                        log('', 'info');
+                        log('📱 Sample verification - iPhone 15 Pro Max:', 'info');
+                        log(`  - 256GB: $${iphone15ProMax.storagePrices['256GB']} (should be $800)`, 'info');
+                        log(`  - 512GB: $${iphone15ProMax.storagePrices['512GB']} (should be $850)`, 'info');
+                        log(`  - 1TB: $${iphone15ProMax.storagePrices['1TB']} (should be $900)`, 'info');
+
+                        // Verify prices
+                        if (iphone15ProMax.storagePrices['256GB'] === 800 &&
+                            iphone15ProMax.storagePrices['512GB'] === 850 &&
+                            iphone15ProMax.storagePrices['1TB'] === 900) {
+                            log('✅ PRICES ARE CORRECT!', 'success');
+                        } else {
+                            log('❌ PRICES ARE STILL WRONG!', 'error');
+                        }
+                    }
+                }
+
+                log('', 'info');
+                log('✅ DONE! Now go back to admin panel and check prices', 'success');
+                log('If prices still wrong, hard refresh admin.html (Ctrl+Shift+R)', 'warning');
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Force Clear Cache Tool loaded', 'info');
+            log('Ready to clear cache and reset prices', 'info');
+
+            // Show current localStorage status
+            const keys = Object.keys(localStorage);
+            log(`Current localStorage has ${keys.length} items`, 'info');
+
+            if (keys.includes('ktmobile_phones')) {
+                try {
+                    const phones = JSON.parse(localStorage.getItem('ktmobile_phones'));
+                    log(`  - ktmobile_phones: ${phones.length} phones stored`, 'info');
+
+                    // Check iPhone 15 Pro Max price
+                    const iphone15ProMax = phones.find(p => p.model === 'iPhone 15 Pro Max');
+                    if (iphone15ProMax) {
+                        log(`  - iPhone 15 Pro Max 256GB: $${iphone15ProMax.storagePrices['256GB']}`, 'info');
+                    }
+                } catch (e) {
+                    log('  - ktmobile_phones: corrupted data', 'error');
+                }
+            }
+
+            log('', 'info');
+        });
+    </script>
+</body>
+</html>

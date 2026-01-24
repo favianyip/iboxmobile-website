@@ -98,10 +98,12 @@ function loadProducts() {
                     const basePrice = data.basePrice + (data.storage[storage] || 0);
                     
                     ['excellent', 'good', 'fair'].forEach(condition => {
+                        // Load condition modifiers from admin settings
+                        const adminModifiers = JSON.parse(localStorage.getItem('ktmobile_condition_modifiers') || '{}');
                         const conditionModifiers = {
-                            'excellent': 0,
-                            'good': -50,
-                            'fair': -150
+                            'excellent': adminModifiers.refurbCondition?.excellent || 0,
+                            'good': adminModifiers.refurbCondition?.good || -50,
+                            'fair': adminModifiers.refurbCondition?.fair || -150
                         };
                         
                         const product = {
