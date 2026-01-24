@@ -665,6 +665,66 @@ function isOnAdminPage() {
 if (isOnAdminPage()) {
     adminManager = new AdminDataManager();
     console.log('✅ Full adminManager created for admin page');
+
+    // Clean up any cache-busting parameters from stored image URLs
+    function cleanupImageUrls() {
+        let needsSave = false;
+
+        // Clean phone images
+        if (adminManager.phones && adminManager.phones.length > 0) {
+            adminManager.phones.forEach(phone => {
+                if (phone.image && phone.image.indexOf('?t=') !== -1) {
+                    // Remove cache-busting parameter
+                    phone.image = phone.image.split('?t=')[0];
+                    needsSave = true;
+                }
+            });
+
+            if (needsSave) {
+                adminManager.savePhones();
+                console.log('🧹 Cleaned up cache-busting parameters from phone images');
+            }
+        }
+
+        // Clean hero image
+        const heroSettings = localStorage.getItem('ktmobile_hero_image');
+        if (heroSettings) {
+            try {
+                const settings = JSON.parse(heroSettings);
+                if (settings.imagePath && settings.imagePath.indexOf('?t=') !== -1) {
+                    settings.imagePath = settings.imagePath.split('?t=')[0];
+                    localStorage.setItem('ktmobile_hero_image', JSON.stringify(settings));
+                    console.log('🧹 Cleaned up cache-busting parameter from hero image');
+                }
+            } catch (e) {
+                console.error('Error cleaning hero image:', e);
+            }
+        }
+
+        // Clean brand images
+        const brandsData = localStorage.getItem('ktmobile_brands');
+        if (brandsData) {
+            try {
+                const brands = JSON.parse(brandsData);
+                let brandNeedsSave = false;
+                Object.keys(brands).forEach(brandName => {
+                    if (brands[brandName].image && brands[brandName].image.indexOf('?t=') !== -1) {
+                        brands[brandName].image = brands[brandName].image.split('?t=')[0];
+                        brandNeedsSave = true;
+                    }
+                });
+                if (brandNeedsSave) {
+                    localStorage.setItem('ktmobile_brands', JSON.stringify(brands));
+                    console.log('🧹 Cleaned up cache-busting parameters from brand images');
+                }
+            } catch (e) {
+                console.error('Error cleaning brand images:', e);
+            }
+        }
+    }
+
+    // Run cleanup on page load
+    cleanupImageUrls();
 } else {
     // On customer pages (sell-phones.html, quote.html), create minimal adminManager
     // Just to expose phones array from localStorage without initializing phoneDatabase
@@ -3147,13 +3207,8 @@ function savePhone() {
         });
     });
 
-    // Don't add cache-busting to base64 images or if already has timestamp
+    // Don't add cache-busting when saving - only add it when rendering/displaying
     let finalImageUrl = imageUrl || adminManager.getDefaultImage(brand);
-
-    // Only add cache-busting to URL-based images (not base64)
-    if (finalImageUrl && !finalImageUrl.startsWith('data:') && finalImageUrl.indexOf('?t=') === -1) {
-        finalImageUrl = `${finalImageUrl}?t=${Date.now()}`;
-    }
 
     const phoneData = {
         brand,
@@ -3783,11 +3838,7 @@ async function saveHeroImage() {
         }
     }
 
-    // CRITICAL FIX: Add cache busting for non-base64 images
-    if (!finalImagePath.startsWith('data:') && finalImagePath.indexOf('?t=') === -1) {
-        finalImagePath = `${finalImagePath}?t=${Date.now()}`;
-    }
-
+    // Don't add cache-busting when saving - only add it when rendering/displaying
     // Save settings
     adminManager.saveHeroImage(finalImagePath, removeBackground);
 
