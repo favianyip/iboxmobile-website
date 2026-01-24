@@ -655,7 +655,9 @@ let adminManager;
 
 // Check if we're on admin page BEFORE initializing
 function isOnAdminPage() {
-    return document.querySelector('.admin-container') !== null ||
+    // Check for admin page indicators
+    return document.querySelector('.admin-page') !== null ||
+           document.querySelector('.admin-main') !== null ||
            window.location.pathname.includes('admin.html') ||
            window.location.href.includes('admin.html');
 }
