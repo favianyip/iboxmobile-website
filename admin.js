@@ -3147,13 +3147,18 @@ function savePhone() {
         });
     });
 
-    // CRITICAL FIX: Add cache busting timestamp to force browser reload
-    const imageWithCacheBust = imageUrl ? `${imageUrl}?t=${Date.now()}` : adminManager.getDefaultImage(brand);
+    // Don't add cache-busting to base64 images or if already has timestamp
+    let finalImageUrl = imageUrl || adminManager.getDefaultImage(brand);
+
+    // Only add cache-busting to URL-based images (not base64)
+    if (finalImageUrl && !finalImageUrl.startsWith('data:') && finalImageUrl.indexOf('?t=') === -1) {
+        finalImageUrl = `${finalImageUrl}?t=${Date.now()}`;
+    }
 
     const phoneData = {
         brand,
         model,
-        image: imageWithCacheBust,
+        image: finalImageUrl,
         storages: checkedStorages,
         colors: colors, // Already an array from dropdown
         basePrice: basePrice, // Calculated from minimum storage price
