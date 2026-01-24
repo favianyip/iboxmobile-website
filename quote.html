@@ -607,13 +607,12 @@
         </svg>
     </a>
 
-    <!-- CRITICAL: Price Database System - Load FIRST -->
-    <script src="price-database.js"></script>
+    <!-- CRITICAL: Price Database System - Load in proper sequence -->
+    <script src="import-exact-prices.js"></script>
     <script src="init-database-from-excel.js"></script>
-
-    <script src="import-exact-prices.js"></script> <!-- AUTO-IMPORT: Loads prices automatically if localStorage empty -->
+    <script src="price-database.js"></script>
     <script src="quote.js?v=20260124-activation-fix"></script>
-    <script src="admin.js" defer></script>
+    <script src="admin.js"></script>
     
     <!-- Emergency click fix script -->
     <script>
