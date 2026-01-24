@@ -954,6 +954,19 @@ function createBuyDeviceCard(brand, modelName, modelData) {
     return card;
 }
 
+/**
+ * Navigate to product/quote page
+ */
+function navigateToProduct(brand, modelName) {
+    const params = new URLSearchParams();
+    params.set('brand', brand);
+    params.set('model', modelName);
+    params.set('type', 'used');
+    params.set('direct', 'true');
+
+    window.location.href = `quote.html?${params.toString()}`;
+}
+
 window.phoneAPI = phoneAPI;
 window.searchDevice = searchDevice;
 // REMOVED: window.searchDeviceBuy = searchDeviceBuy; - Function doesn't exist, causes ReferenceError
