@@ -1111,9 +1111,12 @@ function loadGoogleReviews() {
     const widgetContainer = document.getElementById('google-reviews-widget');
 
     if (!widgetContainer) {
-        console.error('❌ Google reviews widget container not found!');
-        console.log('💡 Looking for element with id="google-reviews-widget"');
-        return;
+        // Widget is optional - only log if on homepage where it should exist
+        const isHomepage = window.location.pathname === '/' || window.location.pathname.includes('index.html');
+        if (isHomepage) {
+            console.warn('⚠️ Google reviews widget container not found on homepage');
+        }
+        return; // Silently skip if not needed
     }
 
     console.log('✅ Found reviews widget container');

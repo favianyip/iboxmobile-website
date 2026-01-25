@@ -940,8 +940,7 @@
                 <div class="model-card" onclick="navigateToEvaluation('${brand}', '${model.name}')" data-model="${searchKey}">
                     <img src="${imageSrc}"
                          alt="${model.name}"
-                         onerror="console.error('❌ Image failed for ${model.name}'); this.src='${fallbackImage}'; this.onerror=null;"
-                         onload="console.log('✅ Image loaded: ${model.name}')"
+                         onerror="this.src='${fallbackImage}'; this.onerror=null;"
                          style="background: #f5f5f5; min-height: 200px; object-fit: contain;">
                     <h3>${model.name}</h3>
                     <div class="storage-badges">
