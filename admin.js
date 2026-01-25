@@ -4,6 +4,56 @@
  */
 
 // ============================================================================
+// HELPER FUNCTIONS FOR IMAGE AND COLOR DATA MANAGEMENT
+// ============================================================================
+
+/**
+ * Safely sets image src with data URL protection
+ * @param {HTMLImageElement} imgElement - The image element
+ * @param {string} imageSrc - The image source URL
+ * @param {boolean} addCacheBusting - Whether to add cache-busting timestamp
+ */
+function safeSetImageSrc(imgElement, imageSrc, addCacheBusting = true) {
+    if (!imgElement || !imageSrc) return;
+
+    let finalSrc = imageSrc;
+
+    // Don't add cache-busting to data URLs (they can't have query parameters)
+    if (addCacheBusting && !imageSrc.startsWith('data:') && imageSrc.indexOf('?t=') === -1) {
+        finalSrc = `${imageSrc}?t=${Date.now()}`;
+    }
+
+    imgElement.src = finalSrc;
+}
+
+/**
+ * Migrates color data from old object format to new string format
+ * @param {Array} colors - Colors array (could be objects or strings)
+ * @returns {Array} - Array of color name strings
+ */
+function migrateColorData(colors) {
+    if (!Array.isArray(colors)) return [];
+
+    return colors.map(color => {
+        // If already a string, return as-is
+        if (typeof color === 'string') return color;
+
+        // If object, extract name (handle nested objects from previous bugs)
+        if (typeof color === 'object' && color !== null) {
+            // Handle nested objects: {name: {name: "Black", hex: "#000"}}
+            if (typeof color.name === 'object' && color.name !== null && color.name.name) {
+                return color.name.name;
+            }
+            // Handle normal objects: {name: "Black", hex: "#000"}
+            if (color.name) return color.name;
+        }
+
+        // Fallback
+        return 'Black';
+    });
+}
+
+// ============================================================================
 // ADMIN DATA STORAGE (In production, use backend API)
 // ============================================================================
 
@@ -2416,9 +2466,14 @@ function renderBrands() {
     const grid = document.getElementById('brandsGrid');
     const brands = adminManager.brands;
 
-    grid.innerHTML = Object.entries(brands).map(([brandName, brandData]) => `
+    grid.innerHTML = Object.entries(brands).map(([brandName, brandData]) => {
+        // Prepare safe image src with data URL check
+        const imageSrc = brandData.image && brandData.image.startsWith('data:')
+            ? brandData.image
+            : `${brandData.image}?t=${Date.now()}`;
+        return `
         <div class="brand-card">
-            <img src="${brandData.image}" alt="${brandName}" class="brand-card-image" 
+            <img src="${imageSrc}" alt="${brandName}" class="brand-card-image" 
                  id="brand-preview-${brandName}"
                  onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
             <h4>${brandName}</h4>
@@ -2436,7 +2491,8 @@ function renderBrands() {
                         onclick="saveBrandImage('${brandName}')">Save Image</button>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 async function handleBrandFileUpload(brandName, file) {
@@ -2540,7 +2596,7 @@ function saveBrandImage(brandName) {
     // Update preview
     const preview = document.getElementById(`brand-preview-${brandName}`);
     if (preview) {
-        preview.src = imagePath;
+        safeSetImageSrc(preview, imagePath, false);
     }
 }
 
@@ -2656,6 +2712,8 @@ function openPhoneModal(phoneId = null) {
         // Set selected colors in dropdown
         const colorSelect = document.getElementById('phoneColorsSelect');
         if (colorSelect && phone.colors) {
+            // Migrate old object format to new string format
+            phone.colors = migrateColorData(phone.colors);
             Array.from(colorSelect.options).forEach(option => {
                 option.selected = phone.colors.includes(option.value);
             });
@@ -3643,7 +3701,7 @@ function initializeHeroImageSettings() {
     if (previewImg) {
         // Ensure image path is valid
         const imagePath = heroSettings.imagePath || 'images/phones/iphone-16-pro-max-best.jpg';
-        previewImg.src = imagePath;
+        safeSetImageSrc(previewImg, imagePath, false);
         previewImg.style.display = 'block';
         previewImg.style.maxWidth = '200px';
         previewImg.style.maxHeight = '300px';
@@ -4562,6 +4620,10 @@ function renderRefurbishPhones() {
             });
         }
         const isAvailable = totalStock > 0;
+        // Prepare safe image src with data URL check
+        const imageSrc = phone.image && phone.image.startsWith('data:')
+            ? phone.image
+            : `${phone.image}?t=${Date.now()}`;
         return `
             <div class="phone-card-admin" data-phone-id="${phone.id}">
                 <div class="phone-card-header">
@@ -4570,7 +4632,7 @@ function renderRefurbishPhones() {
                         <button class="btn-icon btn-edit" onclick="editRefurbishPhone('${phone.id}')" title="Edit">✏️</button>
                     </div>
                 </div>
-                <img src="${phone.image}" alt="${phone.model}" class="phone-card-image" onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
+                <img src="${imageSrc}" alt="${phone.model}" class="phone-card-image" onerror="this.src='images/phones/iphone-16-pro-max.jpg'">
                 <div class="phone-card-info">
                     <h4>${phone.model}</h4>
                     <p><strong>Stock:</strong> ${totalStock} units</p>
