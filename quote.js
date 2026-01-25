@@ -3708,7 +3708,17 @@ function initBookingForm() {
         const appointments = JSON.parse(localStorage.getItem('ktmobile_appointments') || '[]');
         appointments.push(appointment);
         localStorage.setItem('ktmobile_appointments', JSON.stringify(appointments));
-        
+
+        // CRITICAL FIX: Sync appointment to Firebase for cross-device visibility
+        if (window.firebaseSync) {
+            window.firebaseSync.syncAppointment(appointment).catch(err => {
+                console.warn('⚠️ Firebase appointment sync failed:', err);
+                // Appointment still saved locally, will sync when admin opens
+            });
+        } else {
+            console.warn('⚠️ Firebase sync not available - appointment saved locally only');
+        }
+
         // Show confirmation
         document.getElementById('booking-ref').textContent = bookingRef;
         document.getElementById('confirm-device').textContent = `${quoteState.model} ${quoteState.storage}`;

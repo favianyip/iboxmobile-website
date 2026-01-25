@@ -1210,6 +1210,29 @@ function setupFirebaseListeners() {
                     }
                 });
 
+                // CRITICAL FIX: Listen for appointment updates from other devices
+                window.firebaseSync.listenAppointments((appointments) => {
+                    console.log('📥 Admin: Appointments updated from cloud');
+                    localStorage.setItem('ktmobile_appointments', JSON.stringify(appointments));
+                    if (typeof renderAppointments === 'function') {
+                        renderAppointments();
+                    }
+                    if (typeof updateAppointmentStats === 'function') {
+                        updateAppointmentStats();
+                    }
+                    console.log('✅ Admin appointments refreshed with', appointments.length, 'appointments from Firebase');
+                });
+
+                // CRITICAL FIX: Listen for hero image updates from other devices
+                window.firebaseSync.listenHeroImage((heroData) => {
+                    console.log('📥 Admin: Hero image updated from cloud');
+                    localStorage.setItem('ktmobile_hero_image', JSON.stringify(heroData));
+                    if (typeof renderHeroImageSettings === 'function') {
+                        renderHeroImageSettings();
+                    }
+                    console.log('✅ Hero image settings refreshed from Firebase');
+                });
+
                 console.log('✅ Firebase listeners active - real-time sync enabled');
             } catch (err) {
                 console.error('❌ Failed to set up Firebase listeners:', err);
@@ -2052,7 +2075,17 @@ function saveBuyPrice(phoneId, storage, condition) {
     
     phone.updatedAt = new Date().toISOString();
     adminManager.savePhones();
-    
+
+    // Sync to Firebase for cross-device visibility
+    if (window.priceDB && window.firebaseSync) {
+        const database = window.priceDB.loadDatabase();
+        if (database && database.phones) {
+            window.firebaseSync.syncPriceDatabase(database).catch(err => {
+                console.error('❌ Failed to sync buy price to Firebase:', err);
+            });
+        }
+    }
+
     alert('Buy price and quantity saved successfully!');
 }
 
@@ -2412,6 +2445,16 @@ function updatePrice(phoneId, storage, newPrice) {
 
     phone.updatedAt = new Date().toISOString();
     adminManager.savePhones();
+
+    // Sync to Firebase for cross-device visibility
+    if (window.priceDB && window.firebaseSync) {
+        const database = window.priceDB.loadDatabase();
+        if (database && database.phones) {
+            window.firebaseSync.syncPriceDatabase(database).catch(err => {
+                console.error('❌ Failed to sync price update to Firebase:', err);
+            });
+        }
+    }
 }
 
 function savePrice(phoneId, storage) {
@@ -2450,6 +2493,16 @@ function saveSinglePrice(phoneId, storage, priceType) {
     // Save to localStorage
     phone.updatedAt = new Date().toISOString();
     adminManager.updatePhone(phoneId, phone);
+
+    // Sync to Firebase for cross-device visibility
+    if (window.priceDB && window.firebaseSync) {
+        const database = window.priceDB.loadDatabase();
+        if (database && database.phones) {
+            window.firebaseSync.syncPriceDatabase(database).catch(err => {
+                console.error('❌ Failed to sync price update to Firebase:', err);
+            });
+        }
+    }
 
     // Show success message
     const priceTypeLabel = priceType === 'new' ? 'New' : 'Used';
