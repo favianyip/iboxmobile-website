@@ -2597,8 +2597,15 @@ function saveBrandImage(brandName) {
     }
     
     adminManager.updateBrandImage(brandName, imagePath);
+
+    // CRITICAL FIX: Sync brand image to Firebase so mobile sees updated brand logo
+    if (typeof firebaseSync !== 'undefined' && firebaseSync.syncBrands) {
+        console.log('🔄 Syncing brand image to Firebase...');
+        firebaseSync.syncBrands(adminManager.brands);
+    }
+
     alert('Brand image updated!');
-    
+
     // Update preview
     const preview = document.getElementById(`brand-preview-${brandName}`);
     if (preview) {
@@ -4692,6 +4699,13 @@ function toggleRefurbishDisplay(phoneId, display) {
         phone.display = display;
         phone.updatedAt = new Date().toISOString();
         adminManager.savePhones();
+
+        // CRITICAL FIX: Sync display toggle to Firebase so mobile reflects changes
+        if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+            console.log('🔄 Syncing display toggle to Firebase...');
+            firebaseSync.syncPriceDatabase();
+        }
+
         renderDisplaySettings();
         console.log(`Display ${display ? 'enabled' : 'disabled'} for ${phone.brand} ${phone.model}`);
     }
@@ -4829,6 +4843,12 @@ function applyBulkPriceUpdate() {
     // Save changes
     adminManager.savePhones();
 
+    // CRITICAL FIX: Sync bulk price updates to Firebase so mobile receives them
+    if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+        console.log('🔄 Syncing bulk price updates to Firebase...');
+        firebaseSync.syncPriceDatabase();
+    }
+
     // Refresh the price table
     renderPriceTable();
 
@@ -4902,6 +4922,13 @@ function saveGeneralSettings() {
     };
     
     localStorage.setItem('ibox_general_settings', JSON.stringify(settings));
+
+    // CRITICAL FIX: Sync general settings to Firebase so mobile has updated contact info
+    if (typeof firebaseSync !== 'undefined' && firebaseSync.syncGeneralSettings) {
+        console.log('🔄 Syncing general settings to Firebase...');
+        firebaseSync.syncGeneralSettings(settings);
+    }
+
     alert('General settings saved successfully!');
     console.log('General settings saved:', settings);
 }
@@ -5530,6 +5557,12 @@ function performBulkUpdate() {
     // Save to localStorage
     adminManager.savePhones();
 
+    // CRITICAL FIX: Sync bulk price updates to Firebase so mobile receives them
+    if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+        console.log('🔄 Syncing bulk price updates to Firebase...');
+        firebaseSync.syncPriceDatabase();
+    }
+
     // Close modal and refresh
     closeBulkUpdateModal();
     renderPriceTable();
@@ -5649,6 +5682,12 @@ async function runBenchmarkImport() {
             // Refresh the UI
             renderPhones();
             renderPriceTable();
+
+            // CRITICAL FIX: Sync benchmark prices to Firebase so mobile gets updated prices
+            if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+                console.log('🔄 Syncing benchmark prices to Firebase...');
+                firebaseSync.syncPriceDatabase();
+            }
 
             // Close modal
             closeImportModal();
@@ -5821,6 +5860,12 @@ async function clearAndReimport() {
             // Refresh UI
             renderPhones();
             renderPriceTable();
+
+            // CRITICAL FIX: Sync complete reset data to Firebase so mobile gets fresh data
+            if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+                console.log('🔄 Syncing complete reset data to Firebase...');
+                firebaseSync.syncPriceDatabase();
+            }
 
             closeImportModal();
 
@@ -6159,6 +6204,26 @@ function loadPreviousData(event) {
 
             // Update timestamp
             localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
+            // CRITICAL FIX: Sync restored data to Firebase so mobile receives ALL restored data
+            if (typeof firebaseSync !== 'undefined') {
+                console.log('🔄 Syncing restored data to Firebase...');
+                if (backupData.data.phones && firebaseSync.syncPriceDatabase) {
+                    firebaseSync.syncPriceDatabase();
+                }
+                if (backupData.data.brands && firebaseSync.syncBrands) {
+                    firebaseSync.syncBrands(backupData.data.brands);
+                }
+                if (backupData.data.conditionModifiers && firebaseSync.syncConditionModifiers) {
+                    firebaseSync.syncConditionModifiers(backupData.data.conditionModifiers);
+                }
+                if (backupData.data.heroImage && firebaseSync.syncHeroImage) {
+                    firebaseSync.syncHeroImage(backupData.data.heroImage);
+                }
+                if (backupData.data.generalSettings && firebaseSync.syncGeneralSettings) {
+                    firebaseSync.syncGeneralSettings(backupData.data.generalSettings);
+                }
+            }
 
             alert(`✅ DATA RESTORED SUCCESSFULLY!\n\n` +
                   `📱 Restored ${backupData.data.phones?.length || 0} phone models\n` +
