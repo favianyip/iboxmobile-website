@@ -39,6 +39,29 @@ const conditionDescriptions = {
     }
 };
 
+// ============================================================================
+// HELPER FUNCTION FOR IMAGE MANAGEMENT
+// ============================================================================
+
+/**
+ * Safely sets image src with data URL protection
+ * @param {HTMLImageElement} imgElement - The image element
+ * @param {string} imageSrc - The image source URL
+ * @param {boolean} addCacheBusting - Whether to add cache-busting timestamp
+ */
+function safeSetImageSrc(imgElement, imageSrc, addCacheBusting = true) {
+    if (!imgElement || !imageSrc) return;
+
+    let finalSrc = imageSrc;
+
+    // Don't add cache-busting to data URLs (they can't have query parameters)
+    if (addCacheBusting && !imageSrc.startsWith('data:') && imageSrc.indexOf('?t=') === -1) {
+        finalSrc = `${imageSrc}?t=${Date.now()}`;
+    }
+
+    imgElement.src = finalSrc;
+}
+
 // Initialize product page
 document.addEventListener('DOMContentLoaded', function() {
     initializeProduct();
@@ -108,7 +131,7 @@ function loadProductData(brand, model) {
     
     // Set product image
     const mainImage = document.getElementById('mainProductImage');
-    mainImage.src = product.image;
+    safeSetImageSrc(mainImage, product.image, true);
     mainImage.alt = model;
     
     // Generate thumbnails
@@ -168,7 +191,7 @@ function generateThumbnails(mainImageSrc) {
     thumbnail.className = 'thumbnail-item active';
     thumbnail.innerHTML = `<img src="${mainImageSrc}" alt="Thumbnail">`;
     thumbnail.addEventListener('click', () => {
-        document.getElementById('mainProductImage').src = mainImageSrc;
+        safeSetImageSrc(document.getElementById('mainProductImage'), mainImageSrc, true);
         document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
         thumbnail.classList.add('active');
     });

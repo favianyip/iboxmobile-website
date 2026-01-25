@@ -134,6 +134,29 @@ function generatePlaceholder(modelName) {
 }
 
 // ============================================================================
+// HELPER FUNCTION FOR IMAGE MANAGEMENT
+// ============================================================================
+
+/**
+ * Safely sets image src with data URL protection
+ * @param {HTMLImageElement} imgElement - The image element
+ * @param {string} imageSrc - The image source URL
+ * @param {boolean} addCacheBusting - Whether to add cache-busting timestamp
+ */
+function safeSetImageSrc(imgElement, imageSrc, addCacheBusting = true) {
+    if (!imgElement || !imageSrc) return;
+
+    let finalSrc = imageSrc;
+
+    // Don't add cache-busting to data URLs (they can't have query parameters)
+    if (addCacheBusting && !imageSrc.startsWith('data:') && imageSrc.indexOf('?t=') === -1) {
+        finalSrc = `${imageSrc}?t=${Date.now()}`;
+    }
+
+    imgElement.src = finalSrc;
+}
+
+// ============================================================================
 // PHONE BUYBACK API CLASS
 // ============================================================================
 
@@ -318,9 +341,9 @@ function loadHeroImage() {
         if (heroSettings) {
             const settings = JSON.parse(heroSettings);
             console.log('Loading hero image:', settings.imagePath);
-            
+
             // Set image source
-            heroImage.src = settings.imagePath;
+            safeSetImageSrc(heroImage, settings.imagePath, false);
             
             // Apply background removal if enabled
             if (settings.removeBackground !== false) {
@@ -428,10 +451,16 @@ function loadiPhoneModels() {
                 imageUrl = adminPhone.image;
             }
         }
-        
+
+        // Prepare safe image src with data URL check
+        const finalImageUrl = imageUrl || phoneAPI.getPhoneImage(modelName);
+        const safeImageUrl = finalImageUrl && finalImageUrl.startsWith('data:')
+            ? finalImageUrl
+            : `${finalImageUrl}?t=${Date.now()}`;
+
         card.innerHTML = `
             <div class="phone-image-container">
-                <img src="${imageUrl || phoneAPI.getPhoneImage(modelName)}" alt="${modelName}" class="phone-image" loading="lazy" 
+                <img src="${safeImageUrl}" alt="${modelName}" class="phone-image" loading="lazy" 
                      onerror="this.src='${phoneAPI.getPhoneImage(modelName)}'; this.onerror=function(){this.style.display='none';};">
             </div>
             <h4>${modelName}</h4>
@@ -491,7 +520,7 @@ function initializePhoneImages() {
                         if (modelName === deviceName || deviceName.includes(modelName) || modelName.includes(deviceName.replace('Google ', ''))) {
                             if (modelData.image) {
                                 console.log(`Found image in phoneDatabase: ${modelData.image}`);
-                                this.src = modelData.image;
+                                safeSetImageSrc(this, modelData.image, true);
                                 return;
                             }
                         }

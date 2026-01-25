@@ -114,6 +114,94 @@ window.verifyPriceIntegrity = function() {
     return results;
 };
 
+// ============================================================================
+// HELPER FUNCTIONS FOR IMAGE AND COLOR DATA MANAGEMENT
+// ============================================================================
+
+/**
+ * Safely sets image src with data URL protection
+ * @param {HTMLImageElement} imgElement - The image element
+ * @param {string} imageSrc - The image source URL
+ * @param {boolean} addCacheBusting - Whether to add cache-busting timestamp
+ */
+function safeSetImageSrc(imgElement, imageSrc, addCacheBusting = true) {
+    if (!imgElement || !imageSrc) return;
+
+    let finalSrc = imageSrc;
+
+    // Don't add cache-busting to data URLs (they can't have query parameters)
+    if (addCacheBusting && !imageSrc.startsWith('data:') && imageSrc.indexOf('?t=') === -1) {
+        finalSrc = `${imageSrc}?t=${Date.now()}`;
+    }
+
+    imgElement.src = finalSrc;
+}
+
+/**
+ * Migrates color data from old object format to new string format
+ * @param {Array} colors - Colors array (could be objects or strings)
+ * @returns {Array} - Array of color name strings
+ */
+function migrateColorData(colors) {
+    if (!Array.isArray(colors)) return [];
+
+    return colors.map(color => {
+        // If already a string, return as-is
+        if (typeof color === 'string') return color;
+
+        // If object, extract name (handle nested objects from previous bugs)
+        if (typeof color === 'object' && color !== null) {
+            // Handle nested objects: {name: {name: "Black", hex: "#000"}}
+            if (typeof color.name === 'object' && color.name !== null && color.name.name) {
+                return color.name.name;
+            }
+            // Handle normal objects: {name: "Black", hex: "#000"}
+            if (color.name) return color.name;
+        }
+
+        // Fallback
+        return 'Black';
+    });
+}
+
+/**
+ * One-time migration: Clean up all phone data in localStorage
+ */
+function cleanupPhoneDataInLocalStorage() {
+    const storageKeys = ['ktmobile_phones', 'iboxmobile_price_database'];
+
+    storageKeys.forEach(key => {
+        try {
+            const data = localStorage.getItem(key);
+            if (!data) return;
+
+            let phones = JSON.parse(data);
+            if (!Array.isArray(phones)) return;
+
+            let changed = false;
+            phones.forEach(phone => {
+                if (phone.colors && Array.isArray(phone.colors)) {
+                    const oldColors = JSON.stringify(phone.colors);
+                    phone.colors = migrateColorData(phone.colors);
+                    if (JSON.stringify(phone.colors) !== oldColors) {
+                        changed = true;
+                    }
+                }
+            });
+
+            if (changed) {
+                localStorage.setItem(key, JSON.stringify(phones));
+                console.log(`✅ Migrated color data in ${key}`);
+            }
+        } catch (e) {
+            console.warn(`Migration failed for ${key}:`, e);
+        }
+    });
+}
+
+// Run migration once on page load
+cleanupPhoneDataInLocalStorage();
+
 // Run integrity check on page load and display banner if issues found
 function displayPriceIntegrityBanner() {
     const results = window.verifyPriceIntegrity();
@@ -2573,7 +2661,9 @@ function populateStep2() {
             // Convert admin colors (strings) to quote format (objects with name/hex)
             let colorsArray = model.colors; // Default from database
             if (adminPhone.colors && adminPhone.colors.length > 0) {
-                colorsArray = adminPhone.colors.map(colorName => {
+                // Migrate old object format to new string format
+                const migratedColors = migrateColorData(adminPhone.colors);
+                colorsArray = migratedColors.map(colorName => {
                     // Try to find color in original model colors
                     const originalColor = model.colors.find(c =>
                         (typeof c === 'string' ? c : c.name) === colorName
@@ -3312,7 +3402,7 @@ function displayQuoteResult() {
     else if (quoteState.deviceType === 'new-activated') deviceTypeDisplay = 'New Activated';
     
     document.getElementById('quote-device-name').textContent = quoteState.model;
-    document.getElementById('quote-device-image').src = model.image;
+    safeSetImageSrc(document.getElementById('quote-device-image'), model.image, true);
     
     // Show device type, storage, color, and condition (only for used)
     let specsText = `${deviceTypeDisplay} - ${quoteState.storage} - ${quoteState.color}`;
