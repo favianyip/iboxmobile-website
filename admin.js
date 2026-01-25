@@ -2438,7 +2438,24 @@ function saveAllBuybackPrices() {
         // CRITICAL FIX: Sync price updates to Firebase so mobile receives them
         if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
             console.log('🔄 Syncing price updates to Firebase...');
-            firebaseSync.syncPriceDatabase();
+
+            // Get database object from priceDB
+            if (window.priceDB) {
+                const database = window.priceDB.getAllData();
+
+                // Call with parameter and error handling
+                firebaseSync.syncPriceDatabase(database).catch(err => {
+                    console.error('❌ Failed to sync to Firebase:', err);
+                    alert(
+                        '⚠️ SYNC WARNING\n\n' +
+                        'Price updates saved locally but failed to sync to Firebase.\n\n' +
+                        'Mobile devices may not see updates until you retry.\n\n' +
+                        'Error: ' + err.message
+                    );
+                });
+            } else {
+                console.error('❌ priceDB not available - cannot sync to Firebase');
+            }
         }
 
         console.log(`✅ Successfully updated ${updatedCount} prices across ${Object.keys(phoneUpdates).length} phone models`);
@@ -3394,7 +3411,24 @@ function savePhone() {
     // CRITICAL FIX: Sync phone changes to Firebase so mobile receives them
     if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
         console.log('🔄 Syncing phone data to Firebase...');
-        firebaseSync.syncPriceDatabase();
+
+        // Get database object from priceDB
+        if (window.priceDB) {
+            const database = window.priceDB.getAllData();
+
+            // Call with parameter and error handling
+            firebaseSync.syncPriceDatabase(database).catch(err => {
+                console.error('❌ Failed to sync to Firebase:', err);
+                alert(
+                    '⚠️ SYNC WARNING\n\n' +
+                    'Phone data saved locally but failed to sync to Firebase.\n\n' +
+                    'Mobile devices may not see updates until you retry.\n\n' +
+                    'Error: ' + err.message
+                );
+            });
+        } else {
+            console.error('❌ priceDB not available - cannot sync to Firebase');
+        }
     }
 
     closePhoneModal();
@@ -3433,7 +3467,24 @@ function deletePhone(id) {
         // CRITICAL FIX: Sync phone deletion to Firebase so mobile reflects the change
         if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
             console.log('🔄 Syncing phone deletion to Firebase...');
-            firebaseSync.syncPriceDatabase();
+
+            // Get database object from priceDB
+            if (window.priceDB) {
+                const database = window.priceDB.getAllData();
+
+                // Call with parameter and error handling
+                firebaseSync.syncPriceDatabase(database).catch(err => {
+                    console.error('❌ Failed to sync to Firebase:', err);
+                    alert(
+                        '⚠️ SYNC WARNING\n\n' +
+                        'Phone deletion saved locally but failed to sync to Firebase.\n\n' +
+                        'Mobile devices may not see updates until you retry.\n\n' +
+                        'Error: ' + err.message
+                    );
+                });
+            } else {
+                console.error('❌ priceDB not available - cannot sync to Firebase');
+            }
         }
 
         // Update model dropdown if brand filter is active
@@ -4703,7 +4754,24 @@ function toggleRefurbishDisplay(phoneId, display) {
         // CRITICAL FIX: Sync display toggle to Firebase so mobile reflects changes
         if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
             console.log('🔄 Syncing display toggle to Firebase...');
-            firebaseSync.syncPriceDatabase();
+
+            // Get database object from priceDB
+            if (window.priceDB) {
+                const database = window.priceDB.getAllData();
+
+                // Call with parameter and error handling
+                firebaseSync.syncPriceDatabase(database).catch(err => {
+                    console.error('❌ Failed to sync to Firebase:', err);
+                    alert(
+                        '⚠️ SYNC WARNING\n\n' +
+                        'Display toggle saved locally but failed to sync to Firebase.\n\n' +
+                        'Mobile devices may not see updates until you retry.\n\n' +
+                        'Error: ' + err.message
+                    );
+                });
+            } else {
+                console.error('❌ priceDB not available - cannot sync to Firebase');
+            }
         }
 
         renderDisplaySettings();
@@ -4846,7 +4914,24 @@ function applyBulkPriceUpdate() {
     // CRITICAL FIX: Sync bulk price updates to Firebase so mobile receives them
     if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
         console.log('🔄 Syncing bulk price updates to Firebase...');
-        firebaseSync.syncPriceDatabase();
+
+        // Get database object from priceDB
+        if (window.priceDB) {
+            const database = window.priceDB.getAllData();
+
+            // Call with parameter and error handling
+            firebaseSync.syncPriceDatabase(database).catch(err => {
+                console.error('❌ Failed to sync to Firebase:', err);
+                alert(
+                    '⚠️ SYNC WARNING\n\n' +
+                    'Bulk price updates saved locally but failed to sync to Firebase.\n\n' +
+                    'Mobile devices may not see updates until you retry.\n\n' +
+                    'Error: ' + err.message
+                );
+            });
+        } else {
+            console.error('❌ priceDB not available - cannot sync to Firebase');
+        }
     }
 
     // Refresh the price table
@@ -5560,7 +5645,24 @@ function performBulkUpdate() {
     // CRITICAL FIX: Sync bulk price updates to Firebase so mobile receives them
     if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
         console.log('🔄 Syncing bulk price updates to Firebase...');
-        firebaseSync.syncPriceDatabase();
+
+        // Get database object from priceDB
+        if (window.priceDB) {
+            const database = window.priceDB.getAllData();
+
+            // Call with parameter and error handling
+            firebaseSync.syncPriceDatabase(database).catch(err => {
+                console.error('❌ Failed to sync to Firebase:', err);
+                alert(
+                    '⚠️ SYNC WARNING\n\n' +
+                    'Bulk price updates saved locally but failed to sync to Firebase.\n\n' +
+                    'Mobile devices may not see updates until you retry.\n\n' +
+                    'Error: ' + err.message
+                );
+            });
+        } else {
+            console.error('❌ priceDB not available - cannot sync to Firebase');
+        }
     }
 
     // Close modal and refresh
@@ -5686,7 +5788,24 @@ async function runBenchmarkImport() {
             // CRITICAL FIX: Sync benchmark prices to Firebase so mobile gets updated prices
             if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
                 console.log('🔄 Syncing benchmark prices to Firebase...');
-                firebaseSync.syncPriceDatabase();
+
+                // Get database object from priceDB
+                if (window.priceDB) {
+                    const database = window.priceDB.getAllData();
+
+                    // Call with parameter and error handling
+                    firebaseSync.syncPriceDatabase(database).catch(err => {
+                        console.error('❌ Failed to sync to Firebase:', err);
+                        alert(
+                            '⚠️ SYNC WARNING\n\n' +
+                            'Benchmark prices saved locally but failed to sync to Firebase.\n\n' +
+                            'Mobile devices may not see updates until you retry.\n\n' +
+                            'Error: ' + err.message
+                        );
+                    });
+                } else {
+                    console.error('❌ priceDB not available - cannot sync to Firebase');
+                }
             }
 
             // Close modal
@@ -5864,7 +5983,24 @@ async function clearAndReimport() {
             // CRITICAL FIX: Sync complete reset data to Firebase so mobile gets fresh data
             if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
                 console.log('🔄 Syncing complete reset data to Firebase...');
-                firebaseSync.syncPriceDatabase();
+
+                // Get database object from priceDB
+                if (window.priceDB) {
+                    const database = window.priceDB.getAllData();
+
+                    // Call with parameter and error handling
+                    firebaseSync.syncPriceDatabase(database).catch(err => {
+                        console.error('❌ Failed to sync to Firebase:', err);
+                        alert(
+                            '⚠️ SYNC WARNING\n\n' +
+                            'Reset data saved locally but failed to sync to Firebase.\n\n' +
+                            'Mobile devices may not see updates until you retry.\n\n' +
+                            'Error: ' + err.message
+                        );
+                    });
+                } else {
+                    console.error('❌ priceDB not available - cannot sync to Firebase');
+                }
             }
 
             closeImportModal();
@@ -6208,20 +6344,41 @@ function loadPreviousData(event) {
             // CRITICAL FIX: Sync restored data to Firebase so mobile receives ALL restored data
             if (typeof firebaseSync !== 'undefined') {
                 console.log('🔄 Syncing restored data to Firebase...');
-                if (backupData.data.phones && firebaseSync.syncPriceDatabase) {
-                    firebaseSync.syncPriceDatabase();
+
+                // Sync price database
+                if (backupData.data.phones && firebaseSync.syncPriceDatabase && window.priceDB) {
+                    const database = window.priceDB.getAllData();
+                    firebaseSync.syncPriceDatabase(database).catch(err => {
+                        console.error('Failed to sync price database:', err);
+                    });
                 }
+
+                // Sync brands
                 if (backupData.data.brands && firebaseSync.syncBrands) {
-                    firebaseSync.syncBrands(backupData.data.brands);
+                    firebaseSync.syncBrands(backupData.data.brands).catch(err => {
+                        console.error('Failed to sync brands:', err);
+                    });
                 }
+
+                // Sync condition modifiers
                 if (backupData.data.conditionModifiers && firebaseSync.syncConditionModifiers) {
-                    firebaseSync.syncConditionModifiers(backupData.data.conditionModifiers);
+                    firebaseSync.syncConditionModifiers(backupData.data.conditionModifiers).catch(err => {
+                        console.error('Failed to sync modifiers:', err);
+                    });
                 }
+
+                // Sync hero image
                 if (backupData.data.heroImage && firebaseSync.syncHeroImage) {
-                    firebaseSync.syncHeroImage(backupData.data.heroImage);
+                    firebaseSync.syncHeroImage(backupData.data.heroImage).catch(err => {
+                        console.error('Failed to sync hero image:', err);
+                    });
                 }
+
+                // Sync general settings
                 if (backupData.data.generalSettings && firebaseSync.syncGeneralSettings) {
-                    firebaseSync.syncGeneralSettings(backupData.data.generalSettings);
+                    firebaseSync.syncGeneralSettings(backupData.data.generalSettings).catch(err => {
+                        console.error('Failed to sync general settings:', err);
+                    });
                 }
             }
 

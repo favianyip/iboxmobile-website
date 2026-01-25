@@ -173,6 +173,85 @@ class FirebaseSync {
         return unsubscribe;
     }
 
+    // Sync brands to cloud (brand logos, names, settings)
+    async syncBrands(brands) {
+        if (!this.syncEnabled) return;
+
+        try {
+            this.updateSyncStatus('syncing');
+
+            const brandData = {
+                brands: brands || {},
+                lastUpdate: serverTimestamp()
+            };
+
+            await setDoc(doc(db, 'settings', 'brands'), brandData);
+            console.log('✅ Brands synced to cloud');
+            this.updateSyncStatus('synced');
+        } catch (error) {
+            console.error('❌ Brands sync failed:', error);
+            this.updateSyncStatus('error');
+            throw error;  // Re-throw for .catch() handling
+        }
+    }
+
+    // Listen for brand changes from cloud
+    listenBrands(callback) {
+        const unsubscribe = onSnapshot(doc(db, 'settings', 'brands'), (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                localStorage.setItem('ktmobile_brands', JSON.stringify(data.brands));
+                if (callback) callback(data.brands);
+                console.log('📥 Brands updated from cloud');
+            }
+        }, (error) => {
+            console.error('❌ Brands listener error:', error);
+        });
+
+        this.listeners.push(unsubscribe);
+        return unsubscribe;
+    }
+
+    // Sync general settings to cloud (company info, contact details)
+    async syncGeneralSettings(settings) {
+        if (!this.syncEnabled) return;
+
+        try {
+            this.updateSyncStatus('syncing');
+
+            const settingsData = {
+                ...settings,
+                lastUpdate: serverTimestamp()
+            };
+
+            await setDoc(doc(db, 'settings', 'generalSettings'), settingsData);
+            console.log('✅ General settings synced to cloud');
+            this.updateSyncStatus('synced');
+        } catch (error) {
+            console.error('❌ General settings sync failed:', error);
+            this.updateSyncStatus('error');
+            throw error;  // Re-throw for .catch() handling
+        }
+    }
+
+    // Listen for general settings changes from cloud
+    listenGeneralSettings(callback) {
+        const unsubscribe = onSnapshot(doc(db, 'settings', 'generalSettings'), (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                delete data.lastUpdate;
+                localStorage.setItem('ibox_general_settings', JSON.stringify(data));
+                if (callback) callback(data);
+                console.log('📥 General settings updated from cloud');
+            }
+        }, (error) => {
+            console.error('❌ General settings listener error:', error);
+        });
+
+        this.listeners.push(unsubscribe);
+        return unsubscribe;
+    }
+
     // Sync single appointment to cloud
     async syncAppointment(appointment) {
         if (!this.syncEnabled) return;
@@ -317,6 +396,23 @@ class FirebaseSync {
                 const data = priceDoc.data();
                 localStorage.setItem('iboxmobile_price_database', JSON.stringify(data));
                 console.log('✅ Price database loaded from cloud (' + (data.phones?.length || 0) + ' phones)');
+            }
+
+            // Load brands
+            const brandsDoc = await getDoc(doc(db, 'settings', 'brands'));
+            if (brandsDoc.exists()) {
+                const data = brandsDoc.data();
+                localStorage.setItem('ktmobile_brands', JSON.stringify(data.brands));
+                console.log('✅ Brands loaded from cloud');
+            }
+
+            // Load general settings
+            const settingsDoc = await getDoc(doc(db, 'settings', 'generalSettings'));
+            if (settingsDoc.exists()) {
+                const data = settingsDoc.data();
+                delete data.lastUpdate;
+                localStorage.setItem('ibox_general_settings', JSON.stringify(data));
+                console.log('✅ General settings loaded from cloud');
             }
 
             console.log('✅ Initial data load complete');
