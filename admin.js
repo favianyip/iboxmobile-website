@@ -2441,7 +2441,7 @@ function saveAllBuybackPrices() {
 
             // Get database object from priceDB
             if (window.priceDB) {
-                const database = window.priceDB.getAllData();
+                const database = window.priceDB.loadDatabase();
 
                 // Call with parameter and error handling
                 firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -3414,7 +3414,7 @@ function savePhone() {
 
         // Get database object from priceDB
         if (window.priceDB) {
-            const database = window.priceDB.getAllData();
+            const database = window.priceDB.loadDatabase();
 
             // Call with parameter and error handling
             firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -3470,7 +3470,7 @@ function deletePhone(id) {
 
             // Get database object from priceDB
             if (window.priceDB) {
-                const database = window.priceDB.getAllData();
+                const database = window.priceDB.loadDatabase();
 
                 // Call with parameter and error handling
                 firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -4757,7 +4757,7 @@ function toggleRefurbishDisplay(phoneId, display) {
 
             // Get database object from priceDB
             if (window.priceDB) {
-                const database = window.priceDB.getAllData();
+                const database = window.priceDB.loadDatabase();
 
                 // Call with parameter and error handling
                 firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -4917,7 +4917,7 @@ function applyBulkPriceUpdate() {
 
         // Get database object from priceDB
         if (window.priceDB) {
-            const database = window.priceDB.getAllData();
+            const database = window.priceDB.loadDatabase();
 
             // Call with parameter and error handling
             firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -5648,7 +5648,7 @@ function performBulkUpdate() {
 
         // Get database object from priceDB
         if (window.priceDB) {
-            const database = window.priceDB.getAllData();
+            const database = window.priceDB.loadDatabase();
 
             // Call with parameter and error handling
             firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -5791,7 +5791,7 @@ async function runBenchmarkImport() {
 
                 // Get database object from priceDB
                 if (window.priceDB) {
-                    const database = window.priceDB.getAllData();
+                    const database = window.priceDB.loadDatabase();
 
                     // Call with parameter and error handling
                     firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -5880,7 +5880,7 @@ async function runExactPriceImport() {
 
             // Sync to Firebase cloud
             if (window.firebaseSync && window.priceDB) {
-                const database = window.priceDB.getAllData();
+                const database = window.priceDB.loadDatabase();
                 window.firebaseSync.syncPriceDatabase(database).catch(err => {
                     console.warn('Firebase sync failed, data saved locally only:', err);
                 });
@@ -5986,7 +5986,7 @@ async function clearAndReimport() {
 
                 // Get database object from priceDB
                 if (window.priceDB) {
-                    const database = window.priceDB.getAllData();
+                    const database = window.priceDB.loadDatabase();
 
                     // Call with parameter and error handling
                     firebaseSync.syncPriceDatabase(database).catch(err => {
@@ -6347,7 +6347,7 @@ function loadPreviousData(event) {
 
                 // Sync price database
                 if (backupData.data.phones && firebaseSync.syncPriceDatabase && window.priceDB) {
-                    const database = window.priceDB.getAllData();
+                    const database = window.priceDB.loadDatabase();
                     firebaseSync.syncPriceDatabase(database).catch(err => {
                         console.error('Failed to sync price database:', err);
                     });
