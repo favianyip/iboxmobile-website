@@ -433,7 +433,23 @@ class AdminDataManager {
      * Save phones to localStorage
      */
     savePhones() {
+        // Save to old storage (maintain compatibility)
         localStorage.setItem('ktmobile_phones', JSON.stringify(this.phones));
+        localStorage.setItem('ktmobile_last_update', new Date().toISOString());
+
+        // CRITICAL FIX: Also sync to priceDB so Firebase gets latest data
+        if (window.priceDB) {
+            const db = window.priceDB.loadDatabase() || {
+                version: '1.0.0',
+                phones: [],
+                conditionModifiers: window.priceDB.getConditionModifiers(),
+                lastUpdate: new Date().toISOString()
+            };
+            db.phones = this.phones;
+            db.lastUpdate = new Date().toISOString();
+            window.priceDB.saveDatabase(db);
+            console.log('🔄 Synced adminManager → priceDB:', this.phones.length, 'phones');
+        }
     }
 
     /**
@@ -1125,6 +1141,54 @@ function initializeAdmin() {
         }
         
         console.log('Admin panel initialized successfully');
+
+        // CRITICAL FIX: Setup Firebase real-time listeners for bidirectional sync
+        if (window.firebaseSync) {
+            console.log('🔔 Setting up Firebase listeners for admin panel...');
+
+            // Listen for price database updates from other devices
+            window.firebaseSync.listenPriceDatabase((database) => {
+                console.log('📥 Admin: Price database updated from cloud');
+                if (database && database.phones) {
+                    adminManager.phones = database.phones;
+                    localStorage.setItem('ktmobile_phones', JSON.stringify(database.phones));
+
+                    // Auto-refresh UI to show changes
+                    if (typeof renderPhones === 'function') renderPhones();
+                    if (typeof renderPriceTable === 'function') renderPriceTable();
+                    if (typeof renderDisplaySettings === 'function') renderDisplaySettings();
+
+                    console.log('✅ Admin UI refreshed with', database.phones.length, 'phones from Firebase');
+                }
+            });
+
+            // Listen for brand updates from other devices
+            window.firebaseSync.listenBrands((brands) => {
+                console.log('📥 Admin: Brands updated from cloud');
+                localStorage.setItem('ktmobile_brands', JSON.stringify(brands));
+                if (typeof renderBrandSettings === 'function') renderBrandSettings();
+            });
+
+            // Listen for general settings updates from other devices
+            window.firebaseSync.listenGeneralSettings((settings) => {
+                console.log('📥 Admin: General settings updated from cloud');
+                localStorage.setItem('ibox_general_settings', JSON.stringify(settings));
+                if (typeof renderGeneralSettings === 'function') renderGeneralSettings();
+            });
+
+            // Listen for condition modifier updates from other devices
+            window.firebaseSync.listenConditionModifiers((modifiers) => {
+                console.log('📥 Admin: Condition modifiers updated from cloud');
+                if (typeof loadConditionModifierInputs === 'function') {
+                    loadConditionModifierInputs();
+                }
+            });
+
+            console.log('✅ Firebase listeners active - admin will receive real-time updates from other devices');
+        } else {
+            console.warn('⚠️ firebaseSync not available - admin won\'t receive real-time updates');
+        }
+
     } catch (e) {
         console.error('Error initializing sections:', e);
         // Even if initialization fails, ensure menu navigation works
