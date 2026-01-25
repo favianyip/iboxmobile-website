@@ -2435,6 +2435,12 @@ function saveAllBuybackPrices() {
             adminManager.updatePhone(phoneId, phoneUpdates[phoneId]);
         });
 
+        // CRITICAL FIX: Sync price updates to Firebase so mobile receives them
+        if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+            console.log('🔄 Syncing price updates to Firebase...');
+            firebaseSync.syncPriceDatabase();
+        }
+
         console.log(`✅ Successfully updated ${updatedCount} prices across ${Object.keys(phoneUpdates).length} phone models`);
 
         // Re-render the table to reflect saved changes
@@ -3378,6 +3384,12 @@ function savePhone() {
         alert(`Phone added successfully!\n\nBrand: ${phoneData.brand}\nModel: ${phoneData.model}\nTotal phones: ${savedPhones.length}\n\nCheck console (F12) for detailed logs.`);
     }
 
+    // CRITICAL FIX: Sync phone changes to Firebase so mobile receives them
+    if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+        console.log('🔄 Syncing phone data to Firebase...');
+        firebaseSync.syncPriceDatabase();
+    }
+
     closePhoneModal();
 
     // Force reload from localStorage before rendering
@@ -3410,13 +3422,19 @@ function deletePhone(id) {
 
     if (confirm('Are you sure you want to delete this phone?')) {
         adminManager.deletePhone(id);
-        
+
+        // CRITICAL FIX: Sync phone deletion to Firebase so mobile reflects the change
+        if (typeof firebaseSync !== 'undefined' && firebaseSync.syncPriceDatabase) {
+            console.log('🔄 Syncing phone deletion to Firebase...');
+            firebaseSync.syncPriceDatabase();
+        }
+
         // Update model dropdown if brand filter is active
         const brandFilter = document.getElementById('brandFilter');
         if (brandFilter) {
             updateModelDropdown(brandFilter.value);
         }
-        
+
         renderPhones();
         renderPriceTable();
         alert('Phone deleted successfully!');

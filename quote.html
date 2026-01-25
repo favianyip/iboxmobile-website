@@ -541,7 +541,7 @@
 
                         <div class="form-checkbox">
                             <input type="checkbox" id="terms-agree" required>
-                            <label for="terms-agree">I have read and agree to the <a href="#" class="link">Buy-Back Terms and Conditions</a></label>
+                            <label for="terms-agree">I have read and agree to the <a href="#" class="link" id="terms-link" onclick="openTermsModal(event)">Buy-Back Terms and Conditions</a></label>
                         </div>
 
                         <div class="step-actions">
@@ -716,5 +716,52 @@
         setTimeout(forceEnableClicks, 500);
     })();
     </script>
+
+    <!-- Terms and Conditions Modal -->
+    <div id="terms-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
+        <div style="max-width: 800px; margin: 50px auto; background: white; padding: 2rem; border-radius: 8px; position: relative;">
+            <button onclick="closeTermsModal()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; font-size: 2rem; cursor: pointer; color: #666;">&times;</button>
+            <h2 style="color: #C9A84C; margin-bottom: 1.5rem;">Buy-Back Terms and Conditions</h2>
+            <div style="color: #333; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
+                <h3>1. Device Condition Assessment</h3>
+                <p>All devices are subject to physical inspection upon arrival. The final buyback price may be adjusted based on the actual condition of the device, including but not limited to screen condition, body condition, and battery health.</p>
+
+                <h3>2. Payment Terms</h3>
+                <p>Payment will be processed within 24-48 hours after device inspection and approval. Payment methods include bank transfer, PayNow, or cash for in-store transactions.</p>
+
+                <h3>3. Device Requirements</h3>
+                <ul>
+                    <li>Device must power on and function properly</li>
+                    <li>Find My iPhone/Google Account must be disabled</li>
+                    <li>Device must not be reported lost or stolen</li>
+                    <li>All personal data must be backed up and removed</li>
+                </ul>
+
+                <h3>4. Cancellation Policy</h3>
+                <p>You may cancel your appointment up to 2 hours before the scheduled time. Late cancellations may result in restrictions on future bookings.</p>
+
+                <h3>5. Price Validity</h3>
+                <p>Quoted prices are valid for 7 days from the quote date. Market fluctuations may affect pricing after this period.</p>
+
+                <h3>6. Data Privacy</h3>
+                <p>We are committed to protecting your personal information. All data collected during the buyback process will be used solely for transaction purposes and will not be shared with third parties without your consent.</p>
+
+                <h3>7. Warranty and Returns</h3>
+                <p>All sales are final. Once the device is sold to us and payment is made, the transaction cannot be reversed.</p>
+
+                <h3>8. Liability</h3>
+                <p>IBOX Mobile is not liable for any data loss. Please ensure all data is backed up before handing over your device.</p>
+
+                <h3>9. Contact Information</h3>
+                <p>For questions or concerns, please contact us at:<br>
+                Email: support@iboxmobile.sg<br>
+                Phone: +65 6123 4567<br>
+                Address: 159 Sin Ming Road, #03-01 Amtech Building, Singapore 575625</p>
+            </div>
+            <div style="margin-top: 2rem; text-align: center;">
+                <button onclick="acceptTerms()" class="btn btn-primary" style="background: #C9A84C; color: white; padding: 0.75rem 2rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">Accept & Close</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
