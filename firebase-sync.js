@@ -130,6 +130,12 @@ class FirebaseSync {
     async syncPriceDatabase(database) {
         if (!this.syncEnabled) return;
 
+        // CRITICAL FIX: Add null check to prevent crashes
+        if (!database) {
+            console.warn('⚠️ syncPriceDatabase called with null database - skipping sync');
+            return;
+        }
+
         try {
             this.updateSyncStatus('syncing');
 
