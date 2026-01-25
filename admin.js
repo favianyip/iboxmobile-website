@@ -1142,53 +1142,6 @@ function initializeAdmin() {
         
         console.log('Admin panel initialized successfully');
 
-        // CRITICAL FIX: Setup Firebase real-time listeners for bidirectional sync
-        if (window.firebaseSync) {
-            console.log('🔔 Setting up Firebase listeners for admin panel...');
-
-            // Listen for price database updates from other devices
-            window.firebaseSync.listenPriceDatabase((database) => {
-                console.log('📥 Admin: Price database updated from cloud');
-                if (database && database.phones) {
-                    adminManager.phones = database.phones;
-                    localStorage.setItem('ktmobile_phones', JSON.stringify(database.phones));
-
-                    // Auto-refresh UI to show changes
-                    if (typeof renderPhones === 'function') renderPhones();
-                    if (typeof renderPriceTable === 'function') renderPriceTable();
-                    if (typeof renderDisplaySettings === 'function') renderDisplaySettings();
-
-                    console.log('✅ Admin UI refreshed with', database.phones.length, 'phones from Firebase');
-                }
-            });
-
-            // Listen for brand updates from other devices
-            window.firebaseSync.listenBrands((brands) => {
-                console.log('📥 Admin: Brands updated from cloud');
-                localStorage.setItem('ktmobile_brands', JSON.stringify(brands));
-                if (typeof renderBrandSettings === 'function') renderBrandSettings();
-            });
-
-            // Listen for general settings updates from other devices
-            window.firebaseSync.listenGeneralSettings((settings) => {
-                console.log('📥 Admin: General settings updated from cloud');
-                localStorage.setItem('ibox_general_settings', JSON.stringify(settings));
-                if (typeof renderGeneralSettings === 'function') renderGeneralSettings();
-            });
-
-            // Listen for condition modifier updates from other devices
-            window.firebaseSync.listenConditionModifiers((modifiers) => {
-                console.log('📥 Admin: Condition modifiers updated from cloud');
-                if (typeof loadConditionModifierInputs === 'function') {
-                    loadConditionModifierInputs();
-                }
-            });
-
-            console.log('✅ Firebase listeners active - admin will receive real-time updates from other devices');
-        } else {
-            console.warn('⚠️ firebaseSync not available - admin won\'t receive real-time updates');
-        }
-
     } catch (e) {
         console.error('Error initializing sections:', e);
         // Even if initialization fails, ensure menu navigation works
@@ -1200,6 +1153,79 @@ function initializeAdmin() {
             }
         }, 500);
     }
+
+    // CRITICAL FIX: Setup Firebase listeners OUTSIDE try-catch
+    // This guarantees bidirectional sync even if other initialization fails
+    setupFirebaseListeners();
+}
+
+// CRITICAL FIX: Setup Firebase listeners with retry logic
+function setupFirebaseListeners() {
+    console.log('🔔 Setting up Firebase listeners for admin panel...');
+
+    let retryCount = 0;
+    const maxRetries = 5;
+    const retryDelay = 500;
+
+    function attemptListenerSetup() {
+        if (window.firebaseSync) {
+            console.log('✅ Firebase sync available, setting up listeners...');
+
+            try {
+                // Listen for price database updates from other devices
+                window.firebaseSync.listenPriceDatabase((database) => {
+                    console.log('📥 Admin: Price database updated from cloud');
+                    if (database && database.phones) {
+                        adminManager.phones = database.phones;
+                        localStorage.setItem('ktmobile_phones', JSON.stringify(database.phones));
+
+                        // Auto-refresh UI to show changes
+                        if (typeof renderPhones === 'function') renderPhones();
+                        if (typeof renderPriceTable === 'function') renderPriceTable();
+                        if (typeof renderDisplaySettings === 'function') renderDisplaySettings();
+
+                        console.log('✅ Admin UI refreshed with', database.phones.length, 'phones from Firebase');
+                    }
+                });
+
+                // Listen for brand updates from other devices
+                window.firebaseSync.listenBrands((brands) => {
+                    console.log('📥 Admin: Brands updated from cloud');
+                    localStorage.setItem('ktmobile_brands', JSON.stringify(brands));
+                    if (typeof renderBrandSettings === 'function') renderBrandSettings();
+                });
+
+                // Listen for general settings updates from other devices
+                window.firebaseSync.listenGeneralSettings((settings) => {
+                    console.log('📥 Admin: General settings updated from cloud');
+                    localStorage.setItem('ibox_general_settings', JSON.stringify(settings));
+                    if (typeof renderGeneralSettings === 'function') renderGeneralSettings();
+                });
+
+                // Listen for condition modifier updates from other devices
+                window.firebaseSync.listenConditionModifiers((modifiers) => {
+                    console.log('📥 Admin: Condition modifiers updated from cloud');
+                    if (typeof loadConditionModifierInputs === 'function') {
+                        loadConditionModifierInputs();
+                    }
+                });
+
+                console.log('✅ Firebase listeners active - real-time sync enabled');
+            } catch (err) {
+                console.error('❌ Failed to set up Firebase listeners:', err);
+            }
+        } else {
+            retryCount++;
+            if (retryCount < maxRetries) {
+                console.log(`⏳ Firebase sync not ready yet (attempt ${retryCount}/${maxRetries}), retrying in ${retryDelay}ms...`);
+                setTimeout(attemptListenerSetup, retryDelay);
+            } else {
+                console.error('❌ Firebase sync failed to load after', maxRetries, 'attempts - real-time sync disabled');
+            }
+        }
+    }
+
+    attemptListenerSetup();
 }
 
 // Initialize when DOM is ready and phoneDatabase is loaded

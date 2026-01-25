@@ -141,6 +141,16 @@ class PriceDatabase {
             localStorage.setItem('ktmobile_last_update', database.lastUpdate);
 
             console.log('✅ Database saved successfully');
+
+            // CRITICAL FIX: Sync to Firebase for cross-device synchronization
+            if (window.firebaseSync) {
+                window.firebaseSync.syncPriceDatabase(database).catch(err => {
+                    console.error('❌ Firebase sync failed (data saved locally):', err);
+                });
+            } else {
+                console.warn('⚠️ Firebase sync not available - data saved locally only');
+            }
+
             return true;
         } catch (e) {
             console.error('❌ Failed to save database:', e);
