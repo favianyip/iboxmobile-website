@@ -3261,7 +3261,7 @@ function savePhone() {
         model,
         image: finalImageUrl,
         storages: checkedStorages,
-        colors: colors, // Already an array from dropdown
+        colors: selectedColorNames, // Array of color name strings (NOT objects)
         basePrice: basePrice, // Calculated from minimum storage price
         storagePrices: storagePrices, // USED prices
         newPhonePrices: newPhonePrices, // NEW SEALED prices

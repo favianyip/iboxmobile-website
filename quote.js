@@ -376,10 +376,16 @@ function loadAdminDataForCustomerPages() {
             // Update image - ALWAYS use admin image if available
             // CRITICAL FIX: Force cache busting to ensure browser reloads new images
             if (phone.image) {
-                // Strip old timestamp if present and add fresh one
-                let cleanImagePath = phone.image.split('?')[0];
-                dbModel.image = `${cleanImagePath}?t=${Date.now()}`;
-                console.log(`   📷 Updated image for ${brand} ${model}: ${dbModel.image}`);
+                // Don't add cache-busting to data URLs (they can't have query parameters)
+                if (phone.image.startsWith('data:')) {
+                    dbModel.image = phone.image;
+                    console.log(`   📷 Updated image for ${brand} ${model}: [data URL]`);
+                } else {
+                    // Strip old timestamp if present and add fresh one
+                    let cleanImagePath = phone.image.split('?')[0];
+                    dbModel.image = `${cleanImagePath}?t=${Date.now()}`;
+                    console.log(`   📷 Updated image for ${brand} ${model}: ${dbModel.image}`);
+                }
             }
 
             // Update basePrice
@@ -2634,6 +2640,11 @@ function populateStep2() {
     } else {
         // Default fallback image
         imageSrc = 'images/phones/iphone-16-pro-max.jpg';
+    }
+
+    // Add cache-busting to force reload of updated images (consistent with model cards)
+    if (!imageSrc.startsWith('data:') && imageSrc.indexOf('?t=') === -1) {
+        imageSrc = `${imageSrc}?t=${Date.now()}`;
     }
 
     deviceImageEl.src = imageSrc;
