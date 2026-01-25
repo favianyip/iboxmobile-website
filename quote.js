@@ -3471,6 +3471,11 @@ function goToStep(step) {
         targetStep.classList.add('active');
         console.log(`Step ${step} activated`);
 
+        // CRITICAL FIX: Recalculate min booking date when showing step 4
+        if (step === 4) {
+            setMinBookingDate();
+        }
+
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -3634,7 +3639,27 @@ function initBookingForm() {
         const mobile = document.getElementById('booking-mobile').value;
         const email = document.getElementById('booking-email').value;
         const remarks = document.getElementById('booking-remarks').value;
-        
+
+        // CRITICAL FIX: Validate that appointment date/time is not in the past
+        const selectedDateTime = new Date(date + 'T' + time);
+        const now = new Date();
+
+        if (selectedDateTime < now) {
+            alert('❌ Invalid Date/Time\n\nYou cannot book appointments in the past.\n\nPlease select a future date and time.');
+            document.getElementById('booking-date').style.borderColor = '#e74c3c';
+            document.getElementById('booking-time').style.borderColor = '#e74c3c';
+            return;
+        }
+
+        // Validate minimum 2 hours notice
+        const twoHoursFromNow = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+        if (selectedDateTime < twoHoursFromNow) {
+            alert('❌ Insufficient Notice\n\nAppointments require at least 2 hours advance booking.\n\nPlease select a later time.');
+            document.getElementById('booking-date').style.borderColor = '#e74c3c';
+            document.getElementById('booking-time').style.borderColor = '#e74c3c';
+            return;
+        }
+
         // Create appointment object
         const appointment = {
             id: bookingRef,
@@ -3863,3 +3888,42 @@ function updateAvailableTimeSlots() {
 
     console.log(`📅 Booking date: ${selectedDateStr}, Available slots: ${availableSlots}`);
 }
+
+// ============================================================================
+// TERMS AND CONDITIONS MODAL
+// ============================================================================
+
+function openTermsModal(event) {
+    if (event) event.preventDefault();
+    const modal = document.getElementById('terms-modal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+}
+
+function closeTermsModal() {
+    const modal = document.getElementById('terms-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scroll
+    }
+}
+
+function acceptTerms() {
+    // Check the terms checkbox
+    const checkbox = document.getElementById('terms-agree');
+    if (checkbox) {
+        checkbox.checked = true;
+        checkbox.style.borderColor = ''; // Clear any error styling
+    }
+    closeTermsModal();
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('terms-modal');
+    if (modal && event.target === modal) {
+        closeTermsModal();
+    }
+});
