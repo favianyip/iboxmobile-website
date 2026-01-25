@@ -421,6 +421,21 @@ class FirebaseSync {
                 console.log('✅ General settings loaded from cloud');
             }
 
+            // CRITICAL FIX: Load appointments from cloud
+            const appointmentsSnapshot = await getDocs(collection(db, 'appointments'));
+            const appointments = [];
+            appointmentsSnapshot.forEach((doc) => {
+                const data = doc.data();
+                delete data.lastUpdate;
+                appointments.push(data);
+            });
+            if (appointments.length > 0) {
+                localStorage.setItem('ktmobile_appointments', JSON.stringify(appointments));
+                console.log('✅ Appointments loaded from cloud (' + appointments.length + ' appointments)');
+            } else {
+                console.log('✅ No appointments in cloud (empty database)');
+            }
+
             console.log('✅ Initial data load complete');
         } catch (error) {
             console.error('❌ Initial data load failed:', error);
